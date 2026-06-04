@@ -326,16 +326,18 @@
     // ⬇️ GAS Web App /exec 網址（家長回條寫入 Google 試算表）
     var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
 
-    /* ---- 畢業祝福牆：抓取已公開祝福，渲染跑馬燈 + 卡片 ---- */
+    /* ---- 畢業祝福牆：抓取已公開祝福，渲染置頂跑馬燈 + 卡片牆 ---- */
     (function () {
+      var ticker = document.getElementById("topTicker");
+      var tickerTrack = document.getElementById("topTickerTrack");
       var wall = document.getElementById("wishWall");
-      var track = document.getElementById("wishTrack");
       var cards = document.getElementById("wishCards");
-      if (!wall || !track || !cards) return;
+      var count = document.getElementById("wishCount");
+      if (!wall || !cards) return;
       function maskName(n) {
         n = String(n || "").trim();
-        if (n.length <= 1) return n;
-        return n.charAt(0) + new Array(n.length).join("○");
+        if (n.length <= 2) return n; // 1~2 字完整顯示（如 王明）
+        return n.charAt(0) + new Array(n.length - 1).join("○") + n.charAt(n.length - 1); // 首+中遮+尾：王○明
       }
       function esc(s) {
         return String(s).replace(/[&<>"]/g, function (c) {
@@ -347,23 +349,27 @@
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var ws = (d && d.wishes) || [];
-            if (!ws.length) { wall.hidden = true; return; }
+            if (!ws.length) { wall.hidden = true; if (ticker) ticker.hidden = true; return; }
             cards.innerHTML = ws.map(function (w) {
               return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
                 esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
                 esc(w.m) + "</div></div>";
             }).join("");
-            // 跑馬燈：祝福少時補滿，並複製一份做無縫循環
-            var base = ws.slice();
-            while (base.length < 6) base = base.concat(ws);
-            var chips = base.map(function (w) {
-              return '<span class="wish-chip">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(w.m) + "</span>";
-            }).join("");
-            track.innerHTML = chips + chips;
-            track.style.animationDuration = Math.max(24, base.length * 5) + "s";
+            if (count) count.textContent = "目前已有 " + ws.length + " 則祝福 💛";
             wall.hidden = false;
+            // 置頂跑馬燈：祝福少時補滿、複製一份無縫循環、速度放慢
+            if (ticker && tickerTrack) {
+              var base = ws.slice();
+              while (base.length < 8) base = base.concat(ws);
+              var items = base.map(function (w) {
+                return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(w.m) + "</span>";
+              }).join("");
+              tickerTrack.innerHTML = items + items;
+              tickerTrack.style.animationDuration = Math.max(60, base.length * 9) + "s";
+              ticker.hidden = false;
+            }
           })
-          .catch(function () { /* 抓不到就不顯示牆，靜默 */ });
+          .catch(function () { /* 抓不到就不顯示，靜默 */ });
       }
       load();
       setInterval(load, 3 * 60 * 1000);
