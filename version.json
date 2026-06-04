@@ -1,4 +1,4 @@
 {
-  "version": "1.6.0",
-  "notes": "新增：家長線上回條（站內表單 + Google Apps Script 後端，資料寫進 Google 試算表）；後端 exec 網址設定後啟用"
+  "version": "1.6.1",
+  "notes": "家長線上回條正式啟用：接上 GAS 後端、改用 no-cors 送出 + 逾時安全網，送出成功顯示感謝畫面"
 }

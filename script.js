@@ -301,8 +301,8 @@
 
   /* ---------- 家長線上回條（送出至 Google Apps Script） ---------- */
   (function () {
-    // ⬇️ 部署 GAS 後，把 /exec 網址填進這裡即可啟用表單（見 gas/部署說明.md）
-    var RSVP_ENDPOINT = "";
+    // ⬇️ GAS Web App /exec 網址（家長回條寫入 Google 試算表）
+    var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
 
     var form = document.getElementById("rsvpForm");
     var pending = document.getElementById("rsvpPending");
@@ -328,21 +328,23 @@
         message: document.getElementById("rsvpMsg").value.trim()
       });
       submit.disabled = true; submit.textContent = "送出中…";
-      // text/plain 屬「簡單請求」可避開 CORS preflight；GAS 最終回應帶 ACAO:*
+      // GAS Web App 的跨網域回應會經 302 轉址，瀏覽器難以讀取；
+      // 採 no-cors 送出（fire-and-forget，text/plain 為簡單請求、不觸發 preflight）。
+      var settled = false;
+      function ok() { if (settled) return; settled = true; finish(); }
+      function fail() {
+        if (settled) return; settled = true;
+        submit.disabled = false; submit.textContent = "送出回條";
+        if (typeof showToast === "function") showToast("送出失敗，請稍後再試或洽詢學校");
+      }
+      var guard = setTimeout(ok, 10000); // 安全網：避免卡住（no-cors 讀不到回應）
       fetch(RSVP_ENDPOINT, {
         method: "POST",
+        mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: payload
-      }).then(function () { finish(); })
-        .catch(function () {
-          // 後援：no-cors 再送一次（多半成功，僅讀不到回應）
-          fetch(RSVP_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload })
-            .then(function () { finish(); })
-            .catch(function () {
-              submit.disabled = false; submit.textContent = "送出回條";
-              if (typeof showToast === "function") showToast("送出失敗，請稍後再試或洽詢學校");
-            });
-        });
+      }).then(function () { clearTimeout(guard); ok(); })
+        .catch(function () { clearTimeout(guard); fail(); });
     });
   })();
 
