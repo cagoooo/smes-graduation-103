@@ -16,8 +16,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/" />
   <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta property="og:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.1.2" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.1.2" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.2.0" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.2.0" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta name="twitter:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.1.2" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.2.0" />
 
   <!-- Favicon / 圖示（石門校徽） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -37,12 +37,46 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
 
+  <!-- 效能：預載首屏校徽（LCP） -->
+  <link rel="preload" as="image" href="assets/logo.png" fetchpriority="high" />
+
+  <!-- 結構化資料：Event（Google 活動卡片 / SEO） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": "桃園市龍潭區石門國民小學 第103屆畢業典禮",
+    "startDate": "2026-06-10T09:00:00+08:00",
+    "endDate": "2026-06-10T12:00:00+08:00",
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/MixedEventAttendanceMode",
+    "location": {
+      "@type": "Place",
+      "name": "桃園市龍潭區石門國民小學 禮堂",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "龍潭區",
+        "addressRegion": "桃園市",
+        "addressCountry": "TW"
+      }
+    },
+    "image": ["https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png"],
+    "description": "114學年度第103屆畢業典禮，115年6月10日（星期三）上午9:00於本校禮堂舉行。誠摯邀請全校師生與畢業生家長一同見證孩子們啟程的時刻。",
+    "organizer": {
+      "@type": "Organization",
+      "name": "桃園市龍潭區石門國民小學",
+      "url": "https://www.smes.tyc.edu.tw/"
+    },
+    "url": "https://cagoooo.github.io/smes-graduation-103/"
+  }
+  </script>
+
   <!-- 字型 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=1.1.2" />
+  <link rel="stylesheet" href="styles.css?v=1.2.0" />
 </head>
 <body>
   <!-- 跳到主內容（無障礙） -->
@@ -52,7 +86,7 @@
   <header class="nav" id="top">
     <div class="nav__inner">
       <a class="nav__brand" href="#top">
-        <img class="nav__logo" src="assets/logo.png" alt="石門國小校徽" width="40" height="38" />
+        <img class="nav__logo" src="assets/logo.png" alt="石門國小校徽" width="40" height="38" decoding="async" />
         <span class="nav__brand-text">
           <span class="nav__brand-school">石門國小</span>
           <span class="nav__brand-sub">第103屆畢業典禮</span>
@@ -80,7 +114,7 @@
       <div class="hero__rainbow" aria-hidden="true"></div>
 
       <div class="hero__content">
-        <img class="hero__logo" src="assets/logo.png" alt="石門國小校徽" width="116" height="110" />
+        <img class="hero__logo" src="assets/logo.png" alt="石門國小校徽" width="116" height="110" decoding="async" fetchpriority="high" />
         <p class="hero__school">桃園市龍潭區石門國民小學</p>
         <p class="hero__eyebrow">114 學年度・第 103 屆</p>
         <h1 class="hero__title">畢業典禮</h1>
@@ -149,6 +183,24 @@
             <p class="info-card__big">全校共襄盛舉</p>
             <p class="info-card__sub">畢業班師生、全體教職員、<br />貴賓及畢業生家長</p>
           </div>
+        </div>
+
+        <div class="action-bar reveal" aria-label="行事曆與分享">
+          <a class="action-btn action-btn--primary" href="event.ics" download="石門國小第103屆畢業典禮.ics">
+            <span aria-hidden="true">📅</span> 加入行事曆
+          </a>
+          <button type="button" class="action-btn" id="shareBtn">
+            <span aria-hidden="true">🔗</span> 分享 / 複製連結
+          </button>
+          <a class="action-btn action-btn--line" href="https://social-plugins.line.me/lineit/share?url=https%3A%2F%2Fcagoooo.github.io%2Fsmes-graduation-103%2F" target="_blank" rel="noopener noreferrer">
+            <span aria-hidden="true">💬</span> LINE
+          </a>
+          <a class="action-btn action-btn--fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fcagoooo.github.io%2Fsmes-graduation-103%2F" target="_blank" rel="noopener noreferrer">
+            <span aria-hidden="true">📘</span> Facebook
+          </a>
+          <a class="action-btn" href="assets/qr-poster.png" download="石門國小第103屆畢業典禮海報.png">
+            <span aria-hidden="true">🖼️</span> 下載宣傳海報
+          </a>
         </div>
       </div>
     </section>
@@ -403,7 +455,7 @@
   <!-- ===== 頁尾 ===== -->
   <footer class="site-footer">
     <div class="container site-footer__inner">
-      <img class="site-footer__logo" src="assets/logo.png" alt="石門國小校徽" width="72" height="68" />
+      <img class="site-footer__logo" src="assets/logo.png" alt="石門國小校徽" width="72" height="68" decoding="async" loading="lazy" />
       <p class="site-footer__school">桃園市龍潭區石門國民小學</p>
       <p class="site-footer__sub">114 學年度第 103 屆畢業典禮・啟程・感恩・祝福</p>
       <p class="site-footer__feature">🐟 鱻魚特色學園</p>
@@ -423,6 +475,9 @@
   <!-- 回到頂端 -->
   <a href="#top" class="to-top" id="toTop" aria-label="回到頂端">↑</a>
 
+  <!-- 複製/分享提示 toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
   <!-- 版本更新提示（偵測到新版本時由 script.js 顯示） -->
   <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
     <span class="update-banner__ico" aria-hidden="true">🎉</span>
@@ -431,6 +486,6 @@
     <button class="update-banner__close" id="updateClose" type="button" aria-label="關閉提示">×</button>
   </div>
 
-  <script src="script.js?v=1.1.2"></script>
+  <script src="script.js?v=1.2.0"></script>
 </body>
 </html>

@@ -10,8 +10,12 @@
 param([Parameter(Mandatory = $true)][string]$NewVersion)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$vj = Get-Content (Join-Path $root 'version.json') -Raw | ConvertFrom-Json
-$old = $vj.version
+# Read as UTF-8 and regex the version out (avoids cp950 mis-read + ConvertFrom-Json
+# choking on non-ASCII "notes").
+$vjText = [System.IO.File]::ReadAllText((Join-Path $root 'version.json'))
+$m = [regex]::Match($vjText, '"version"\s*:\s*"([^"]+)"')
+if (-not $m.Success) { Write-Error "Cannot find version in version.json"; exit 1 }
+$old = $m.Groups[1].Value
 if ($old -eq $NewVersion) { Write-Host "Already at $NewVersion, nothing to do."; exit 0 }
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)

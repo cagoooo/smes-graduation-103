@@ -289,6 +289,37 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .info-card__big { font-family: var(--font-serif); font-size: clamp(1.5rem, 5vw, 2rem); color: var(--navy-800); margin: 8px 0 6px; }
 .info-card__sub { font-size: .88rem; color: var(--ink-soft); line-height: 1.6; }
 
+/* 行事曆 / 分享 動作列 */
+.action-bar {
+  margin-top: clamp(24px, 4vw, 36px);
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+}
+.action-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 18px; border-radius: 999px; min-height: 44px;
+  font-size: .92rem; font-weight: 700; font-family: inherit; cursor: pointer;
+  text-decoration: none; border: 1.5px solid var(--paper-2);
+  background: var(--white); color: var(--navy-800);
+  box-shadow: var(--shadow-sm); transition: transform .2s var(--ease), box-shadow .2s, background .2s;
+}
+.action-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.action-btn--primary { background: var(--gold); border-color: var(--gold); color: var(--navy-900); }
+.action-btn--primary:hover { background: #ffca5a; }
+.action-btn--line { background: #06c755; border-color: #06c755; color: #fff; }
+.action-btn--line:hover { background: #05b34c; }
+.action-btn--fb { background: #1877f2; border-color: #1877f2; color: #fff; }
+.action-btn--fb:hover { background: #1467d8; }
+
+/* 複製 / 分享 toast */
+.toast {
+  position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%) translateY(16px);
+  z-index: 210; background: var(--navy-900); color: #fff;
+  padding: 12px 22px; border-radius: 999px; font-size: .9rem; font-weight: 500;
+  box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .25s; max-width: calc(100vw - 32px);
+}
+.toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* =========================================================
    活動意義
    ========================================================= */
@@ -371,6 +402,37 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .timeline__sub li::before { content: "•"; position: absolute; left: 2px; color: var(--gold-deep); font-weight: 900; }
 .timeline__item--accent .timeline__time { background: var(--navy-800); border-color: var(--gold); color: var(--gold); }
 .timeline__item--accent .timeline__card { border-color: var(--gold); background: linear-gradient(150deg, #fff 0%, #fff7e6 100%); }
+
+/* 典禮當天：目前進行中的環節（由 script.js 依當下時間標記） */
+.timeline__item--now .timeline__time {
+  background: #e8392f; border-color: #e8392f; color: #fff;
+  box-shadow: 0 0 0 0 rgba(232,57,47,.5); animation: nowPulse 1.6s ease-out infinite;
+}
+.timeline__item--now .timeline__card {
+  border-color: #e8392f; background: linear-gradient(150deg, #fff 0%, #fff0ee 100%);
+  box-shadow: 0 12px 30px rgba(232,57,47,.22);
+}
+.timeline__now-badge {
+  display: inline-flex; align-items: center; gap: 6px; vertical-align: middle;
+  margin-left: 8px; background: #e8392f; color: #fff; font-size: .68rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px; letter-spacing: .5px;
+}
+.timeline__now-badge::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+  animation: livePulse 1.4s ease-out infinite;
+}
+@keyframes nowPulse {
+  0% { box-shadow: 0 0 0 0 rgba(232,57,47,.5); }
+  70% { box-shadow: 0 0 0 12px rgba(232,57,47,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,57,47,0); }
+}
+
+/* 直播按鈕「回放」狀態（典禮結束後，去掉脈動、轉沉穩色） */
+.btn--live.is-replay { background: var(--navy-700); box-shadow: 0 10px 26px rgba(40,58,114,.4); }
+.btn--live.is-replay:hover { background: var(--navy-600); }
+.nav__live.is-replay { background: var(--navy-700); box-shadow: 0 4px 14px rgba(40,58,114,.4); }
+.btn--live.is-replay .btn__live-dot,
+.nav__live.is-replay .btn__live-dot { animation: none; background: var(--gold); box-shadow: none; }
 
 /* =========================================================
    校園巡禮路線

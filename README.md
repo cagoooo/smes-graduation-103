@@ -35,7 +35,11 @@
 - 支援 `prefers-reduced-motion` 與列印樣式
 - 校徽 favicon、apple-touch-icon、PWA manifest
 - 1200×630 社群分享 OG 圖（中文渲染進 PNG，LINE/FB 不會方框）
-- Service Worker 離線快取 + 版本更新通知（偵測新版主動提示重整）
+- Service Worker 離線快取 + 版本更新通知（純生命週期偵測，偵測新版主動提示重整）
+- 加入行事曆（.ics）、一鍵分享（LINE / Facebook / 複製連結 / 原生分享）
+- QR Code 宣傳海報（`assets/qr-poster.png`，可列印張貼）
+- 日期感知直播按鈕（賽前 → 直播中 → 回放自動切換）+ 典禮當天流程即時高亮
+- schema.org Event 結構化資料（Google 活動卡片 / SEO）
 - 部署於 GitHub Pages
 
 ## 版本維護（更新內容後如何讓使用者收到新版）
