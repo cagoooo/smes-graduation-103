@@ -398,8 +398,26 @@
           renderCards();
         });
       }
-      // 愛心：點擊樂觀 +1 → 背景送後端、localStorage 防同裝置重複按
-      cards.addEventListener("click", function (e) {
+      // 飛心 + 數字彈跳動效（卡片牆與放大牆共用）
+      var reduceM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function bumpNum(el) { if (reduceM || !el) return; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+      function flyHearts(btn) {
+        if (reduceM) return;
+        var layer = document.getElementById("fxLayer"); if (!layer) return;
+        var rect = btn.getBoundingClientRect(), cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        for (var i = 0; i < 8; i++) {
+          var h = document.createElement("span"); h.className = "flyheart"; h.textContent = "❤️";
+          h.style.left = cx + "px"; h.style.top = cy + "px";
+          h.style.setProperty("--dx", ((Math.random() * 2 - 1) * 120) + "px");
+          h.style.setProperty("--dy", (-(80 + Math.random() * 130)) + "px");
+          h.style.setProperty("--rot", ((Math.random() * 120 - 60)) + "deg");
+          h.style.animationDelay = (Math.random() * 0.14).toFixed(2) + "s";
+          layer.appendChild(h);
+          (function (el) { setTimeout(function () { el.remove(); }, 1500); })(h);
+        }
+      }
+      // 愛心點擊（document 委派，涵蓋卡片牆 + 放大牆）：樂觀 +1 + 飛心 + 數字彈跳
+      document.addEventListener("click", function (e) {
         var btn = e.target.closest ? e.target.closest(".wish-like") : null;
         if (!btn || btn.disabled) return;
         var r = parseInt(btn.getAttribute("data-row"), 10);
@@ -408,7 +426,7 @@
         btn.classList.add("is-liked"); btn.disabled = true;
         var nEl = btn.querySelector(".wish-like__n");
         var cur = (parseInt(nEl.textContent, 10) || 0) + 1;
-        nEl.textContent = cur;
+        nEl.textContent = cur; bumpNum(nEl); flyHearts(btn);
         for (var i = 0; i < allWishes.length; i++) if (allWishes[i].r === r) { allWishes[i].l = cur; break; }
         fetch(RSVP_ENDPOINT + "?action=like&row=" + r + "&t=" + Date.now())
           .then(function (res) { return res.json(); })
@@ -420,6 +438,59 @@
           })
           .catch(function () { /* 樂觀更新已生效，靜默 */ });
       });
+
+      // ===== 完整祝福牆放大版（全螢幕沉浸瀏覽）=====
+      var wallBox = document.getElementById("wallBox");
+      var wallOpenBtn = document.getElementById("wallOpen");
+      var wallCloseBtn = document.getElementById("wallClose");
+      var wallGrid = document.getElementById("wallGrid");
+      var wallCountEl = document.getElementById("wallCount");
+      var wallFiltersEl = document.getElementById("wallFilters");
+      var wallScroll = document.getElementById("wallScroll");
+      var wallFilter = "全部";
+      function renderWall() {
+        if (!wallGrid) return;
+        var list = wallFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === wallFilter; });
+        list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); });
+        wallGrid.innerHTML = list.map(cardHTML).join("");
+        if (wallCountEl) wallCountEl.textContent = wallFilter === "全部" ? "（" + allWishes.length + " 則）" : "（" + wallFilter + " " + list.length + " 則）";
+      }
+      function buildWallFilters() {
+        if (!wallFiltersEl) return;
+        var classes = [];
+        allWishes.forEach(function (w) { var c = String(w.c || "").trim(); if (c && classes.indexOf(c) === -1) classes.push(c); });
+        if (classes.length <= 1) { wallFiltersEl.hidden = true; wallFiltersEl.innerHTML = ""; return; }
+        classes.sort();
+        wallFiltersEl.innerHTML = ["全部"].concat(classes).map(function (c) {
+          return '<button type="button" class="wall-chip' + (c === wallFilter ? " is-active" : "") + '" data-class="' + esc(c) + '">' + esc(c) + "</button>";
+        }).join("");
+        wallFiltersEl.hidden = false;
+      }
+      function openWall() {
+        if (!wallBox) return;
+        buildWallFilters(); renderWall();
+        wallBox.hidden = false; wallBox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        if (wallScroll) wallScroll.scrollTop = 0;
+      }
+      function closeWall() {
+        if (!wallBox) return;
+        wallBox.hidden = true; wallBox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        renderCards(); // 同步放大牆按過的愛心回卡片牆
+      }
+      if (wallOpenBtn) wallOpenBtn.addEventListener("click", openWall);
+      if (wallCloseBtn) wallCloseBtn.addEventListener("click", closeWall);
+      if (wallBox) wallBox.addEventListener("click", function (e) { if (e.target === wallBox) closeWall(); });
+      if (wallFiltersEl) wallFiltersEl.addEventListener("click", function (e) {
+        var b = e.target;
+        if (!b.classList || !b.classList.contains("wall-chip")) return;
+        wallFilter = b.getAttribute("data-class") || "全部";
+        var bs = wallFiltersEl.querySelectorAll(".wall-chip");
+        for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === b);
+        renderWall();
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && wallBox && !wallBox.hidden) closeWall(); });
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
@@ -431,6 +502,8 @@
             buildFilters();
             renderCards();
             wall.hidden = false;
+            if (wallOpenBtn) wallOpenBtn.hidden = false; // 有祝福才顯示「放大看完整祝福牆」
+            if (wallBox && !wallBox.hidden) { buildWallFilters(); renderWall(); } // 放大牆開著時同步更新
             // 置頂跑馬燈：維持「全部」祝福（不受班級篩選影響）；祝福少時補滿、無縫循環、速度放慢
             if (ticker && tickerTrack) {
               var base = ws.slice();

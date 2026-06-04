@@ -711,6 +711,73 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wish-like.is-liked { background: #ffe9e6; border-color: var(--coral); color: var(--coral); cursor: default; }
 .wish-like__heart { font-size: 1rem; line-height: 1; }
 .wish-like__n { min-width: 1ch; text-align: left; }
+
+/* 放大看完整祝福牆 — 入口按鈕 */
+.wishwall__more { text-align: center; margin-top: clamp(20px, 4vw, 32px); }
+.btn-wallzoom {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  font-family: inherit; font-size: 1rem; font-weight: 700;
+  padding: 12px 26px; border-radius: 999px; border: 1.5px solid var(--navy-700);
+  background: var(--white); color: var(--navy-700); box-shadow: var(--shadow-sm);
+  transition: transform .15s var(--ease), background .2s, color .2s;
+}
+.btn-wallzoom:hover { background: var(--navy-700); color: #fff; transform: translateY(-2px); }
+
+/* 放大看完整祝福牆 — 全螢幕 overlay */
+.wallbox { position: fixed; inset: 0; z-index: 320; display: flex; flex-direction: column; }
+.wallbox[hidden] { display: none; }
+.wallbox__sky { position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(120% 90% at 50% -10%, #3a4f9e 0%, #233268 38%, #16204a 72%, #101733 100%); }
+.wallbox__bar {
+  position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: clamp(14px, 2.5vw, 22px) clamp(16px, 4vw, 40px);
+  background: rgba(20, 29, 59, .72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(245, 185, 66, .3);
+}
+.wallbox__title { font-family: var(--font-serif); font-weight: 900; color: #fff; font-size: clamp(1.1rem, 2.4vw, 1.7rem); flex-shrink: 0; }
+.wallbox__title b { color: var(--gold); font-weight: 700; font-size: .8em; }
+.wallbox__filters { display: flex; flex-wrap: wrap; gap: 7px; flex: 1; min-width: 0; }
+.wallbox__filters[hidden] { display: none; }
+.wall-chip {
+  font-family: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+  padding: 6px 14px; border-radius: 999px;
+  background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .85); border: 1px solid rgba(255, 255, 255, .22);
+  transition: background .2s, color .2s, border-color .2s;
+}
+.wall-chip:hover { border-color: var(--gold); color: var(--gold); }
+.wall-chip.is-active { background: var(--gold); color: var(--navy-900); border-color: var(--gold); }
+.wallbox__close {
+  flex-shrink: 0; margin-left: auto; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(255, 255, 255, .16); color: #fff; font-size: 1.7rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center; transition: background .2s;
+}
+.wallbox__close:hover { background: rgba(255, 255, 255, .3); }
+.wallbox__scroll { position: relative; z-index: 1; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: clamp(18px, 3vw, 36px) clamp(16px, 4vw, 40px) clamp(40px, 8vw, 80px); }
+.wallbox__grid {
+  max-width: 1200px; margin: 0 auto; display: grid; gap: clamp(14px, 2vw, 24px);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+.wallbox__grid .wish-card { padding: clamp(22px, 2.5vw, 32px); }
+.wallbox__grid .wish-card__to { font-size: clamp(1rem, 1.6vw, 1.25rem); }
+.wallbox__grid .wish-card__msg { font-size: clamp(1.05rem, 1.6vw, 1.3rem); }
+
+/* 愛心飛心特效 + 數字彈跳（卡片牆 / 放大牆共用） */
+.fxlayer { position: fixed; inset: 0; z-index: 330; pointer-events: none; overflow: hidden; }
+.flyheart { position: fixed; font-size: 1.5rem; pointer-events: none; will-change: transform, opacity; animation: flyup 1.3s ease-out forwards; }
+@keyframes flyup {
+  0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2) rotate(var(--rot)); opacity: 0; }
+}
+.wish-like__n.bump { display: inline-block; animation: numbump .5s ease; }
+.wish-like.is-liked .wish-like__heart { display: inline-block; animation: heartpop .5s ease; }
+@keyframes numbump { 0% { transform: scale(1); } 40% { transform: scale(1.7); } 100% { transform: scale(1); } }
+@keyframes heartpop { 0% { transform: scale(1); } 30% { transform: scale(1.5); } 60% { transform: scale(.85); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .flyheart { display: none; }
+  .wish-like__n.bump, .wish-like.is-liked .wish-like__heart { animation: none; }
+}
 .wishwall__count { text-align: center; color: var(--gold-deep); font-weight: 700; margin-bottom: 18px; }
 .wishwall__cards {
   display: grid; gap: 14px;
