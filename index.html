@@ -16,8 +16,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/" />
   <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta property="og:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.1" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.1" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.2" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.2" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta name="twitter:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.1" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.6.2" />
 
   <!-- Favicon / 圖示（石門校徽） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -76,7 +76,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=1.6.1" />
+  <link rel="stylesheet" href="styles.css?v=1.6.2" />
 </head>
 <body>
   <!-- 跳到主內容（無障礙） -->
@@ -100,7 +100,7 @@
         <a href="#route">校園巡禮</a>
         <a href="#song">畢業歌</a>
         <a href="#parents">家長須知</a>
-        <a href="#rsvp">線上回條</a>
+        <a href="#rsvp">祝福留言</a>
       </nav>
       <a class="nav__live" href="#live" aria-label="前往典禮直播">
         <span class="btn__live-dot" aria-hidden="true"></span>LIVE
@@ -510,11 +510,11 @@
     <!-- ===== 家長線上回條 ===== -->
     <section class="section section--rsvp" id="rsvp">
       <div class="container">
-        <h2 class="section__title reveal">家長線上回條</h2>
-        <p class="section__intro reveal">預計出席的家長請填寫回條，方便我們為您安排座位、與孩子共享這份榮耀。</p>
+        <h2 class="section__title reveal">給畢業生的祝福</h2>
+        <p class="section__intro reveal">邀請家長為畢業的孩子寫下一句祝福，我們會把這份心意彙整轉交給孩子，陪他勇敢啟程。</p>
 
         <div class="rsvp-wrap reveal">
-          <!-- 表單（後端設定完成後啟用） -->
+          <!-- 祝福表單 -->
           <form class="rsvp-form" id="rsvpForm" novalidate hidden>
             <div class="rsvp-field">
               <label for="rsvpClass">畢業生班級 <span class="rsvp-req">*</span></label>
@@ -533,38 +533,28 @@
               <label for="rsvpName">畢業生姓名 <span class="rsvp-req">*</span></label>
               <input type="text" id="rsvpName" name="name" required maxlength="20" autocomplete="off" placeholder="請填寫畢業生姓名" />
             </div>
-            <div class="rsvp-field">
-              <label for="rsvpCount">出席家長 / 親友人數 <span class="rsvp-req">*</span></label>
-              <select id="rsvpCount" name="count" required>
-                <option value="" disabled selected>請選擇人數</option>
-                <option>1 人</option>
-                <option>2 人</option>
-                <option>3 人</option>
-                <option>4 人以上</option>
-              </select>
+            <div class="rsvp-field rsvp-field--full">
+              <label for="rsvpMsg">祝福的話 <span class="rsvp-req">*</span></label>
+              <textarea id="rsvpMsg" name="message" rows="4" maxlength="300" required placeholder="寫下想對畢業的孩子說的一句祝福…"></textarea>
             </div>
             <div class="rsvp-field rsvp-field--full">
-              <label for="rsvpMsg">給孩子的祝福悄悄話（選填）</label>
-              <textarea id="rsvpMsg" name="message" rows="3" maxlength="200" placeholder="想對畢業的孩子說的一句話…"></textarea>
-            </div>
-            <div class="rsvp-field rsvp-field--full">
-              <button class="rsvp-submit" type="submit" id="rsvpSubmit">送出回條</button>
-              <p class="rsvp-note">送出資料僅供典禮座位安排與祝福彙整使用。</p>
+              <button class="rsvp-submit" type="submit" id="rsvpSubmit">送出祝福</button>
+              <p class="rsvp-note">您的祝福將彙整轉交給畢業生，陪伴孩子啟程。</p>
             </div>
           </form>
 
           <!-- 後端尚未設定時顯示 -->
           <div class="rsvp-pending" id="rsvpPending">
-            <span class="rsvp-pending__ico" aria-hidden="true">📋</span>
-            <h3>線上回條即將開放</h3>
-            <p>報名系統建置中，開放後即可在此線上登記出席。敬請期待！</p>
+            <span class="rsvp-pending__ico" aria-hidden="true">💌</span>
+            <h3>祝福留言即將開放</h3>
+            <p>系統建置中，開放後即可在此為畢業生留下祝福。敬請期待！</p>
           </div>
 
           <!-- 送出成功 -->
           <div class="rsvp-done" id="rsvpDone" hidden>
-            <span class="rsvp-done__ico" aria-hidden="true">🎉</span>
-            <h3>回條已送出，感謝您！</h3>
-            <p>我們已收到您的出席登記，期待 6/10 與您一同見證孩子的畢業時刻。</p>
+            <span class="rsvp-done__ico" aria-hidden="true">💛</span>
+            <h3>祝福已送出，感謝您！</h3>
+            <p>我們已收到您給孩子的祝福，會在畢業的時刻把這份心意傳遞給他。</p>
           </div>
         </div>
       </div>
@@ -613,6 +603,6 @@
     <button class="update-banner__close" id="updateClose" type="button" aria-label="關閉提示">×</button>
   </div>
 
-  <script src="script.js?v=1.6.1"></script>
+  <script src="script.js?v=1.6.2"></script>
 </body>
 </html>

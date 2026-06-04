@@ -324,7 +324,6 @@
       var payload = JSON.stringify({
         class: document.getElementById("rsvpClass").value,
         name: document.getElementById("rsvpName").value.trim(),
-        count: document.getElementById("rsvpCount").value,
         message: document.getElementById("rsvpMsg").value.trim()
       });
       submit.disabled = true; submit.textContent = "送出中…";
