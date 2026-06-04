@@ -530,6 +530,18 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .live-stage { text-align: center; }
 
 /* =========================================================
+   畢業歌〈啟程〉MV 嵌入
+   ========================================================= */
+.section--song { background: var(--paper); }
+.song-stage { max-width: 860px; margin: clamp(30px, 5vw, 48px) auto 0; text-align: center; }
+.song-stage__external {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 18px;
+  color: var(--ink-soft); text-decoration: none; font-weight: 500; font-size: .92rem;
+  border-bottom: 1px dotted currentColor; padding-bottom: 1px; transition: color .2s, border-color .2s;
+}
+.song-stage__external:hover { color: var(--gold-deep); border-bottom-color: var(--gold-deep); }
+
+/* =========================================================
    給家長的話
    ========================================================= */
 .section--parents { background: var(--paper); }

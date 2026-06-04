@@ -163,21 +163,24 @@
     });
   }
 
-  /* ---------- 直播 facade：點擊才載入 YouTube iframe（省效能 / 隱私） ---------- */
-  (function () {
-    var embed = document.getElementById("liveEmbed");
-    var play = document.getElementById("liveEmbedPlay");
+  /* ---------- YouTube facade：點擊才載入 iframe（省效能 / 隱私），直播 + 畢業歌共用 ---------- */
+  [
+    { embed: "liveEmbed", play: "liveEmbedPlay", vid: "OiJlVXOzM8U", title: "石門國小第103屆畢業典禮直播" },
+    { embed: "songEmbed", play: "songEmbedPlay", vid: "7BaXaZErzcU", title: "畢業歌〈啟程〉MV" }
+  ].forEach(function (c) {
+    var embed = document.getElementById(c.embed);
+    var play = document.getElementById(c.play);
     if (!embed || !play) return;
     play.addEventListener("click", function () {
       var iframe = document.createElement("iframe");
-      iframe.src = "https://www.youtube.com/embed/OiJlVXOzM8U?autoplay=1&rel=0";
-      iframe.title = "石門國小第103屆畢業典禮直播";
+      iframe.src = "https://www.youtube.com/embed/" + c.vid + "?autoplay=1&rel=0";
+      iframe.title = c.title;
       iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
       iframe.setAttribute("allowfullscreen", "");
       embed.innerHTML = "";
       embed.appendChild(iframe);
     });
-  })();
+  });
 
   /* ---------- 日期感知直播狀態（按鈕 + 站內直播區） ---------- */
   (function () {
