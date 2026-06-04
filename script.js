@@ -344,6 +344,7 @@
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
         });
       }
+      function clip(s, n) { s = String(s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n) + "…" : s; }
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
@@ -362,7 +363,7 @@
               var base = ws.slice();
               while (base.length < 8) base = base.concat(ws);
               var items = base.map(function (w) {
-                return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(w.m) + "</span>";
+                return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(clip(w.m, 38)) + "</span>";
               }).join("");
               tickerTrack.innerHTML = items + items;
               tickerTrack.style.animationDuration = Math.max(60, base.length * 9) + "s";
