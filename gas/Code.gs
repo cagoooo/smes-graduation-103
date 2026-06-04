@@ -227,10 +227,27 @@ function setupLineNotify() {
 
 /**
  * 設定好憑證後，可執行本函數送一張測試卡片到你的 LINE，確認通知正常。
+ * 本函數會「明確回報」結果（不像正式通知會靜默失敗），方便診斷：
+ *   - 未設定憑證    → 直接丟錯，提醒你去設指令碼屬性
+ *   - 未授權對外連線 → 執行前會跳出授權要求（選帳號 → 進階 → 允許）
+ *   - 成功         → 執行記錄顯示「LINE 推播成功（HTTP 200）」且手機收到卡片
  */
 function testLineNotify() {
-  notifyNewWish_('六年甲班', '王小明', '親愛的孩子，畢業快樂，前程似錦！', 1);
-  return 'sent';
+  var c = lineCreds_();
+  if (!c.token) throw new Error('尚未設定指令碼屬性 LINE_CHANNEL_ACCESS_TOKEN');
+  if (!c.userId) throw new Error('尚未設定指令碼屬性 LINE_ADMIN_USER_ID');
+  var fields = [
+    { icon: '🎓', label: '班級', value: '六年甲班' },
+    { icon: '👤', label: '畢業生', value: '王小明' },
+    { icon: '💌', label: '祝福', value: '親愛的孩子，畢業快樂，前程似錦！' },
+    { icon: '📊', label: '累計', value: '第 1 則（測試）' }
+  ];
+  var code = pushLine_([{ type: 'flex', altText: '✅ LINE 通知測試', contents: buildFlex_('success', '收到一則新的畢業祝福', fields) }]);
+  Logger.log('LINE push HTTP status = ' + code);
+  if (code !== 200) {
+    throw new Error('LINE 推播失敗，HTTP ' + code + '（請檢查 Token / userId 是否正確）');
+  }
+  return 'LINE 推播成功（HTTP 200），請查看手機 LINE';
 }
 
 /**
