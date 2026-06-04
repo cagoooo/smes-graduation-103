@@ -4,6 +4,9 @@
 # 原始高解析校徽素材（已產生最佳化的 assets/logo.png）
 /logo.png
 
+# 原始平面圖 PDF（已產生 assets/campus-map.png；含同等資訊，不重複進 repo）
+*.pdf
+
 # 本地預覽／工具設定
 .claude/
 
