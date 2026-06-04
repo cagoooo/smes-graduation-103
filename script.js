@@ -144,37 +144,42 @@
     confettiBox.appendChild(frag);
   }
 
-  /* ---------- Service Worker 註冊 + 版本更新通知 ---------- */
+  /* ---------- Service Worker 註冊 + 版本更新通知 ----------
+     僅靠 SW 生命週期偵測（sw.js 內容變了才算更新），不比對任何硬寫版本號，
+     徹底避免「APP_VERSION 漂移 / version.json 被 CDN 快取錯位」造成的誤判一直跳。 */
   if ("serviceWorker" in navigator) {
-    var APP_VERSION = "1.1.0";
     var banner = document.getElementById("updateBanner");
     var updBtn = document.getElementById("updateBtn");
     var updClose = document.getElementById("updateClose");
     var bannerShown = false, refreshing = false, userInitiated = false;
-    var hadController = !!navigator.serviceWorker.controller;
 
+    function dismissedThisSession() {
+      try { return sessionStorage.getItem("swUpdateDismissed") === "1"; } catch (_) { return false; }
+    }
     function showUpdateBanner() {
-      if (bannerShown || !banner) return;
+      if (bannerShown || !banner || dismissedThisSession()) return;
       bannerShown = true;
       banner.classList.add("is-visible");
     }
     function hideUpdateBanner() { if (banner) banner.classList.remove("is-visible"); }
-    if (updClose) updClose.addEventListener("click", hideUpdateBanner);
+    if (updClose) updClose.addEventListener("click", function () {
+      hideUpdateBanner();
+      try { sessionStorage.setItem("swUpdateDismissed", "1"); } catch (_) {} // 本次工作階段不再提示
+    });
 
-    // 新 SW 接管 → 重新整理（防迴圈；首次安裝不重整）
+    // 只有使用者按「立即更新」觸發接管才重新整理（杜絕自動重整迴圈、首次安裝不重整）
     navigator.serviceWorker.addEventListener("controllerchange", function () {
-      if (refreshing) return;
-      if (!hadController && !userInitiated) return; // 首次安裝的 claim 不重整
+      if (refreshing || !userInitiated) return;
       refreshing = true;
       window.location.reload();
     });
 
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
-        // 已有等待中的新版（上次沒更新就離開）→ 直接提示
+        // 進來就有等待中的新版（上次沒更新就離開）→ 提示一次
         if (reg.waiting && navigator.serviceWorker.controller) showUpdateBanner();
 
-        // 線 A：偵測到新 SW 安裝完成（且已有舊 controller = 屬於更新而非首裝）
+        // 偵測到全新 SW 安裝完成，且已有舊 controller（= 真的有更新，非首次安裝）→ 提示
         reg.addEventListener("updatefound", function () {
           var nw = reg.installing;
           if (!nw) return;
@@ -183,37 +188,25 @@
           });
         });
 
-        // 點「立即更新」→ 請等待中的 SW 立即接管
+        // 點「立即更新」→ 請等待中的 SW 立即接管；沒有等待中的就不動作（避免無謂 reload）
         if (updBtn) updBtn.addEventListener("click", function () {
-          userInitiated = true;
           hideUpdateBanner();
-          if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
-          else window.location.reload();
+          if (reg.waiting) {
+            userInitiated = true;
+            reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          }
         });
 
-        // 回到分頁時主動檢查更新
-        function tryUpdate() { reg.update().catch(function () {}); }
-        window.addEventListener("focus", tryUpdate);
+        // 回到分頁時最多每分鐘檢查一次是否有新版（sw.js 沒變就不會誤觸發）
+        var lastCheck = 0;
         document.addEventListener("visibilitychange", function () {
-          if (document.visibilityState === "visible") tryUpdate();
+          if (document.visibilityState !== "visible") return;
+          var now = Date.now();
+          if (now - lastCheck < 60000) return;
+          lastCheck = now;
+          reg.update().catch(function () {});
         });
       }).catch(function () {});
     });
-
-    // 線 B：SW activate 後廣播（保險，多在新版接管前提示）
-    navigator.serviceWorker.addEventListener("message", function (e) {
-      if (e.data && e.data.type === "SW_ACTIVATED" && e.data.version !== APP_VERSION) showUpdateBanner();
-    });
-
-    // 線 C：version.json 輪詢備援（GitHub Pages CDN 約有 10 分鐘窗口）
-    function checkVersion() {
-      fetch("version.json?t=" + Date.now(), { cache: "no-store" })
-        .then(function (r) { return r.json(); })
-        .then(function (d) { if (d && d.version && d.version !== APP_VERSION) showUpdateBanner(); })
-        .catch(function () {});
-    }
-    setTimeout(checkVersion, 6000);
-    setInterval(checkVersion, 3 * 60 * 1000);
-    window.addEventListener("focus", checkVersion);
   }
 })();

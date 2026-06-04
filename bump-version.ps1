@@ -22,5 +22,16 @@ foreach ($f in @('index.html', 'sw.js', 'version.json')) {
   [System.IO.File]::WriteAllText($p, $n, $utf8NoBom)
   Write-Host ("Updated " + $f + " : " + $old + " -> " + $NewVersion)
 }
+
+# Safety: warn if the OLD version still lingers anywhere (drift guard).
+$leftover = Get-ChildItem -Path $root -Include *.html, *.js, *.json, *.webmanifest -Recurse -File |
+  Where-Object { $_.Name -ne 'bump-version.ps1' } |
+  Select-String -SimpleMatch -Pattern $old
+if ($leftover) {
+  Write-Host ""
+  Write-Host "WARNING: old version '$old' still found in:" -ForegroundColor Yellow
+  $leftover | ForEach-Object { Write-Host ("  " + $_.Path + " : line " + $_.LineNumber) -ForegroundColor Yellow }
+  Write-Host "Fix these so the SW update prompt does not keep firing." -ForegroundColor Yellow
+}
 Write-Host ""
 Write-Host "Done. Next: git add -A; git commit -m 'bump v$NewVersion'; git push"
