@@ -71,6 +71,28 @@
       overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;}
     .wcard__like{margin-top:auto;align-self:flex-start;color:#ff8a7a;font-weight:900;
       font-size:clamp(.95rem,1.4vw,1.3rem);padding-top:4px;}
+    /* 可按愛心鈕 */
+    .wlike{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:9px;cursor:pointer;
+      background:rgba(255,122,107,.15);border:1.5px solid rgba(255,138,122,.5);border-radius:999px;
+      padding:9px 20px;font-family:inherit;font-weight:900;color:#ff8a7a;line-height:1;
+      font-size:clamp(1rem,1.5vw,1.45rem);transition:transform .15s ease,background .2s,border-color .2s,color .2s;
+      -webkit-tap-highlight-color:transparent;}
+    .wlike:hover{background:rgba(255,122,107,.26);}
+    .wlike:active{transform:scale(1.16);}
+    .wlike.is-liked{background:rgba(255,122,107,.32);border-color:#ff7a6b;color:#fff;cursor:default;}
+    .wlike__h{font-size:1.15em;line-height:1;transform-origin:center;}
+    .wlike.is-liked .wlike__h{animation:heartpop .5s ease;}
+    .wlike__n.bump{display:inline-block;animation:numbump .5s ease;}
+    @keyframes numbump{0%{transform:scale(1);}40%{transform:scale(1.7);}100%{transform:scale(1);}}
+    @keyframes heartpop{0%{transform:scale(1);}30%{transform:scale(1.5);}60%{transform:scale(.85);}100%{transform:scale(1);}}
+    /* 飛心特效層 */
+    .fxlayer{position:fixed;inset:0;z-index:9;pointer-events:none;overflow:hidden;}
+    .flyheart{position:fixed;font-size:clamp(1.4rem,2vw,2rem);pointer-events:none;will-change:transform,opacity;
+      animation:flyup 1.3s ease-out forwards;}
+    @keyframes flyup{
+      0%{transform:translate(-50%,-50%) scale(.5);opacity:0;}
+      15%{opacity:1;}
+      100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.25) rotate(var(--rot));opacity:0;}}
     .wcard:nth-child(2){animation-delay:.12s;}
     .wcard:nth-child(3){animation-delay:.24s;}
     @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98);}to{opacity:1;transform:none;}}
@@ -99,6 +121,8 @@
       .confetti span{animation:none;display:none;}
       .wcard{animation:none;}
       .stage{transition:none;}
+      .flyheart{display:none;}
+      .wlike__n.bump,.wlike.is-liked .wlike__h{animation:none;}
     }
   </style>
 </head>
@@ -126,6 +150,7 @@
   </footer>
 
   <button class="fsbtn" id="fsbtn" type="button">⛶ 全螢幕</button>
+  <div class="fxlayer" id="fxLayer" aria-hidden="true"></div>
 
   <script>
     (function () {
@@ -152,6 +177,30 @@
         });
       }
 
+      // 愛心：與主站共用 localStorage key，防同裝置重複按
+      var LIKE_KEY = "smes_liked";
+      function likedSet() { try { return JSON.parse(localStorage.getItem(LIKE_KEY) || "[]"); } catch (e) { return []; } }
+      function hasLiked(r) { return likedSet().indexOf(r) !== -1; }
+      function markLiked(r) { try { var a = likedSet(); if (a.indexOf(r) === -1) { a.push(r); localStorage.setItem(LIKE_KEY, JSON.stringify(a)); } } catch (e) {} }
+      function bumpNumber(el) { if (reduce || !el) return; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+      function flyHearts(btn) {
+        if (reduce) return;
+        var rect = btn.getBoundingClientRect();
+        var layer = document.getElementById("fxLayer");
+        var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        for (var i = 0; i < 9; i++) {
+          var h = document.createElement("span");
+          h.className = "flyheart"; h.textContent = "❤️";
+          h.style.left = cx + "px"; h.style.top = cy + "px";
+          h.style.setProperty("--dx", ((Math.random() * 2 - 1) * 140) + "px");
+          h.style.setProperty("--dy", (-(90 + Math.random() * 150)) + "px");
+          h.style.setProperty("--rot", ((Math.random() * 120 - 60)) + "deg");
+          h.style.animationDelay = (Math.random() * 0.14).toFixed(2) + "s";
+          layer.appendChild(h);
+          (function (el) { setTimeout(function () { el.remove(); }, 1500); })(h);
+        }
+      }
+
       function renderBatch() {
         if (!wishes.length) {
           stage.innerHTML = '<div class="empty">祝福即將開始收集，敬請期待 💛</div>';
@@ -162,7 +211,14 @@
         var slice = [];
         for (var i = 0; i < Math.min(BATCH, total); i++) slice.push(wishes[(start + i) % total]);
         var html = slice.map(function (w) {
-          var like = (w.l && w.l > 0) ? '<div class="wcard__like">❤️ ' + w.l + "</div>" : "";
+          var like;
+          if (w.r) { // 後端有回列號 → 可按愛心鈕（樂觀 +1 + 飛心）
+            var liked = hasLiked(w.r);
+            like = '<button type="button" class="wlike' + (liked ? " is-liked" : "") + '" data-row="' + w.r + '"' +
+              (liked ? " disabled" : "") + '><span class="wlike__h">❤️</span><span class="wlike__n">' + (w.l || 0) + "</span></button>";
+          } else { // 舊後端無列號 → 唯讀顯示（降級）
+            like = (w.l && w.l > 0) ? '<div class="wcard__like">❤️ ' + w.l + "</div>" : "";
+          }
           return '<div class="wcard"><div class="wcard__to">💛 給 ' +
             esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wcard__msg">' +
             esc(w.m) + "</div>" + like + "</div>";
@@ -208,6 +264,30 @@
         }
         box.appendChild(frag);
       })();
+
+      // 愛心點擊（事件委派在 stage，不受輪播重渲染影響）：樂觀 +1 + 飛心 + 數字彈跳
+      stage.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest(".wlike") : null;
+        if (!btn || btn.disabled) return;
+        var r = parseInt(btn.getAttribute("data-row"), 10);
+        if (!r || hasLiked(r)) return;
+        markLiked(r);
+        btn.classList.add("is-liked"); btn.disabled = true;
+        var nEl = btn.querySelector(".wlike__n");
+        var cur = (parseInt(nEl.textContent, 10) || 0) + 1;
+        nEl.textContent = cur;
+        bumpNumber(nEl); flyHearts(btn);
+        for (var i = 0; i < wishes.length; i++) if (wishes[i].r === r) { wishes[i].l = cur; break; }
+        fetch(ENDPOINT + "?action=like&row=" + r + "&t=" + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (d) {
+            if (d && d.ok && typeof d.likes === "number") {
+              nEl.textContent = d.likes;
+              for (var j = 0; j < wishes.length; j++) if (wishes[j].r === r) { wishes[j].l = d.likes; break; }
+            }
+          })
+          .catch(function () { /* 樂觀更新已生效，靜默 */ });
+      });
 
       // 全螢幕（瀏覽器需使用者手勢）
       var fsbtn = document.getElementById("fsbtn");
