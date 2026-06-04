@@ -1,0 +1,14 @@
+# 內部規劃文件（含人員分工、經費概算、個資）— 不公開、不部署
+*.docx
+
+# 原始高解析校徽素材（已產生最佳化的 assets/logo.png）
+/logo.png
+
+# 本地預覽／工具設定
+.claude/
+
+# 暫存／系統檔
+_*/
+_*.txt
+Thumbs.db
+.DS_Store

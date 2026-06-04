@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>石門國小 第103屆畢業典禮｜啟程・感恩・祝福</title>
+  <meta name="description" content="桃園市龍潭區石門國民小學 114學年度第103屆畢業典禮。115年6月10日（星期三）上午9:00於本校禮堂舉行。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
+  <meta name="author" content="阿凱老師" />
+  <meta name="theme-color" content="#1d2a52" />
+
+  <!-- Open Graph / 社群分享 -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
+  <meta property="og:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- 表情符號 SVG favicon，避免外部圖檔失效 -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E" />
+
+  <!-- 字型 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 跳到主內容（無障礙） -->
+  <a class="skip-link" href="#info">跳到主要內容</a>
+
+  <!-- ===== 導覽列 ===== -->
+  <header class="nav" id="top">
+    <div class="nav__inner">
+      <a class="nav__brand" href="#top">
+        <img class="nav__logo" src="assets/logo.png" alt="石門國小校徽" width="40" height="38" />
+        <span class="nav__brand-text">
+          <span class="nav__brand-school">石門國小</span>
+          <span class="nav__brand-sub">第103屆畢業典禮</span>
+        </span>
+      </a>
+      <nav class="nav__links" aria-label="主要導覽">
+        <a href="#info">典禮資訊</a>
+        <a href="#meaning">活動意義</a>
+        <a href="#week">畢業週</a>
+        <a href="#program">當天流程</a>
+        <a href="#route">校園巡禮</a>
+        <a href="#parents">家長須知</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="hero">
+      <div class="hero__sky" aria-hidden="true"></div>
+      <div class="hero__confetti" aria-hidden="true"></div>
+      <div class="hero__rainbow" aria-hidden="true"></div>
+
+      <div class="hero__content">
+        <img class="hero__logo" src="assets/logo.png" alt="石門國小校徽" width="116" height="110" />
+        <p class="hero__school">桃園市龍潭區石門國民小學</p>
+        <p class="hero__eyebrow">114 學年度・第 103 屆</p>
+        <h1 class="hero__title">畢業典禮</h1>
+        <p class="hero__slogan">啟程&nbsp;・&nbsp;感恩&nbsp;・&nbsp;祝福</p>
+        <p class="hero__lede">六年同窗，一朝啟程。<br />誠摯邀請全校師生與畢業生家長，<br class="br-mobile" />一同見證孩子們閃耀的時刻。</p>
+
+        <div class="hero__pills">
+          <span class="pill"><span class="pill__ico" aria-hidden="true">📅</span>115年6月10日（星期三）</span>
+          <span class="pill"><span class="pill__ico" aria-hidden="true">🕘</span>上午 9:00 典禮開始</span>
+          <span class="pill"><span class="pill__ico" aria-hidden="true">📍</span>本校禮堂</span>
+        </div>
+
+        <!-- 倒數計時 -->
+        <div class="countdown" id="countdown" aria-live="polite">
+          <p class="countdown__label">距離畢業典禮還有</p>
+          <div class="countdown__grid">
+            <div class="countdown__box"><span class="countdown__num" id="cd-days">--</span><span class="countdown__unit">天</span></div>
+            <div class="countdown__box"><span class="countdown__num" id="cd-hours">--</span><span class="countdown__unit">時</span></div>
+            <div class="countdown__box"><span class="countdown__num" id="cd-mins">--</span><span class="countdown__unit">分</span></div>
+            <div class="countdown__box"><span class="countdown__num" id="cd-secs">--</span><span class="countdown__unit">秒</span></div>
+          </div>
+        </div>
+
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#program">查看典禮流程</a>
+          <a class="btn btn--ghost" href="#parents">給家長的話</a>
+        </div>
+      </div>
+
+      <a class="hero__scroll" href="#info" aria-label="向下捲動">
+        <span></span>
+      </a>
+    </section>
+
+    <!-- ===== 典禮資訊 ===== -->
+    <section class="section section--info" id="info">
+      <div class="container">
+        <h2 class="section__title reveal">典禮資訊</h2>
+        <p class="section__intro reveal">一張圖看懂時間與地點，請家長預留時間出席，與孩子共享榮耀。</p>
+
+        <div class="info-cards">
+          <div class="info-card reveal">
+            <div class="info-card__ico" aria-hidden="true">📅</div>
+            <h3>日期</h3>
+            <p class="info-card__big">6月10日</p>
+            <p class="info-card__sub">中華民國115年・星期三</p>
+          </div>
+          <div class="info-card reveal">
+            <div class="info-card__ico" aria-hidden="true">🕘</div>
+            <h3>時間</h3>
+            <p class="info-card__big">09:00</p>
+            <p class="info-card__sub">建議 08:50 前入座<br />典禮約至 11:00 禮成</p>
+          </div>
+          <div class="info-card reveal">
+            <div class="info-card__ico" aria-hidden="true">📍</div>
+            <h3>地點</h3>
+            <p class="info-card__big">本校禮堂</p>
+            <p class="info-card__sub">石門國小・大禮堂</p>
+          </div>
+          <div class="info-card reveal">
+            <div class="info-card__ico" aria-hidden="true">👨‍👩‍👧‍👦</div>
+            <h3>對象</h3>
+            <p class="info-card__big">全校共襄盛舉</p>
+            <p class="info-card__sub">畢業班師生、全體教職員、<br />貴賓及畢業生家長</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 活動意義 ===== -->
+    <section class="section section--meaning" id="meaning">
+      <div class="container">
+        <h2 class="section__title reveal">活動的意義</h2>
+        <p class="section__intro reveal">畢業，不是結束，而是帶著祝福啟程。這場典禮，我們想給孩子兩份禮物。</p>
+
+        <div class="meaning-grid">
+          <article class="meaning-card reveal">
+            <div class="meaning-card__num">01</div>
+            <h3>愛校・感恩・惜福</h3>
+            <p>培養學生愛校、感恩、惜福之高度情懷，讓孩子在離開前，記得這片校園與每一位陪伴成長的師長。</p>
+          </article>
+          <article class="meaning-card reveal">
+            <div class="meaning-card__num">02</div>
+            <h3>展現成果・增進情誼</h3>
+            <p>表揚並呈現學生六年的學習成果，在掌聲與祝福中增進師生情誼，為小學生涯畫下溫暖的句點。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 畢業週活動一覽 ===== -->
+    <section class="section section--week" id="week">
+      <div class="container">
+        <h2 class="section__title reveal">畢業週活動一覽</h2>
+        <p class="section__intro reveal">從畢業考到典禮當天，這一週每一步都是重要的倒數。</p>
+
+        <div class="week-list">
+          <div class="week-item reveal">
+            <div class="week-item__date"><span class="week-item__md">5/28<small>–</small>5/29</span><span class="week-item__dow">四・五</span></div>
+            <div class="week-item__body">
+              <h3>畢業考</h3>
+              <p>六年級各班期末評量，為六年學習成果做最後驗收。</p>
+            </div>
+          </div>
+          <div class="week-item reveal">
+            <div class="week-item__date"><span class="week-item__md">6/5</span><span class="week-item__dow">星期五</span></div>
+            <div class="week-item__body">
+              <h3>畢業典禮第一次預演 <span class="week-item__time">08:45–10:15</span></h3>
+              <p>六年級各班、主持人、小司儀及相關工作人員彩排走位。</p>
+            </div>
+          </div>
+          <div class="week-item reveal">
+            <div class="week-item__date"><span class="week-item__md">6/9</span><span class="week-item__dow">星期二</span></div>
+            <div class="week-item__body">
+              <h3>畢業典禮第二次預演 <span class="week-item__time">08:45–10:15</span></h3>
+              <p>全體再次彩排，會場佈置（紅地毯、充氣拱門、彩虹廊道）完成。</p>
+            </div>
+          </div>
+          <div class="week-item week-item--highlight reveal">
+            <div class="week-item__date"><span class="week-item__md">6/10</span><span class="week-item__dow">星期三</span></div>
+            <div class="week-item__body">
+              <h3>🎓 畢業典禮 <span class="week-item__time">09:00–12:00</span></h3>
+              <p>畢業班師生、全體教職員工、貴賓及畢業生家長齊聚禮堂，見證啟程時刻。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 典禮當天流程 ===== -->
+    <section class="section section--program" id="program">
+      <div class="container">
+        <h2 class="section__title reveal">典禮當天流程</h2>
+        <p class="section__intro reveal">6月10日（星期三）完整流程，讓家長掌握每個感動的環節。</p>
+
+        <ol class="timeline">
+          <li class="timeline__item reveal">
+            <span class="timeline__time">08:20</span>
+            <div class="timeline__card">
+              <h3>畢業生集合・佩戴胸花</h3>
+              <p>畢業生於彩虹走廊集合，由導師為孩子別上胸花。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">08:35</span>
+            <div class="timeline__card">
+              <h3>校園巡禮</h3>
+              <p>在背景音樂中，畢業生走過六年回憶的校園角落。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">08:50</span>
+            <div class="timeline__card">
+              <h3>畢業生進場就座</h3>
+              <p>畢業生依安排就座，請家長同步入席。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">08:55</span>
+            <div class="timeline__card">
+              <h3>校長及師長進場</h3>
+            </div>
+          </li>
+          <li class="timeline__item timeline__item--accent reveal">
+            <span class="timeline__time">09:00</span>
+            <div class="timeline__card">
+              <h3>🎉 典禮開始</h3>
+              <ul class="timeline__sub">
+                <li>頒發畢業證書</li>
+                <li>主席（校長）致詞</li>
+                <li>介紹貴賓・貴賓致詞・家長會長致詞</li>
+              </ul>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">09:20</span>
+            <div class="timeline__card">
+              <h3>🎬 感恩影片（一）</h3>
+              <p>1、2、3 班，每班 2～3 分鐘。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">09:25</span>
+            <div class="timeline__card">
+              <h3>🎤 學生表演（一）</h3>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">09:30</span>
+            <div class="timeline__card">
+              <h3>🏆 頒獎時間（一）</h3>
+              <ul class="timeline__sub">
+                <li>市長獎、議長獎、教育局長獎、區公所獎</li>
+                <li>校長獎、家長會長獎、龍潭總會長獎</li>
+                <li>教育文化家長協會獎、敬業樂群獎、尊師敬友獎</li>
+              </ul>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">09:55</span>
+            <div class="timeline__card">
+              <h3>🎬 感恩影片（二）</h3>
+              <p>4、5、6 班，每班 2～3 分鐘。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">10:00</span>
+            <div class="timeline__card">
+              <h3>🎤 學生表演（二）</h3>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">10:05</span>
+            <div class="timeline__card">
+              <h3>🏆 頒獎時間（二）</h3>
+              <ul class="timeline__sub">
+                <li>服務獎、藝能獎</li>
+                <li>品格模範、閱讀模範</li>
+              </ul>
+            </div>
+          </li>
+          <li class="timeline__item timeline__item--accent reveal">
+            <span class="timeline__time">10:30</span>
+            <div class="timeline__card">
+              <h3>💛 祝福與感恩</h3>
+              <ul class="timeline__sub">
+                <li>在校生致祝福詞（五年級代表）</li>
+                <li>薪火相傳——自治市長交接</li>
+                <li>畢業生致感恩詞（六年級代表）</li>
+                <li>師長祝福・行謝師禮</li>
+              </ul>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">10:45</span>
+            <div class="timeline__card">
+              <h3>🎵 唱校歌及畢業歌</h3>
+              <p>全體畢業生齊唱，畢業歌〈啟程〉。</p>
+            </div>
+          </li>
+          <li class="timeline__item timeline__item--accent reveal">
+            <span class="timeline__time">10:55</span>
+            <div class="timeline__card">
+              <h3>🎓 禮成</h3>
+              <p>典禮結束，導師帶領學生返回教室。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">11:25</span>
+            <div class="timeline__card">
+              <h3>各班頒發畢業證書及獎品獎狀</h3>
+              <p>於各班教室進行。</p>
+            </div>
+          </li>
+          <li class="timeline__item reveal">
+            <span class="timeline__time">11:50</span>
+            <div class="timeline__card">
+              <h3>🎊 全校歡送畢業生離校</h3>
+              <p>以環保鞭炮溫馨歡送，祝福畢業生鵬程萬里。</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== 校園巡禮路線 ===== -->
+    <section class="section section--route" id="route">
+      <div class="container">
+        <h2 class="section__title reveal">校園巡禮路線</h2>
+        <p class="section__intro reveal">典禮前，畢業生將走過這條滿載六年回憶的路線，最後抵達會場。</p>
+
+        <ol class="route">
+          <li class="route__stop reveal"><span class="route__dot">1</span><span class="route__name">六年級教室</span></li>
+          <li class="route__stop reveal"><span class="route__dot">2</span><span class="route__name">桌球教室</span></li>
+          <li class="route__stop reveal"><span class="route__dot">3</span><span class="route__name">圖書館 2F</span></li>
+          <li class="route__stop reveal"><span class="route__dot">4</span><span class="route__name">空中走廊</span></li>
+          <li class="route__stop reveal"><span class="route__dot">5</span><span class="route__name">C2 棟 2F 五年級教室</span></li>
+          <li class="route__stop reveal"><span class="route__dot">6</span><span class="route__name">風雨球場</span></li>
+          <li class="route__stop reveal"><span class="route__dot">7</span><span class="route__name">C1 棟 1F 四年級教室</span></li>
+          <li class="route__stop reveal"><span class="route__dot">8</span><span class="route__name">彩虹廊道</span></li>
+          <li class="route__stop reveal"><span class="route__dot">9</span><span class="route__name">校門圓環</span></li>
+          <li class="route__stop reveal"><span class="route__dot">10</span><span class="route__name">一年級教室前</span></li>
+          <li class="route__stop route__stop--end reveal"><span class="route__dot">🎓</span><span class="route__name">會場（大禮堂）</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== 給家長的話 ===== -->
+    <section class="section section--parents" id="parents">
+      <div class="container">
+        <h2 class="section__title reveal">給家長的溫馨提醒</h2>
+        <p class="section__intro reveal">期待與您一同陪伴孩子，走過這個重要的里程碑。</p>
+
+        <div class="notice-grid">
+          <div class="notice reveal"><span class="notice__ico" aria-hidden="true">⏰</span><div><h3>提早入座</h3><p>典禮 9:00 準時開始，建議 08:50 前抵達禮堂並就座，以免錯過孩子上台的感動瞬間。</p></div></div>
+          <div class="notice reveal"><span class="notice__ico" aria-hidden="true">📍</span><div><h3>地點與動線</h3><p>典禮於本校禮堂（大禮堂）舉行，可循彩虹廊道、校門圓環指引前往會場。</p></div></div>
+          <div class="notice reveal"><span class="notice__ico" aria-hidden="true">🎥</span><div><h3>感恩影片與表演</h3><p>典禮中安排各班感恩影片與學生表演，歡迎家長一同回顧孩子的成長點滴。</p></div></div>
+          <div class="notice reveal"><span class="notice__ico" aria-hidden="true">🎊</span><div><h3>歡送畢業生</h3><p>典禮尾聲將以環保鞭炮歡送畢業生離校，全校師生一同獻上最深的祝福。</p></div></div>
+        </div>
+
+        <div class="blessing reveal">
+          <p class="blessing__quote">「願你帶著母校的祝福，<br />勇敢啟程，閃耀屬於你的未來。」</p>
+          <p class="blessing__sign">—— 石門國小 全體師長　敬上</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 頁尾 ===== -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <img class="site-footer__logo" src="assets/logo.png" alt="石門國小校徽" width="72" height="68" />
+      <p class="site-footer__school">桃園市龍潭區石門國民小學</p>
+      <p class="site-footer__sub">114 學年度第 103 屆畢業典禮・啟程・感恩・祝福</p>
+      <p class="site-footer__feature">🐟 鱻魚特色學園</p>
+
+      <p class="site-credit">
+        Made with <span class="site-credit__heart" aria-label="愛心">❤️</span> by
+        <a
+          href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="site-credit__author"
+        >阿凱老師</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- 回到頂端 -->
+  <a href="#top" class="to-top" id="toTop" aria-label="回到頂端">↑</a>
+
+  <script src="script.js"></script>
+</body>
+</html>
