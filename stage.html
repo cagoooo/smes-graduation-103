@@ -69,6 +69,8 @@
       display:flex;align-items:center;gap:8px;}
     .wcard__msg{color:#fff;font-size:clamp(1.15rem,2vw,1.9rem);line-height:1.7;font-weight:500;
       overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;}
+    .wcard__like{margin-top:auto;align-self:flex-start;color:#ff8a7a;font-weight:900;
+      font-size:clamp(.95rem,1.4vw,1.3rem);padding-top:4px;}
     .wcard:nth-child(2){animation-delay:.12s;}
     .wcard:nth-child(3){animation-delay:.24s;}
     @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98);}to{opacity:1;transform:none;}}
@@ -160,9 +162,10 @@
         var slice = [];
         for (var i = 0; i < Math.min(BATCH, total); i++) slice.push(wishes[(start + i) % total]);
         var html = slice.map(function (w) {
+          var like = (w.l && w.l > 0) ? '<div class="wcard__like">❤️ ' + w.l + "</div>" : "";
           return '<div class="wcard"><div class="wcard__to">💛 給 ' +
             esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wcard__msg">' +
-            esc(w.m) + "</div></div>";
+            esc(w.m) + "</div>" + like + "</div>";
         }).join("");
         if (reduce) { stage.innerHTML = html; return; }
         stage.classList.add("fading");

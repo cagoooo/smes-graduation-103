@@ -16,7 +16,7 @@
  */
 var SHEET_ID = '1Y0R7ypyhFtHg1O_P9CHp7MM7_3GZ_WpOr3t1dHNNceg';
 var SHEET_NAME = '回條';
-var HEADERS = ['送出時間', '班級', '畢業生姓名', '出席人數', '祝福悄悄話', '公開(填1或打勾)'];
+var HEADERS = ['送出時間', '班級', '畢業生姓名', '出席人數', '祝福悄悄話', '公開(填1或打勾)', '愛心'];
 
 function getSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -26,9 +26,10 @@ function getSheet_() {
     sh.appendRow(HEADERS);
     sh.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
     sh.setFrozenRows(1);
-  } else if (!sh.getRange(1, 6).getValue()) {
-    // 既有試算表：補上「公開」欄標題(F)
-    sh.getRange(1, 6).setValue(HEADERS[5]).setFontWeight('bold');
+  } else {
+    // 既有試算表：補上缺的欄位標題（F 公開、G 愛心）
+    if (!sh.getRange(1, 6).getValue()) sh.getRange(1, 6).setValue(HEADERS[5]).setFontWeight('bold');
+    if (!sh.getRange(1, 7).getValue()) sh.getRange(1, 7).setValue(HEADERS[6]).setFontWeight('bold');
   }
   return sh;
 }
@@ -41,6 +42,30 @@ function json_(obj) {
 function isPublic_(v) {
   var s = String(v).trim().toLowerCase();
   return s === '1' || s === 'true' || s === '是' || s === 'v' || s === 'yes' || s === '✓' || s === '公開';
+}
+
+// 祝福牆愛心 +1（GET）。用 LockService 防多人同時按互相覆蓋；只允許對「已公開」祝福按。
+function handleLike_(e) {
+  try {
+    var row = parseInt((e && e.parameter && e.parameter.row), 10);
+    var sh = getSheet_();
+    if (!(row >= 2 && row <= sh.getLastRow())) return json_({ ok: false, error: 'bad row' });
+    if (!isPublic_(sh.getRange(row, 6).getValue())) return json_({ ok: false, error: 'not public' });
+    var lock = LockService.getScriptLock();
+    lock.waitLock(8000);
+    var likes;
+    try {
+      var cell = sh.getRange(row, 7); // G 欄：愛心
+      likes = Math.max(0, parseInt(cell.getValue(), 10) || 0) + 1;
+      cell.setValue(likes);
+      SpreadsheetApp.flush();
+    } finally {
+      lock.releaseLock();
+    }
+    return json_({ ok: true, likes: likes });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  }
 }
 
 function doPost(e) {
@@ -57,8 +82,9 @@ function doPost(e) {
       klass,
       name,
       (data.count || '').toString().slice(0, 20),
-      message
-      // F 欄（公開）留空 → 預設不公開，待老師審核
+      message,
+      '', // F 欄（公開）留空 → 預設不公開，待老師審核
+      0   // G 欄（愛心）初始 0
     ]);
     var total = Math.max(0, sh.getLastRow() - 1); // 扣掉標題列
     notifyNewWish_(klass, name, message, total);  // best-effort LINE 通知（成功）
@@ -77,12 +103,18 @@ function doGet(e) {
       var last = sh.getLastRow();
       var wishes = [];
       if (last >= 2) {
-        var vals = sh.getRange(2, 1, last - 1, 6).getValues(); // A..F
+        var vals = sh.getRange(2, 1, last - 1, 7).getValues(); // A..G
         for (var i = 0; i < vals.length; i++) {
           var r = vals[i];
           var msg = String(r[4] || '').trim();   // E 欄：祝福
           if (isPublic_(r[5]) && msg) {           // F 欄：公開
-            wishes.push({ c: String(r[1] || '').trim(), n: String(r[2] || '').trim(), m: msg });
+            wishes.push({
+              c: String(r[1] || '').trim(),
+              n: String(r[2] || '').trim(),
+              m: msg,
+              r: i + 2,                                 // 試算表列號（給愛心定位）
+              l: Math.max(0, parseInt(r[6], 10) || 0)   // G 欄：愛心數
+            });
           }
         }
       }
@@ -93,6 +125,9 @@ function doGet(e) {
   }
   if (action === 'moderate') {
     return handleModerate_(e); // LINE 卡片按鈕審核 → 回傳 HTML 結果頁
+  }
+  if (action === 'like') {
+    return handleLike_(e); // 祝福牆愛心 +1
   }
   return json_({ ok: true, service: 'smes-grad-103-rsvp' });
 }

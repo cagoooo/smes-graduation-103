@@ -700,6 +700,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .wish-chip:hover { border-color: var(--gold); color: var(--navy-900); }
 .wish-chip.is-active { background: var(--navy-700); color: #fff; border-color: var(--navy-700); }
+.wish-like {
+  margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: var(--paper); border: 1px solid var(--paper-2); border-radius: 999px;
+  padding: 6px 14px; font-family: inherit; font-size: .9rem; font-weight: 700; color: var(--ink-soft);
+  transition: transform .15s var(--ease), background .2s, color .2s, border-color .2s;
+}
+.wish-like:hover { border-color: var(--coral); color: var(--coral); }
+.wish-like:active { transform: scale(1.14); }
+.wish-like.is-liked { background: #ffe9e6; border-color: var(--coral); color: var(--coral); cursor: default; }
+.wish-like__heart { font-size: 1rem; line-height: 1; }
+.wish-like__n { min-width: 1ch; text-align: left; }
 .wishwall__count { text-align: center; color: var(--gold-deep); font-weight: 700; margin-bottom: 18px; }
 .wishwall__cards {
   display: grid; gap: 14px;

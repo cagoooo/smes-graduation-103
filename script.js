@@ -347,13 +347,28 @@
         });
       }
       function clip(s, n) { s = String(s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n) + "…" : s; }
+      function likedSet() {
+        try { return JSON.parse(localStorage.getItem("smes_liked") || "[]"); } catch (e) { return []; }
+      }
+      function hasLiked(r) { return likedSet().indexOf(r) !== -1; }
+      function markLiked(r) {
+        try { var a = likedSet(); if (a.indexOf(r) === -1) { a.push(r); localStorage.setItem("smes_liked", JSON.stringify(a)); } } catch (e) {}
+      }
       function cardHTML(w) {
+        var likeBtn = "";
+        if (w.r) { // 後端有回列號才顯示愛心鈕（舊後端無 r → 優雅降級不顯示）
+          var liked = hasLiked(w.r);
+          likeBtn = '<button type="button" class="wish-like' + (liked ? " is-liked" : "") +
+            '" data-row="' + w.r + '"' + (liked ? " disabled" : "") + ' aria-label="給這則祝福一個愛心">' +
+            '<span class="wish-like__heart">❤️</span><span class="wish-like__n">' + (w.l || 0) + "</span></button>";
+        }
         return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
           esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
-          esc(w.m) + "</div></div>";
+          esc(w.m) + "</div>" + likeBtn + "</div>";
       }
       function renderCards() {
-        var list = curFilter === "全部" ? allWishes : allWishes.filter(function (w) { return w.c === curFilter; });
+        var list = curFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === curFilter; });
+        list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); }); // 愛心多的排前面（熱門優先）
         cards.innerHTML = list.map(cardHTML).join("");
         if (count) {
           count.textContent = curFilter === "全部"
@@ -383,6 +398,28 @@
           renderCards();
         });
       }
+      // 愛心：點擊樂觀 +1 → 背景送後端、localStorage 防同裝置重複按
+      cards.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest(".wish-like") : null;
+        if (!btn || btn.disabled) return;
+        var r = parseInt(btn.getAttribute("data-row"), 10);
+        if (!r || hasLiked(r)) return;
+        markLiked(r);
+        btn.classList.add("is-liked"); btn.disabled = true;
+        var nEl = btn.querySelector(".wish-like__n");
+        var cur = (parseInt(nEl.textContent, 10) || 0) + 1;
+        nEl.textContent = cur;
+        for (var i = 0; i < allWishes.length; i++) if (allWishes[i].r === r) { allWishes[i].l = cur; break; }
+        fetch(RSVP_ENDPOINT + "?action=like&row=" + r + "&t=" + Date.now())
+          .then(function (res) { return res.json(); })
+          .then(function (d) {
+            if (d && d.ok && typeof d.likes === "number") {
+              nEl.textContent = d.likes;
+              for (var j = 0; j < allWishes.length; j++) if (allWishes[j].r === r) { allWishes[j].l = d.likes; break; }
+            }
+          })
+          .catch(function () { /* 樂觀更新已生效，靜默 */ });
+      });
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
