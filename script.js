@@ -283,6 +283,22 @@
     confettiBox.appendChild(frag);
   }
 
+  /* ---------- 校園平面圖放大檢視（lightbox） ---------- */
+  (function () {
+    var openBtn = document.getElementById("campusMapOpen");
+    var box = document.getElementById("lightbox");
+    var closeBtn = document.getElementById("lightboxClose");
+    if (!openBtn || !box) return;
+    function open() { box.hidden = false; document.body.style.overflow = "hidden"; }
+    function close() { box.hidden = true; document.body.style.overflow = ""; }
+    openBtn.addEventListener("click", open);
+    if (closeBtn) closeBtn.addEventListener("click", close);
+    box.addEventListener("click", function (e) {
+      if (e.target === box || (e.target.className && String(e.target.className).indexOf("lightbox__scroll") !== -1)) close();
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !box.hidden) close(); });
+  })();
+
   /* ---------- Service Worker 註冊 + 版本更新通知 ----------
      僅靠 SW 生命週期偵測（sw.js 內容變了才算更新），不比對任何硬寫版本號，
      徹底避免「APP_VERSION 漂移 / version.json 被 CDN 快取錯位」造成的誤判一直跳。 */
