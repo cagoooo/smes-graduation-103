@@ -16,8 +16,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/" />
   <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta property="og:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.7.0" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.7.0" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.8.0" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.8.0" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta name="twitter:description" content="115年6月10日（星期三）上午9:00 於本校禮堂。誠摯邀請全校師生與畢業生家長，一同見證孩子們啟程的時刻。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.7.0" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.8.0" />
 
   <!-- Favicon / 圖示（石門校徽） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -76,7 +76,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=1.7.0" />
+  <link rel="stylesheet" href="styles.css?v=1.8.0" />
 </head>
 <body>
   <!-- 跳到主內容（無障礙） -->
@@ -100,7 +100,7 @@
         <a href="#route">校園巡禮</a>
         <a href="#song">畢業歌</a>
         <a href="#parents">家長須知</a>
-        <a href="#rsvp">祝福留言</a>
+        <a href="#rsvp">祝福牆</a>
       </nav>
       <a class="nav__live" href="#live" aria-label="前往典禮直播">
         <span class="btn__live-dot" aria-hidden="true"></span>LIVE
@@ -513,9 +513,18 @@
     <!-- ===== 家長線上回條 ===== -->
     <section class="section section--rsvp" id="rsvp">
       <div class="container">
-        <h2 class="section__title reveal">給畢業生的祝福</h2>
-        <p class="section__intro reveal">邀請家長為畢業的孩子寫下一句祝福，我們會把這份心意彙整轉交給孩子，陪他勇敢啟程。</p>
+        <h2 class="section__title reveal">畢業祝福牆</h2>
+        <p class="section__intro reveal">來自家長與親友的暖心祝福，陪伴畢業生勇敢啟程。也歡迎您在下方留下一句祝福。</p>
 
+        <!-- 祝福展示牆（跑馬燈 + 卡片）：有已公開祝福時由 script.js 顯示 -->
+        <div class="wishwall reveal" id="wishWall" hidden>
+          <div class="wishwall__marquee" aria-hidden="true">
+            <div class="wishwall__track" id="wishTrack"></div>
+          </div>
+          <div class="wishwall__cards" id="wishCards"></div>
+        </div>
+
+        <h3 class="wish-form-title reveal">✍️ 也為畢業生留下祝福</h3>
         <div class="rsvp-wrap reveal">
           <!-- 祝福表單 -->
           <form class="rsvp-form" id="rsvpForm" novalidate hidden>
@@ -607,6 +616,6 @@
     <button class="update-banner__close" id="updateClose" type="button" aria-label="關閉提示">×</button>
   </div>
 
-  <script src="script.js?v=1.7.0"></script>
+  <script src="script.js?v=1.8.0"></script>
 </body>
 </html>

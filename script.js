@@ -326,6 +326,50 @@
     // ⬇️ GAS Web App /exec 網址（家長回條寫入 Google 試算表）
     var RSVP_ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
 
+    /* ---- 畢業祝福牆：抓取已公開祝福，渲染跑馬燈 + 卡片 ---- */
+    (function () {
+      var wall = document.getElementById("wishWall");
+      var track = document.getElementById("wishTrack");
+      var cards = document.getElementById("wishCards");
+      if (!wall || !track || !cards) return;
+      function maskName(n) {
+        n = String(n || "").trim();
+        if (n.length <= 1) return n;
+        return n.charAt(0) + new Array(n.length).join("○");
+      }
+      function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      function load() {
+        fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var ws = (d && d.wishes) || [];
+            if (!ws.length) { wall.hidden = true; return; }
+            cards.innerHTML = ws.map(function (w) {
+              return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
+                esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
+                esc(w.m) + "</div></div>";
+            }).join("");
+            // 跑馬燈：祝福少時補滿，並複製一份做無縫循環
+            var base = ws.slice();
+            while (base.length < 6) base = base.concat(ws);
+            var chips = base.map(function (w) {
+              return '<span class="wish-chip">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(w.m) + "</span>";
+            }).join("");
+            track.innerHTML = chips + chips;
+            track.style.animationDuration = Math.max(24, base.length * 5) + "s";
+            wall.hidden = false;
+          })
+          .catch(function () { /* 抓不到就不顯示牆，靜默 */ });
+      }
+      load();
+      setInterval(load, 3 * 60 * 1000);
+      window.addEventListener("focus", load);
+    })();
+
     var form = document.getElementById("rsvpForm");
     var pending = document.getElementById("rsvpPending");
     var done = document.getElementById("rsvpDone");

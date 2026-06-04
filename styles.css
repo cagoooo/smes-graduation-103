@@ -661,6 +661,41 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .rsvp-again:hover { background: var(--navy-700); color: #fff; }
 
+/* 畢業祝福牆（跑馬燈 + 卡片） */
+.wish-form-title { text-align: center; color: var(--navy-800); font-size: clamp(1.1rem, 4vw, 1.45rem); margin: clamp(40px, 7vw, 64px) 0 18px; }
+.wishwall { margin-top: clamp(26px, 5vw, 40px); }
+.wishwall__marquee {
+  overflow: hidden; padding: 6px 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.wishwall__track { display: inline-flex; gap: 14px; white-space: nowrap; will-change: transform; animation: wishMarquee 40s linear infinite; }
+.wishwall__marquee:hover .wishwall__track { animation-play-state: paused; }
+@keyframes wishMarquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.wish-chip {
+  display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+  background: linear-gradient(120deg, var(--navy-800), var(--navy-700)); color: #fff;
+  padding: 10px 18px; border-radius: 999px; font-size: .95rem; max-width: 78vw;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.wish-chip b { color: var(--gold); font-weight: 700; }
+.wishwall__cards {
+  margin-top: 22px; display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.wish-card {
+  background: var(--white); border: 1px solid var(--paper-2); border-left: 5px solid var(--gold);
+  border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm);
+  transition: transform .25s var(--ease), box-shadow .25s;
+}
+.wish-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.wish-card__to { font-size: .82rem; color: var(--gold-deep); font-weight: 700; margin-bottom: 8px; }
+.wish-card__msg { color: var(--ink); line-height: 1.7; word-break: break-word; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wishwall__track { animation: none; flex-wrap: wrap; white-space: normal; }
+}
+
 @media (max-width: 520px) {
   .rsvp-form { grid-template-columns: 1fr; }
 }
