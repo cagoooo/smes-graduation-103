@@ -539,8 +539,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   display: flex; align-items: flex-start; justify-content: center;
 }
 .lightbox[hidden] { display: none; }
-.lightbox__scroll { width: 100%; height: 100%; overflow: auto; -webkit-overflow-scrolling: touch; padding: 56px 12px 24px; text-align: center; }
-.lightbox__img { max-width: none; width: min(1100px, 96%); height: auto; border-radius: 10px; box-shadow: var(--shadow-lg); }
+.lightbox__scroll { width: 100%; height: 100%; overflow: auto; -webkit-overflow-scrolling: touch; padding: 56px 12px 24px; text-align: center; scrollbar-gutter: stable both-edges; }
+.lightbox__img { display: block; max-width: none; width: min(1100px, 96%); height: auto; margin: 0 auto; border-radius: 10px; box-shadow: var(--shadow-lg); }
 .lightbox__close {
   position: fixed; top: 14px; right: 16px; z-index: 2;
   width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;

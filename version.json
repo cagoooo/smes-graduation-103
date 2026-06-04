@@ -1,4 +1,4 @@
 {
-  "version": "1.9.3",
-  "notes": "「寫下祝福」按鈕改為精準跳到留言表單(#wishform)，略過上方祝福牆卡片，直達填寫位置"
+  "version": "1.9.4",
+  "notes": "校園平面圖放大(lightbox)圖片置中修正：補 margin auto + scrollbar-gutter，桌機/手機左右對稱不再偏左"
 }
