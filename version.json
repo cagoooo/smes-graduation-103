@@ -1,4 +1,4 @@
 {
-  "version": "1.1.0",
-  "notes": "新增典禮 YouTube 直播連結、社群分享 OG 圖與 favicon、Service Worker 版本更新通知"
+  "version": "1.1.1",
+  "notes": "直播按鈕文案改為『觀看典禮直播』，導覽列新增常駐 LIVE 入口"
 }

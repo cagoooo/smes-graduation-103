@@ -72,7 +72,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .nav__inner {
   max-width: var(--maxw); margin-inline: auto;
   padding: 10px clamp(14px, 4vw, 28px);
-  display: flex; align-items: center; gap: 14px; justify-content: space-between;
+  display: flex; align-items: center; gap: 12px;
 }
 .nav__brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; flex-shrink: 0; }
 .nav__logo { width: 40px; height: auto; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
@@ -82,10 +82,22 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 
 .nav__links {
   display: flex; gap: 2px; align-items: center;
+  flex: 1 1 auto; min-width: 0;
   overflow-x: auto; -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 .nav__links::-webkit-scrollbar { display: none; }
+
+/* 導覽列常駐直播鈕（固定在右側，不隨連結捲動） */
+.nav__live {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+  background: #e8392f; color: #fff; text-decoration: none; white-space: nowrap;
+  padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: .82rem;
+  letter-spacing: .6px; box-shadow: 0 4px 14px rgba(232,57,47,.42);
+  transition: background .2s, transform .2s;
+}
+.nav__live:hover { background: #d22b22; transform: translateY(-1px); }
+.nav__live .btn__live-dot { width: 8px; height: 8px; }
 .nav__links a {
   text-decoration: none; color: rgba(255, 255, 255, 0.82);
   font-size: .9rem; font-weight: 500; white-space: nowrap;
