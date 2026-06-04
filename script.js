@@ -299,6 +299,53 @@
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !box.hidden) close(); });
   })();
 
+  /* ---------- 家長線上回條（送出至 Google Apps Script） ---------- */
+  (function () {
+    // ⬇️ 部署 GAS 後，把 /exec 網址填進這裡即可啟用表單（見 gas/部署說明.md）
+    var RSVP_ENDPOINT = "";
+
+    var form = document.getElementById("rsvpForm");
+    var pending = document.getElementById("rsvpPending");
+    var done = document.getElementById("rsvpDone");
+    if (!form) return;
+
+    var ready = /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(RSVP_ENDPOINT);
+    if (!ready) return; // 端點未設定 → 維持「即將開放」提示
+
+    if (pending) pending.hidden = true;
+    form.hidden = false;
+    var submit = document.getElementById("rsvpSubmit");
+
+    function finish() { form.hidden = true; if (done) done.hidden = false; }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      var payload = JSON.stringify({
+        class: document.getElementById("rsvpClass").value,
+        name: document.getElementById("rsvpName").value.trim(),
+        count: document.getElementById("rsvpCount").value,
+        message: document.getElementById("rsvpMsg").value.trim()
+      });
+      submit.disabled = true; submit.textContent = "送出中…";
+      // text/plain 屬「簡單請求」可避開 CORS preflight；GAS 最終回應帶 ACAO:*
+      fetch(RSVP_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: payload
+      }).then(function () { finish(); })
+        .catch(function () {
+          // 後援：no-cors 再送一次（多半成功，僅讀不到回應）
+          fetch(RSVP_ENDPOINT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: payload })
+            .then(function () { finish(); })
+            .catch(function () {
+              submit.disabled = false; submit.textContent = "送出回條";
+              if (typeof showToast === "function") showToast("送出失敗，請稍後再試或洽詢學校");
+            });
+        });
+    });
+  })();
+
   /* ---------- Service Worker 註冊 + 版本更新通知 ----------
      僅靠 SW 生命週期偵測（sw.js 內容變了才算更新），不比對任何硬寫版本號，
      徹底避免「APP_VERSION 漂移 / version.json 被 CDN 快取錯位」造成的誤判一直跳。 */

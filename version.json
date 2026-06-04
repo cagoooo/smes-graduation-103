@@ -1,4 +1,4 @@
 {
-  "version": "1.5.0",
-  "notes": "校園巡禮升級：嵌入官方 114 學年教室平面圖，可點圖放大（lightbox）對照各班級與場館位置"
+  "version": "1.6.0",
+  "notes": "新增：家長線上回條（站內表單 + Google Apps Script 後端，資料寫進 Google 試算表）；後端 exec 網址設定後啟用"
 }

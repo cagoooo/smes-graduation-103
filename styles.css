@@ -574,6 +574,50 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .song-stage__external:hover { color: var(--gold-deep); border-bottom-color: var(--gold-deep); }
 
 /* =========================================================
+   家長線上回條
+   ========================================================= */
+.section--rsvp { background: var(--white); }
+.rsvp-wrap {
+  max-width: 620px; margin: clamp(30px, 5vw, 46px) auto 0;
+  background: var(--paper); border: 1px solid var(--paper-2); border-radius: var(--radius-lg);
+  padding: clamp(24px, 5vw, 40px); box-shadow: var(--shadow-sm);
+}
+.rsvp-form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rsvp-field { display: flex; flex-direction: column; gap: 7px; }
+.rsvp-field--full { grid-column: 1 / -1; }
+.rsvp-field label { font-weight: 700; color: var(--navy-800); font-size: .92rem; }
+.rsvp-req { color: #e8392f; }
+.rsvp-field input,
+.rsvp-field select,
+.rsvp-field textarea {
+  font-family: inherit; font-size: 1rem; color: var(--ink);
+  background: var(--white); border: 1.5px solid var(--paper-2); border-radius: 12px;
+  padding: 12px 14px; width: 100%; transition: border-color .2s, box-shadow .2s;
+}
+.rsvp-field input:focus,
+.rsvp-field select:focus,
+.rsvp-field textarea:focus {
+  outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(245,185,66,.25);
+}
+.rsvp-field textarea { resize: vertical; min-height: 76px; }
+.rsvp-submit {
+  width: 100%; background: var(--gold); color: var(--navy-900); border: 0; cursor: pointer;
+  font-family: inherit; font-weight: 700; font-size: 1.05rem; padding: 15px; border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(245,185,66,.4); transition: transform .2s var(--ease), box-shadow .2s, background .2s;
+}
+.rsvp-submit:hover:not(:disabled) { transform: translateY(-2px); background: #ffca5a; }
+.rsvp-submit:disabled { opacity: .6; cursor: progress; }
+.rsvp-note { margin-top: 10px; font-size: .8rem; color: var(--ink-soft); text-align: center; }
+.rsvp-pending, .rsvp-done { text-align: center; padding: 18px 8px; }
+.rsvp-pending__ico, .rsvp-done__ico { font-size: 2.6rem; display: block; margin-bottom: 10px; }
+.rsvp-pending h3, .rsvp-done h3 { color: var(--navy-800); font-size: 1.2rem; margin-bottom: 8px; }
+.rsvp-pending p, .rsvp-done p { color: var(--ink-soft); font-size: .95rem; }
+
+@media (max-width: 520px) {
+  .rsvp-form { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
    給家長的話
    ========================================================= */
 .section--parents { background: var(--paper); }
