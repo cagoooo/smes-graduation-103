@@ -333,7 +333,9 @@
       var wall = document.getElementById("wishWall");
       var cards = document.getElementById("wishCards");
       var count = document.getElementById("wishCount");
+      var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
+      var allWishes = [], curFilter = "全部";
       function maskName(n) {
         n = String(n || "").trim();
         if (n.length <= 2) return n; // 1~2 字完整顯示（如 王明）
@@ -345,20 +347,54 @@
         });
       }
       function clip(s, n) { s = String(s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n) + "…" : s; }
+      function cardHTML(w) {
+        return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
+          esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
+          esc(w.m) + "</div></div>";
+      }
+      function renderCards() {
+        var list = curFilter === "全部" ? allWishes : allWishes.filter(function (w) { return w.c === curFilter; });
+        cards.innerHTML = list.map(cardHTML).join("");
+        if (count) {
+          count.textContent = curFilter === "全部"
+            ? "目前已有 " + allWishes.length + " 則祝福 💛"
+            : curFilter + "：" + list.length + " 則（全校 " + allWishes.length + " 則）💛";
+        }
+      }
+      function buildFilters() {
+        if (!filters) return;
+        var classes = [];
+        allWishes.forEach(function (w) { var c = String(w.c || "").trim(); if (c && classes.indexOf(c) === -1) classes.push(c); });
+        if (classes.length <= 1) { filters.hidden = true; filters.innerHTML = ""; return; } // 只有一個班就不顯示篩選
+        classes.sort();
+        var opts = ["全部"].concat(classes);
+        filters.innerHTML = opts.map(function (c) {
+          return '<button type="button" class="wish-chip' + (c === curFilter ? " is-active" : "") + '" data-class="' + esc(c) + '">' + esc(c) + "</button>";
+        }).join("");
+        filters.hidden = false;
+      }
+      if (filters) {
+        filters.addEventListener("click", function (e) {
+          var btn = e.target;
+          if (!btn.classList || !btn.classList.contains("wish-chip")) return;
+          curFilter = btn.getAttribute("data-class") || "全部";
+          var bs = filters.querySelectorAll(".wish-chip");
+          for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === btn);
+          renderCards();
+        });
+      }
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var ws = (d && d.wishes) || [];
             if (!ws.length) { wall.hidden = true; if (ticker) ticker.hidden = true; return; }
-            cards.innerHTML = ws.map(function (w) {
-              return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
-                esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
-                esc(w.m) + "</div></div>";
-            }).join("");
-            if (count) count.textContent = "目前已有 " + ws.length + " 則祝福 💛";
+            allWishes = ws;
+            if (curFilter !== "全部" && !ws.some(function (w) { return w.c === curFilter; })) curFilter = "全部";
+            buildFilters();
+            renderCards();
             wall.hidden = false;
-            // 置頂跑馬燈：祝福少時補滿、複製一份無縫循環、速度放慢
+            // 置頂跑馬燈：維持「全部」祝福（不受班級篩選影響）；祝福少時補滿、無縫循環、速度放慢
             if (ticker && tickerTrack) {
               var base = ws.slice();
               while (base.length < 8) base = base.concat(ws);

@@ -691,6 +691,15 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* 畢業祝福牆（卡片） */
 .wish-form-title { text-align: center; color: var(--navy-800); font-size: clamp(1.1rem, 4vw, 1.45rem); margin: clamp(40px, 7vw, 64px) 0 18px; scroll-margin-top: 126px; }
 .wishwall { margin-top: clamp(26px, 5vw, 40px); }
+.wishwall__filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 4px 0 22px; }
+.wish-chip {
+  font-family: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  padding: 7px 16px; border-radius: 999px; white-space: nowrap;
+  background: var(--white); color: var(--navy-700); border: 1px solid var(--paper-2);
+  transition: background .2s, color .2s, border-color .2s;
+}
+.wish-chip:hover { border-color: var(--gold); color: var(--navy-900); }
+.wish-chip.is-active { background: var(--navy-700); color: #fff; border-color: var(--navy-700); }
 .wishwall__count { text-align: center; color: var(--gold-deep); font-weight: 700; margin-bottom: 18px; }
 .wishwall__cards {
   display: grid; gap: 14px;
