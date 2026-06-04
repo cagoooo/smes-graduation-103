@@ -7,8 +7,9 @@
 # 本地預覽／工具設定
 .claude/
 
-# 暫存／系統檔
+# 暫存／系統檔（含資產產生腳本 _gen_assets.py）
 _*/
 _*.txt
+_*.py
 Thumbs.db
 .DS_Store

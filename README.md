@@ -26,12 +26,30 @@
 - 🌈 校園巡禮路線
 - 👨‍👩‍👧‍👦 給家長的溫馨提醒
 
+- 📺 **線上直播**：https://www.youtube.com/live/OiJlVXOzM8U
+
 ## 技術
 
 - 純靜態 HTML / CSS / JavaScript，無框架、零相依
 - Mobile-first 響應式設計，適配手機 / 平板 / 桌機
 - 支援 `prefers-reduced-motion` 與列印樣式
+- 校徽 favicon、apple-touch-icon、PWA manifest
+- 1200×630 社群分享 OG 圖（中文渲染進 PNG，LINE/FB 不會方框）
+- Service Worker 離線快取 + 版本更新通知（偵測新版主動提示重整）
 - 部署於 GitHub Pages
+
+## 版本維護（更新內容後如何讓使用者收到新版）
+
+每次改完內容要上線時，**先升版再 push**，使用者就會收到「立即更新」提示：
+
+```powershell
+# 1. 升版（會同步更新 index.html / sw.js / version.json 內所有版本號）
+.\bump-version.ps1 1.2.0
+# 2. 推上 GitHub（GitHub Pages 自動部署）
+git add -A; git commit -m "bump v1.2.0"; git push
+```
+
+> 版本號目前散落在 3 個檔案（`styles.css?v=` / `script.js?v=` / `og:image?v=` / `sw.js` 的 `BUILD_VERSION` / `version.json`），`bump-version.ps1` 會一次全部更新，避免版本漂移。
 
 ---
 

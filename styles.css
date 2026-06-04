@@ -215,6 +215,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .btn--primary:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(245,185,66,.5); }
 .btn--ghost { background: rgba(255,255,255,.1); color: #fff; border: 1.5px solid rgba(255,255,255,.5); }
 .btn--ghost:hover { background: rgba(255,255,255,.2); transform: translateY(-3px); }
+.btn--live { background: #e8392f; color: #fff; box-shadow: 0 10px 26px rgba(232,57,47,.45); gap: 9px; }
+.btn--live:hover { background: #d22b22; transform: translateY(-3px); box-shadow: 0 16px 34px rgba(232,57,47,.55); }
+.btn__live-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: #fff; flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(255,255,255,.7); animation: livePulse 1.4s ease-out infinite;
+}
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
 
 .hero__scroll {
   position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
@@ -445,6 +456,59 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    ========================================================= */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
 .reveal.is-in { opacity: 1; transform: none; }
+
+/* =========================================================
+   直播提示卡（給家長區）
+   ========================================================= */
+.live-callout {
+  display: flex; align-items: center; gap: 18px; text-decoration: none;
+  margin: 0 auto clamp(24px, 5vw, 40px); max-width: 760px;
+  background: linear-gradient(120deg, #e8392f, #ff6a3d);
+  color: #fff; border-radius: var(--radius); padding: 18px 24px;
+  box-shadow: 0 14px 32px rgba(232,57,47,.32); transition: transform .25s var(--ease), box-shadow .25s;
+}
+.live-callout:hover { transform: translateY(-4px); box-shadow: 0 20px 42px rgba(232,57,47,.42); }
+.live-callout__badge {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(0,0,0,.22); padding: 8px 14px; border-radius: 999px;
+  font-weight: 900; letter-spacing: 1px; font-size: .9rem;
+}
+.live-callout__text { display: flex; flex-direction: column; line-height: 1.55; font-size: .95rem; }
+.live-callout__text strong { font-size: 1.08rem; font-weight: 900; margin-bottom: 2px; }
+
+/* =========================================================
+   版本更新提示 banner
+   ========================================================= */
+.update-banner {
+  position: fixed; left: 50%; bottom: -120px; transform: translateX(-50%);
+  z-index: 200; display: flex; align-items: center; gap: 12px;
+  background: var(--navy-800); color: #fff;
+  padding: 14px 16px 14px 20px; border-radius: 16px;
+  box-shadow: var(--shadow-lg); border: 1px solid rgba(245,185,66,.4);
+  max-width: calc(100vw - 32px); transition: bottom .45s var(--ease), opacity .3s;
+  opacity: 0; font-size: .92rem;
+  pointer-events: none; /* 隱藏時不可攔截點擊，否則會蓋住「回到頂端」按鈕 */
+}
+.update-banner.is-visible { bottom: 18px; opacity: 1; pointer-events: auto; }
+.update-banner__ico { font-size: 1.2rem; }
+.update-banner__text { flex: 1; }
+.update-banner__btn {
+  flex-shrink: 0; background: var(--gold); color: var(--navy-900);
+  border: none; border-radius: 999px; padding: 9px 18px; font-weight: 700;
+  font-size: .9rem; cursor: pointer; font-family: inherit; transition: background .2s, transform .2s;
+}
+.update-banner__btn:hover { background: #ffca5a; transform: translateY(-1px); }
+.update-banner__close {
+  flex-shrink: 0; background: transparent; color: rgba(255,255,255,.7);
+  border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 0 4px;
+}
+.update-banner__close:hover { color: #fff; }
+
+@media (max-width: 480px) {
+  .update-banner { left: 12px; right: 12px; transform: none; flex-wrap: wrap; }
+  .update-banner.is-visible { bottom: 12px; }
+  .update-banner__text { flex-basis: 100%; }
+}
 
 /* =========================================================
    響應式斷點

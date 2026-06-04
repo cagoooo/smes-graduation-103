@@ -95,6 +95,29 @@
       if (window.scrollY > 600) toTop.classList.add("is-visible");
       else toTop.classList.remove("is-visible");
     }, { passive: true });
+    // 用 JS 捲動，不依賴 href="#top" 錨點：導覽列為 sticky 永遠在視窗頂端，
+    // 純錨點會被瀏覽器判定「目標已可見」而不捲動，重複點擊同一 hash 也會失效。
+    function scrollToTop() {
+      var se = document.scrollingElement || document.documentElement;
+      // 標準平滑捲動（現代瀏覽器平滑、舊 Safari 自動即時）
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? "auto" : "smooth" });
+      } catch (_) {
+        window.scrollTo(0, 0);
+      }
+      // 保險：若環境的 window.scrollTo 失效，稍後直接歸零捲動容器
+      setTimeout(function () {
+        if ((se.scrollTop || 0) > 4 || (window.scrollY || 0) > 4) {
+          se.scrollTop = 0;
+          if (document.body) document.body.scrollTop = 0;
+        }
+      }, reduceMotion ? 0 : 650);
+    }
+    toTop.addEventListener("click", function (e) {
+      e.preventDefault();
+      scrollToTop();
+      if (history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+    });
   }
 
   /* ---------- Hero 彩色紙花 ---------- */
@@ -119,5 +142,78 @@
       frag.appendChild(piece);
     }
     confettiBox.appendChild(frag);
+  }
+
+  /* ---------- Service Worker 註冊 + 版本更新通知 ---------- */
+  if ("serviceWorker" in navigator) {
+    var APP_VERSION = "1.1.0";
+    var banner = document.getElementById("updateBanner");
+    var updBtn = document.getElementById("updateBtn");
+    var updClose = document.getElementById("updateClose");
+    var bannerShown = false, refreshing = false, userInitiated = false;
+    var hadController = !!navigator.serviceWorker.controller;
+
+    function showUpdateBanner() {
+      if (bannerShown || !banner) return;
+      bannerShown = true;
+      banner.classList.add("is-visible");
+    }
+    function hideUpdateBanner() { if (banner) banner.classList.remove("is-visible"); }
+    if (updClose) updClose.addEventListener("click", hideUpdateBanner);
+
+    // 新 SW 接管 → 重新整理（防迴圈；首次安裝不重整）
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (refreshing) return;
+      if (!hadController && !userInitiated) return; // 首次安裝的 claim 不重整
+      refreshing = true;
+      window.location.reload();
+    });
+
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function (reg) {
+        // 已有等待中的新版（上次沒更新就離開）→ 直接提示
+        if (reg.waiting && navigator.serviceWorker.controller) showUpdateBanner();
+
+        // 線 A：偵測到新 SW 安裝完成（且已有舊 controller = 屬於更新而非首裝）
+        reg.addEventListener("updatefound", function () {
+          var nw = reg.installing;
+          if (!nw) return;
+          nw.addEventListener("statechange", function () {
+            if (nw.state === "installed" && navigator.serviceWorker.controller) showUpdateBanner();
+          });
+        });
+
+        // 點「立即更新」→ 請等待中的 SW 立即接管
+        if (updBtn) updBtn.addEventListener("click", function () {
+          userInitiated = true;
+          hideUpdateBanner();
+          if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+          else window.location.reload();
+        });
+
+        // 回到分頁時主動檢查更新
+        function tryUpdate() { reg.update().catch(function () {}); }
+        window.addEventListener("focus", tryUpdate);
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState === "visible") tryUpdate();
+        });
+      }).catch(function () {});
+    });
+
+    // 線 B：SW activate 後廣播（保險，多在新版接管前提示）
+    navigator.serviceWorker.addEventListener("message", function (e) {
+      if (e.data && e.data.type === "SW_ACTIVATED" && e.data.version !== APP_VERSION) showUpdateBanner();
+    });
+
+    // 線 C：version.json 輪詢備援（GitHub Pages CDN 約有 10 分鐘窗口）
+    function checkVersion() {
+      fetch("version.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d && d.version && d.version !== APP_VERSION) showUpdateBanner(); })
+        .catch(function () {});
+    }
+    setTimeout(checkVersion, 6000);
+    setInterval(checkVersion, 3 * 60 * 1000);
+    window.addEventListener("focus", checkVersion);
   }
 })();
