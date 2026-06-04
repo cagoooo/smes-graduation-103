@@ -2,13 +2,17 @@
  * 石門國小 第103屆畢業典禮 — 家長祝福後端（Google Apps Script）
  *
  * - doPost                : 家長送出祝福 → 寫入「回條」分頁（F 欄「公開」預設空白＝尚未公開）
+ *                           寫入後自動推播 LINE 通知給管理員（阿凱老師）
  * - doGet?action=wishes   : 回傳「已公開」的祝福（給前端祝福牆顯示）
  * - doGet（無參數）        : 健康檢查
  *
  * 【審核方式】打開試算表「回條」分頁，在某一列的「公開」欄(F)填 1（或打勾），
  *   該則祝福就會出現在前端祝福牆；清空則隱藏。無需密碼，安全又簡單。
  *
- * 無任何金鑰／密碼，可公開。
+ * 【LINE 通知】Token / userId 存在「指令碼屬性」(Script Properties)，不寫進程式碼。
+ *   設定方式見檔案最下方 setupLineNotify() 的說明，或 gas/部署說明.md。
+ *
+ * 本檔不含任何金鑰／密碼，可公開。
  */
 var SHEET_ID = '1Y0R7ypyhFtHg1O_P9CHp7MM7_3GZ_WpOr3t1dHNNceg';
 var SHEET_NAME = '回條';
@@ -40,21 +44,27 @@ function isPublic_(v) {
 }
 
 function doPost(e) {
+  var klass = '', name = '', message = '';
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    var name = (data.name || '').toString().trim().slice(0, 30);
-    var klass = (data['class'] || '').toString().trim().slice(0, 20);
+    name = (data.name || '').toString().trim().slice(0, 30);
+    klass = (data['class'] || '').toString().trim().slice(0, 20);
     if (!name || !klass) return json_({ ok: false, error: 'missing required fields' });
-    getSheet_().appendRow([
+    message = (data.message || '').toString().slice(0, 300);
+    var sh = getSheet_();
+    sh.appendRow([
       new Date(),
       klass,
       name,
       (data.count || '').toString().slice(0, 20),
-      (data.message || '').toString().slice(0, 300)
+      message
       // F 欄（公開）留空 → 預設不公開，待老師審核
     ]);
+    var total = Math.max(0, sh.getLastRow() - 1); // 扣掉標題列
+    notifyNewWish_(klass, name, message, total);  // best-effort LINE 通知（成功）
     return json_({ ok: true });
   } catch (err) {
+    notifyError_(String(err), klass, name);        // best-effort LINE 通知（失敗）
     return json_({ ok: false, error: String(err) });
   }
 }
@@ -84,10 +94,151 @@ function doGet(e) {
   return json_({ ok: true, service: 'smes-grad-103-rsvp' });
 }
 
+/* ============================================================
+ *  LINE 通知（純 Push 模式）
+ *  - 憑證讀自「指令碼屬性」：LINE_CHANNEL_ACCESS_TOKEN / LINE_ADMIN_USER_ID
+ *  - 未設定憑證時自動跳過，不影響祝福寫入
+ *  - Flex 卡片失敗時自動退回純文字
+ * ============================================================ */
+var LINE_PUSH_API = 'https://api.line.me/v2/bot/message/push';
+
+function lineCreds_() {
+  var p = PropertiesService.getScriptProperties();
+  return {
+    token: (p.getProperty('LINE_CHANNEL_ACCESS_TOKEN') || '').trim(),
+    userId: (p.getProperty('LINE_ADMIN_USER_ID') || '').trim()
+  };
+}
+
+// 回傳 HTTP 狀態碼；未設定憑證回 -1
+function pushLine_(messages) {
+  var c = lineCreds_();
+  if (!c.token || !c.userId) return -1;
+  var res = UrlFetchApp.fetch(LINE_PUSH_API, {
+    method: 'post',
+    contentType: 'application/json; charset=utf-8',
+    headers: { Authorization: 'Bearer ' + c.token },
+    payload: JSON.stringify({ to: c.userId, messages: messages }),
+    muteHttpExceptions: true
+  });
+  return res.getResponseCode();
+}
+
+function clip_(s, n) {
+  s = String(s || '').trim();
+  if (!s) return '（無內容）';
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+// 卡片配色（深色 -800 級 + 白字，對比 ≥5:1，LINE App 內標題清晰）
+var CARD_THEME_ = {
+  success: { bg: '#065F46', sub: '#A7F3D0', icon: '✅' },
+  failed:  { bg: '#991B1B', sub: '#FECACA', icon: '❌' }
+};
+
+// 組 Flex bubble：mega 寬卡 + 深色 header + emoji 獨立欄位（避免中文 label 被截）
+function buildFlex_(status, title, fields) {
+  var t = CARD_THEME_[status] || CARD_THEME_.success;
+  var now = Utilities.formatDate(new Date(), 'Asia/Taipei', 'MM/dd HH:mm');
+  var header = [
+    { type: 'text', text: t.icon, color: '#FFFFFF', size: 'xl' },
+    { type: 'text', text: title, color: '#FFFFFF', weight: 'bold', size: 'lg', wrap: true, margin: 'sm' },
+    { type: 'text', text: '石門國小 畢業典禮網站', color: t.sub, size: 'sm', margin: 'xs' }
+  ];
+  var body = fields.map(function (f) {
+    return {
+      type: 'box', layout: 'horizontal', spacing: 'sm',
+      contents: [
+        { type: 'text', text: f.icon, size: 'sm', flex: 0, color: '#64748B' },
+        { type: 'text', text: f.label, color: '#64748B', size: 'sm', flex: 3, weight: 'bold' },
+        { type: 'text', text: f.value || '—', color: '#0F172A', size: 'sm', flex: 6, wrap: true }
+      ]
+    };
+  });
+  return {
+    type: 'bubble', size: 'mega',
+    header: { type: 'box', layout: 'vertical', backgroundColor: t.bg, paddingAll: '16px', spacing: 'none', contents: header },
+    body: { type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '16px', contents: body },
+    footer: { type: 'box', layout: 'vertical', paddingAll: '12px', contents: [
+      { type: 'text', text: now, color: '#94A3B8', size: 'xs', align: 'end', wrap: true }
+    ]}
+  };
+}
+
+// 新祝福寫入成功 → 推綠色卡片
+function notifyNewWish_(klass, name, message, total) {
+  try {
+    var title = '收到一則新的畢業祝福';
+    var fields = [
+      { icon: '🎓', label: '班級', value: klass || '—' },
+      { icon: '👤', label: '畢業生', value: name || '—' },
+      { icon: '💌', label: '祝福', value: clip_(message, 120) },
+      { icon: '📊', label: '累計', value: '第 ' + total + ' 則（待審核）' }
+    ];
+    var alt = '✅ 收到新祝福：' + (klass || '') + ' ' + (name || '');
+    var code = pushLine_([{ type: 'flex', altText: alt, contents: buildFlex_('success', title, fields) }]);
+    if (code !== -1 && code !== 200) {
+      pushLine_([{ type: 'text', text:
+        '✅ ' + title +
+        '\n班級：' + (klass || '—') +
+        '\n畢業生：' + (name || '—') +
+        '\n祝福：' + clip_(message, 120) +
+        '\n累計：第 ' + total + ' 則（待審核）' }]);
+    }
+  } catch (e) { /* best-effort，推播失敗不影響主流程 */ }
+}
+
+// 祝福寫入失敗 → 推紅色卡片
+function notifyError_(errMsg, klass, name) {
+  try {
+    var fields = [
+      { icon: '🎓', label: '班級', value: klass || '—' },
+      { icon: '👤', label: '畢業生', value: name || '—' },
+      { icon: '💥', label: '錯誤', value: clip_(errMsg, 200) }
+    ];
+    var code = pushLine_([{ type: 'flex', altText: '❌ 祝福寫入失敗', contents: buildFlex_('failed', '祝福寫入失敗', fields) }]);
+    if (code !== -1 && code !== 200) {
+      pushLine_([{ type: 'text', text: '❌ 祝福寫入失敗\n班級：' + (klass || '—') + '\n畢業生：' + (name || '—') + '\n錯誤：' + clip_(errMsg, 200) }]);
+    }
+  } catch (e) { /* best-effort */ }
+}
+
 /**
- * 部署後若跳授權，請在編輯器選此函數按「執行」一次完成授權。
+ * 【一次性】設定 LINE 憑證到指令碼屬性。
+ * 用法：
+ *   1) 把下面兩個空字串填入你的 LINE Channel Access Token 與 userId
+ *   2) 上方函數下拉選 setupLineNotify → 按「執行」（會要求授權，選你的帳號 → 進階 → 允許）
+ *   3) 執行成功後，務必把兩個值改回空字串（避免憑證留在程式碼）
+ * 替代法：直接在「專案設定（齒輪）→ 指令碼屬性」手動新增
+ *         LINE_CHANNEL_ACCESS_TOKEN 與 LINE_ADMIN_USER_ID 兩個屬性，就不必用本函數。
+ */
+function setupLineNotify() {
+  var TOKEN = '';   // ← 貼上 Channel Access Token（執行後請清空）
+  var USER_ID = ''; // ← 貼上你的 LINE userId（執行後請清空）
+  if (!TOKEN || !USER_ID) {
+    throw new Error('請先在 setupLineNotify() 內填入 TOKEN 與 USER_ID 再執行');
+  }
+  PropertiesService.getScriptProperties().setProperties({
+    LINE_CHANNEL_ACCESS_TOKEN: TOKEN,
+    LINE_ADMIN_USER_ID: USER_ID
+  });
+  return 'LINE 憑證已寫入指令碼屬性，請把上面兩個值清空';
+}
+
+/**
+ * 設定好憑證後，可執行本函數送一張測試卡片到你的 LINE，確認通知正常。
+ */
+function testLineNotify() {
+  notifyNewWish_('六年甲班', '王小明', '親愛的孩子，畢業快樂，前程似錦！', 1);
+  return 'sent';
+}
+
+/**
+ * 部署後若跳授權，請在編輯器選此函數按「執行」一次完成授權
+ * （含試算表讀寫 + 對外連線兩項權限）。
  */
 function authorize() {
   getSheet_();
+  lineCreds_();
   return 'authorized';
 }
