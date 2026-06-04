@@ -163,10 +163,28 @@
     });
   }
 
-  /* ---------- 日期感知直播按鈕（即將 / 直播中 / 回放） ---------- */
+  /* ---------- 直播 facade：點擊才載入 YouTube iframe（省效能 / 隱私） ---------- */
+  (function () {
+    var embed = document.getElementById("liveEmbed");
+    var play = document.getElementById("liveEmbedPlay");
+    if (!embed || !play) return;
+    play.addEventListener("click", function () {
+      var iframe = document.createElement("iframe");
+      iframe.src = "https://www.youtube.com/embed/OiJlVXOzM8U?autoplay=1&rel=0";
+      iframe.title = "石門國小第103屆畢業典禮直播";
+      iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share");
+      iframe.setAttribute("allowfullscreen", "");
+      embed.innerHTML = "";
+      embed.appendChild(iframe);
+    });
+  })();
+
+  /* ---------- 日期感知直播狀態（按鈕 + 站內直播區） ---------- */
   (function () {
     var heroLive = document.querySelector(".btn--live");
     var navLive = document.querySelector(".nav__live");
+    var liveBadge = document.getElementById("liveBadge");
+    var liveStatusText = document.getElementById("liveStatusText");
     var ONAIR_START = new Date("2026-06-10T08:45:00+08:00").getTime();
     var ONAIR_END = new Date("2026-06-10T12:00:00+08:00").getTime();
     function setLabel(el, text) {
@@ -176,17 +194,20 @@
       if (dot) el.appendChild(dot);
       el.appendChild(document.createTextNode(text));
     }
+    function setLive(heroText, navText, replay, badge, status) {
+      if (heroLive) { heroLive.classList.toggle("is-replay", replay); setLabel(heroLive, heroText); }
+      if (navLive) { navLive.classList.toggle("is-replay", replay); setLabel(navLive, navText); }
+      if (liveBadge) { liveBadge.classList.toggle("is-replay", replay); liveBadge.textContent = badge; }
+      if (liveStatusText) liveStatusText.textContent = status;
+    }
     function update() {
       var now = Date.now();
       if (now >= ONAIR_START && now < ONAIR_END) {
-        if (heroLive) { heroLive.classList.remove("is-replay"); setLabel(heroLive, "直播進行中"); }
-        if (navLive) { navLive.classList.remove("is-replay"); setLabel(navLive, "LIVE"); }
+        setLive("直播進行中", "LIVE", false, "LIVE 直播中", "典禮正在直播中 — 點擊畫面即可觀看");
       } else if (now >= ONAIR_END) {
-        if (heroLive) { heroLive.classList.add("is-replay"); setLabel(heroLive, "觀看典禮回放"); }
-        if (navLive) { navLive.classList.add("is-replay"); setLabel(navLive, "回放"); }
+        setLive("觀看典禮回放", "回放", true, "回放", "典禮已圓滿結束 — 點擊畫面觀看完整回放");
       } else {
-        if (heroLive) { heroLive.classList.remove("is-replay"); setLabel(heroLive, "觀看典禮直播"); }
-        if (navLive) { navLive.classList.remove("is-replay"); setLabel(navLive, "LIVE"); }
+        setLive("觀看典禮直播", "LIVE", false, "直播", "典禮直播・6月10日（三）上午 9:00 準時上線");
       }
     }
     update();
