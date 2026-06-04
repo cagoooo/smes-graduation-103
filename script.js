@@ -120,6 +120,28 @@
     });
   }
 
+  /* ---------- 導覽列手機漢堡選單 ---------- */
+  (function () {
+    var nav = document.getElementById("top");
+    var toggle = document.getElementById("navToggle");
+    var links = document.getElementById("navLinks");
+    if (!nav || !toggle || !links) return;
+    function setOpen(open) {
+      nav.classList.toggle("is-open", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "關閉選單" : "開啟選單");
+    }
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(!nav.classList.contains("is-open"));
+    });
+    links.addEventListener("click", function (e) { if (e.target.tagName === "A") setOpen(false); });
+    document.addEventListener("click", function (e) {
+      if (nav.classList.contains("is-open") && !nav.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
+  })();
+
   /* ---------- 分享 / 複製連結（含 toast） ---------- */
   var SITE_URL = "https://cagoooo.github.io/smes-graduation-103/";
   var SHARE_TEXT = "石門國小 第103屆畢業典禮｜6/10（三）9:00 本校禮堂・啟程・感恩・祝福";
@@ -316,7 +338,22 @@
     form.hidden = false;
     var submit = document.getElementById("rsvpSubmit");
 
-    function finish() { form.hidden = true; if (done) done.hidden = false; }
+    function finish() {
+      form.hidden = true;
+      if (done) {
+        done.hidden = false;
+        try { done.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); } catch (_) {}
+      }
+    }
+
+    var again = document.getElementById("rsvpAgain");
+    if (again) again.addEventListener("click", function () {
+      form.reset();
+      if (done) done.hidden = true;
+      form.hidden = false;
+      submit.disabled = false; submit.textContent = "送出祝福";
+      try { form.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" }); } catch (_) {}
+    });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
