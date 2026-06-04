@@ -53,7 +53,7 @@
 
     /* 舞台：祝福大卡輪播 */
     .stage{flex:1;display:grid;gap:clamp(16px,2vw,30px);align-content:center;
-      grid-template-columns:repeat(3,1fr);
+      grid-template-columns:repeat(3,1fr);overflow:hidden;
       padding:clamp(8px,1.5vh,20px) clamp(24px,4vw,60px) clamp(12px,2vh,24px);
       transition:opacity .7s ease;}
     .stage.fading{opacity:0;}
@@ -63,12 +63,16 @@
     .wcard{background:rgba(255,255,255,.07);border:1px solid rgba(245,185,66,.28);
       border-radius:22px;padding:clamp(22px,2.6vw,40px);
       box-shadow:0 20px 50px rgba(0,0,0,.3);
-      display:flex;flex-direction:column;gap:14px;min-height:0;
+      display:flex;flex-direction:column;gap:14px;min-height:0;max-height:100%;overflow:hidden;
       animation:rise .7s cubic-bezier(.22,1,.36,1) both;}
     .wcard__to{color:var(--gold);font-weight:900;font-size:clamp(1.05rem,1.7vw,1.5rem);
       display:flex;align-items:center;gap:8px;}
     .wcard__msg{color:#fff;font-size:clamp(1.15rem,2vw,1.9rem);line-height:1.7;font-weight:500;
-      overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:7;}
+      min-height:0;overflow-wrap:break-word;word-break:break-word;}
+    /* 依當批最長祝福自動縮放字級，讓長內容也完整呈現（不再截斷） */
+    .stage[data-len="len-m"] .wcard__msg{font-size:clamp(1.05rem,1.7vw,1.55rem);}
+    .stage[data-len="len-l"] .wcard__msg{font-size:clamp(.95rem,1.4vw,1.3rem);line-height:1.6;}
+    .stage[data-len="len-xl"] .wcard__msg{font-size:clamp(.82rem,1.2vw,1.08rem);line-height:1.55;}
     .wcard__like{margin-top:auto;align-self:flex-start;color:#ff8a7a;font-weight:900;
       font-size:clamp(.95rem,1.4vw,1.3rem);padding-top:4px;}
     /* 可按愛心鈕 */
@@ -156,7 +160,7 @@
     (function () {
       // ⬇️ 與 script.js 相同的 GAS Web App /exec（祝福資料來源）。換端點時兩處都要改。
       var ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
-      var BATCH = 3;          // 一次顯示幾則
+      function batchSize() { var w = window.innerWidth; return w <= 680 ? 1 : (w <= 1100 ? 2 : 3); } // 手機1/平板2/桌機3，配合 grid 欄數，長祝福才放得下
       var ROTATE_MS = 9000;   // 每批停留秒數
       var RELOAD_MS = 90000;  // 多久重新抓一次資料（典禮中新審核祝福會進來）
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -207,9 +211,13 @@
           return;
         }
         var total = wishes.length;
-        var start = (batch * BATCH) % total;
+        var bs = batchSize();
+        var start = (batch * bs) % total;
         var slice = [];
-        for (var i = 0; i < Math.min(BATCH, total); i++) slice.push(wishes[(start + i) % total]);
+        for (var i = 0; i < Math.min(bs, total); i++) slice.push(wishes[(start + i) % total]);
+        var maxLen = 0;
+        slice.forEach(function (w) { maxLen = Math.max(maxLen, String(w.m || "").length); });
+        stage.setAttribute("data-len", maxLen <= 40 ? "len-s" : maxLen <= 90 ? "len-m" : maxLen <= 160 ? "len-l" : "len-xl");
         var html = slice.map(function (w) {
           var like;
           if (w.r) { // 後端有回列號 → 可按愛心鈕（樂觀 +1 + 飛心）
@@ -230,7 +238,7 @@
 
       function startRotate() {
         if (rotateTimer) clearInterval(rotateTimer);
-        if (wishes.length <= BATCH) return; // 不足一批不輪播
+        if (wishes.length <= batchSize()) return; // 不足一批不輪播
         rotateTimer = setInterval(function () { batch++; renderBatch(); }, ROTATE_MS);
       }
 
@@ -311,6 +319,9 @@
 
       load();
       setInterval(load, RELOAD_MS);
+      // 視窗尺寸變化（旋轉/縮放）→ 重算每批卡數
+      var rzTimer = null;
+      window.addEventListener("resize", function () { clearTimeout(rzTimer); rzTimer = setTimeout(function () { batch = 0; renderBatch(); startRotate(); }, 250); });
     })();
   </script>
 </body>
