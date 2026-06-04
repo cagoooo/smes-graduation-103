@@ -91,6 +91,9 @@ function doGet(e) {
       return json_({ ok: false, error: String(err), wishes: [] });
     }
   }
+  if (action === 'moderate') {
+    return handleModerate_(e); // LINE 卡片按鈕審核 → 回傳 HTML 結果頁
+  }
   return json_({ ok: true, service: 'smes-grad-103-rsvp' });
 }
 
@@ -137,7 +140,8 @@ var CARD_THEME_ = {
 };
 
 // 組 Flex bubble：mega 寬卡 + 深色 header + emoji 獨立欄位（避免中文 label 被截）
-function buildFlex_(status, title, fields) {
+// actions：選填，footer 審核按鈕陣列 [{label, uri, primary, color}]
+function buildFlex_(status, title, fields, actions) {
   var t = CARD_THEME_[status] || CARD_THEME_.success;
   var now = Utilities.formatDate(new Date(), 'Asia/Taipei', 'MM/dd HH:mm');
   var header = [
@@ -155,19 +159,26 @@ function buildFlex_(status, title, fields) {
       ]
     };
   });
+  var footer = [];
+  (actions || []).forEach(function (a) {
+    var btn = { type: 'button', height: 'sm', style: a.primary ? 'primary' : 'secondary',
+      action: { type: 'uri', label: a.label, uri: a.uri } };
+    if (a.color) btn.color = a.color;
+    footer.push(btn);
+  });
+  footer.push({ type: 'text', text: now, color: '#94A3B8', size: 'xs', align: 'end', wrap: true, margin: 'md' });
   return {
     type: 'bubble', size: 'mega',
     header: { type: 'box', layout: 'vertical', backgroundColor: t.bg, paddingAll: '16px', spacing: 'none', contents: header },
     body: { type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '16px', contents: body },
-    footer: { type: 'box', layout: 'vertical', paddingAll: '12px', contents: [
-      { type: 'text', text: now, color: '#94A3B8', size: 'xs', align: 'end', wrap: true }
-    ]}
+    footer: { type: 'box', layout: 'vertical', paddingAll: '12px', spacing: 'sm', contents: footer }
   };
 }
 
-// 新祝福寫入成功 → 推綠色卡片
+// 新祝福寫入成功 → 推綠色卡片（含「通過公開 / 維持隱藏」審核按鈕）
 function notifyNewWish_(klass, name, message, total) {
   try {
+    var row = total + 1; // 對應試算表列號（標題列在第 1 列）
     var title = '收到一則新的畢業祝福';
     var fields = [
       { icon: '🎓', label: '班級', value: klass || '—' },
@@ -176,14 +187,15 @@ function notifyNewWish_(klass, name, message, total) {
       { icon: '📊', label: '累計', value: '第 ' + total + ' 則（待審核）' }
     ];
     var alt = '✅ 收到新祝福：' + (klass || '') + ' ' + (name || '');
-    var code = pushLine_([{ type: 'flex', altText: alt, contents: buildFlex_('success', title, fields) }]);
+    var code = pushLine_([{ type: 'flex', altText: alt, contents: buildFlex_('success', title, fields, moderateActions_(row)) }]);
     if (code !== -1 && code !== 200) {
       pushLine_([{ type: 'text', text:
         '✅ ' + title +
         '\n班級：' + (klass || '—') +
         '\n畢業生：' + (name || '—') +
         '\n祝福：' + clip_(message, 120) +
-        '\n累計：第 ' + total + ' 則（待審核）' }]);
+        '\n累計：第 ' + total + ' 則（待審核）' +
+        textModerateLinks_(row) }]);
     }
   } catch (e) { /* best-effort，推播失敗不影響主流程 */ }
 }
@@ -236,26 +248,136 @@ function testLineNotify() {
   var c = lineCreds_();
   if (!c.token) throw new Error('尚未設定指令碼屬性 LINE_CHANNEL_ACCESS_TOKEN');
   if (!c.userId) throw new Error('尚未設定指令碼屬性 LINE_ADMIN_USER_ID');
+  var sh = getSheet_();
+  var total = Math.max(1, sh.getLastRow() - 1); // 以最後一列當測試對象（審核按鈕會指向它）
   var fields = [
     { icon: '🎓', label: '班級', value: '六年甲班' },
     { icon: '👤', label: '畢業生', value: '王小明' },
-    { icon: '💌', label: '祝福', value: '親愛的孩子，畢業快樂，前程似錦！' },
-    { icon: '📊', label: '累計', value: '第 1 則（測試）' }
+    { icon: '💌', label: '祝福', value: '親愛的孩子，畢業快樂，前程似錦！（測試）' },
+    { icon: '📊', label: '累計', value: '第 ' + total + ' 則（測試）' }
   ];
-  var code = pushLine_([{ type: 'flex', altText: '✅ LINE 通知測試', contents: buildFlex_('success', '收到一則新的畢業祝福', fields) }]);
+  var code = pushLine_([{ type: 'flex', altText: '✅ LINE 通知測試', contents: buildFlex_('success', '收到一則新的畢業祝福', fields, moderateActions_(total + 1)) }]);
   Logger.log('LINE push HTTP status = ' + code);
   if (code !== 200) {
     throw new Error('LINE 推播失敗，HTTP ' + code + '（請檢查 Token / userId 是否正確）');
   }
-  return 'LINE 推播成功（HTTP 200），請查看手機 LINE';
+  return 'LINE 推播成功（HTTP 200），請查看手機 LINE（卡片下方有審核按鈕）';
+}
+
+/* ============================================================
+ *  LINE 卡片按鈕審核（方案 A：點按鈕開審核小頁，免 webhook）
+ *  - 卡片按鈕帶 row + 安全 token(k)，點擊開本頁直接更新 F 欄「公開」
+ *  - token 首次自動生成並存於指令碼屬性 MOD_TOKEN（零設定）
+ * ============================================================ */
+function getModToken_() {
+  var p = PropertiesService.getScriptProperties();
+  var t = p.getProperty('MOD_TOKEN');
+  if (!t) { t = Utilities.getUuid(); p.setProperty('MOD_TOKEN', t); }
+  return t;
+}
+
+// 組審核按鈕（給 Flex footer）；拿不到 Web App 網址就回空陣列（安全降級）
+function moderateActions_(row) {
+  var base = webAppUrl_();
+  if (!base || !(row >= 2)) return [];
+  var k = encodeURIComponent(getModToken_());
+  return [
+    { label: '✅ 通過公開', primary: true, color: '#065F46', uri: base + '?action=moderate&row=' + row + '&v=1&k=' + k },
+    { label: '🙈 維持隱藏', primary: false, uri: base + '?action=moderate&row=' + row + '&v=0&k=' + k }
+  ];
+}
+
+// 純文字 fallback 用的審核連結
+function textModerateLinks_(row) {
+  var base = webAppUrl_();
+  if (!base || !(row >= 2)) return '';
+  var k = encodeURIComponent(getModToken_());
+  return '\n\n✅ 通過公開：' + base + '?action=moderate&row=' + row + '&v=1&k=' + k +
+         '\n🙈 維持隱藏：' + base + '?action=moderate&row=' + row + '&v=0&k=' + k;
+}
+
+function webAppUrl_() {
+  try { return ScriptApp.getService().getUrl() || ''; } catch (e) { return ''; }
+}
+
+function escHtml_(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// 畢業典禮風格的審核結果頁
+function htmlPage_(emoji, title, sub, bodyHtml) {
+  var html =
+    '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    '<title>' + escHtml_(title) + '</title><style>' +
+    'body{margin:0;font-family:"Noto Sans TC",system-ui,"Microsoft JhengHei",sans-serif;' +
+    'background:linear-gradient(160deg,#141d3b,#283a72);color:#fff;min-height:100vh;' +
+    'display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}' +
+    '.card{background:rgba(255,255,255,.06);border:1px solid rgba(245,185,66,.35);' +
+    'border-radius:20px;padding:32px 26px;max-width:420px;width:100%;text-align:center;' +
+    'box-shadow:0 24px 60px rgba(0,0,0,.35);}' +
+    '.emoji{font-size:3rem;line-height:1;margin-bottom:10px;}' +
+    'h1{font-size:1.35rem;margin:0 0 6px;}' +
+    '.sub{color:#cdd6f4;font-size:.95rem;margin-bottom:8px;line-height:1.6;}' +
+    '.quote{background:rgba(0,0,0,.22);border-radius:14px;padding:16px 18px;text-align:left;' +
+    'font-size:.95rem;line-height:1.75;margin:18px 0;}' +
+    '.quote b{color:#f5b942;}' +
+    '.btns{display:flex;flex-direction:column;gap:10px;margin-top:8px;}' +
+    'a.btn{display:block;padding:13px 18px;border-radius:999px;text-decoration:none;font-weight:700;}' +
+    '.btn-go{background:#f5b942;color:#141d3b;}' +
+    '.btn-alt{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);}' +
+    '.foot{margin-top:18px;font-size:.8rem;color:rgba(255,255,255,.55);}' +
+    '</style></head><body><div class="card">' +
+    '<div class="emoji">' + emoji + '</div>' +
+    '<h1>' + escHtml_(title) + '</h1>' +
+    '<div class="sub">' + escHtml_(sub) + '</div>' +
+    (bodyHtml || '') +
+    '<div class="foot">石門國小 第103屆畢業典禮 · 祝福審核</div>' +
+    '</div></body></html>';
+  return HtmlService.createHtmlOutput(html)
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+    .setTitle(title);
+}
+
+// 處理 LINE 卡片審核按鈕點擊（GET）→ 更新 F 欄並回結果頁
+function handleModerate_(e) {
+  var p = (e && e.parameter) || {};
+  if (p.k !== getModToken_()) {
+    return htmlPage_('🔒', '連結無效', '審核權杖不符，請從 LINE 通知卡片重新點按。', '');
+  }
+  var row = parseInt(p.row, 10);
+  var sh = getSheet_();
+  if (!(row >= 2 && row <= sh.getLastRow())) {
+    return htmlPage_('⚠️', '找不到這筆祝福', '可能已被刪除或列號變動，請改用試算表審核。', '');
+  }
+  var makePublic = (p.v === '1');
+  sh.getRange(row, 6).setValue(makePublic ? 1 : ''); // F 欄：公開
+  SpreadsheetApp.flush();
+
+  var klass = String(sh.getRange(row, 2).getValue() || '').trim();
+  var name = String(sh.getRange(row, 3).getValue() || '').trim();
+  var msg = String(sh.getRange(row, 5).getValue() || '').trim();
+  var base = webAppUrl_();
+  var k = encodeURIComponent(getModToken_());
+  var quote = '<div class="quote"><b>' + escHtml_(klass) + '　' + escHtml_(name) + '</b><br>' + escHtml_(msg) + '</div>';
+
+  if (makePublic) {
+    return htmlPage_('✅', '已公開到祝福牆', '這則祝福將顯示在網站祝福牆（約數分鐘內同步，家長重整即見）。', quote +
+      '<div class="btns"><a class="btn btn-alt" href="' + base + '?action=moderate&row=' + row + '&v=0&k=' + k + '">改為維持隱藏</a></div>');
+  }
+  return htmlPage_('🙈', '已維持隱藏', '這則祝福不會顯示在網站祝福牆。', quote +
+    '<div class="btns"><a class="btn btn-go" href="' + base + '?action=moderate&row=' + row + '&v=1&k=' + k + '">改為通過公開</a></div>');
 }
 
 /**
  * 部署後若跳授權，請在編輯器選此函數按「執行」一次完成授權
- * （含試算表讀寫 + 對外連線兩項權限）。
+ * （含試算表讀寫 + 對外連線兩項權限）。順便初始化審核 token。
  */
 function authorize() {
   getSheet_();
   lineCreds_();
+  getModToken_();
   return 'authorized';
 }
