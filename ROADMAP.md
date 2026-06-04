@@ -1,6 +1,6 @@
 # 🗺️ 石門國小 第103屆畢業典禮網站 — 進度與未來規劃
 
-> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.9.4**｜後端 **v1.10.0**（GAS + LINE 通知）
+> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.9.5**｜後端 **v1.10.0**（GAS + LINE 通知）
 
 ---
 
@@ -28,6 +28,7 @@
 | **v1.9.2** | Hero 新增「✍️ 寫下祝福」快速跳轉按鈕（珊瑚色，符合 RWD） |
 | **v1.9.3** | 「寫下祝福」改為精準跳到留言表單標題（#wishform + scroll-margin-top），不再只跳到祝福牆頂端 |
 | **v1.9.4** | 校園巡禮平面圖放大(lightbox)圖片置中修正：補 margin auto + scrollbar-gutter，桌機/手機左右對稱不再偏左 |
+| **v1.9.5** | 畢業祝福跑馬燈改為常駐置頂：與導覽列一起 sticky 固定（topticker top:0 / nav top:46px 無縫接合），捲動頁面不再消失；錨點偏移補 46px、無祝福時導覽列回頂不留縫 |
 | **v1.10.0**（後端）| 新祝福 LINE 即時通知：GAS 後端 `doPost` 寫入成功 → 自動推 LINE Flex 卡片給管理員（班級/畢業生/祝福/累計則數），寫入失敗推紅色告警卡；憑證存指令碼屬性不外洩、含純文字 fallback。**純後端改動，前端維持 v1.9.4** |
 
 ### 功能檢核表

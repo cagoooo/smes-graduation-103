@@ -1,4 +1,4 @@
 {
-  "version": "1.9.4",
-  "notes": "校園平面圖放大(lightbox)圖片置中修正：補 margin auto + scrollbar-gutter，桌機/手機左右對稱不再偏左"
+  "version": "1.9.5",
+  "notes": "畢業祝福跑馬燈改為常駐置頂：與導覽列一起 sticky 固定，捲動頁面不再消失（全斷點 46px 無縫接合，RWD）"
 }
