@@ -264,6 +264,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .btn--ghost:hover { background: rgba(255,255,255,.2); transform: translateY(-3px); }
 .btn--live { background: #e8392f; color: #fff; box-shadow: 0 10px 26px rgba(232,57,47,.45); gap: 9px; }
 .btn--live:hover { background: #d22b22; transform: translateY(-3px); box-shadow: 0 16px 34px rgba(232,57,47,.55); }
+.btn--wish { background: var(--coral); color: #fff; box-shadow: 0 10px 26px rgba(255,122,107,.42); }
+.btn--wish:hover { background: #ff6450; transform: translateY(-3px); box-shadow: 0 16px 34px rgba(255,122,107,.52); }
 .btn__live-dot {
   width: 10px; height: 10px; border-radius: 50%; background: #fff; flex-shrink: 0;
   box-shadow: 0 0 0 0 rgba(255,255,255,.7); animation: livePulse 1.4s ease-out infinite;
