@@ -535,8 +535,9 @@
             if (wallBox && !wallBox.hidden) { buildWallFilters(); renderWall(); } // 放大牆開著時同步更新
             // 置頂跑馬燈：維持「全部」祝福（不受班級篩選影響）；祝福少時補滿、無縫循環、速度放慢
             if (ticker && tickerTrack) {
-              var base = ws.slice();
-              while (base.length < 8) base = base.concat(ws);
+              var fresh = ws.slice().sort(function (a, b) { return (b.r || 0) - (a.r || 0); }); // 越新（列號越大）的祝福排越前面，剛留言的人很快看到自己
+              var base = fresh.slice();
+              while (base.length < 8) base = base.concat(fresh);
               var items = base.map(function (w) {
                 return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n, w.c)) + "</b> " + esc(clip(w.m, 38)) + "</span>";
               }).join("");
