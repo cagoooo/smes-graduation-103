@@ -349,7 +349,12 @@ function textModerateLinks_(row) {
 }
 
 function webAppUrl_() {
-  try { return ScriptApp.getService().getUrl() || ''; } catch (e) { return ''; }
+  try {
+    // getUrl() 從編輯器執行（如 testLineNotify）會回傳 /dev 測試網址，
+    // 那網址只有開著編輯器的開發者能開，別人會看到「需要存取權」。
+    // 一律改寫成公開的 /exec，確保 LINE 卡片按鈕在任何人手機上都能點。
+    return (ScriptApp.getService().getUrl() || '').replace(/\/dev$/, '/exec');
+  } catch (e) { return ''; }
 }
 
 function escHtml_(s) {
