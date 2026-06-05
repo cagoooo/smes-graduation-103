@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.17" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.17" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.17" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -193,6 +193,14 @@
       backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
       display:flex;flex-direction:column;gap:clamp(12px,1.4vw,18px);min-height:0;max-height:100%;overflow:hidden;
       animation:floaty var(--fdur,7s) ease-in-out infinite;animation-delay:var(--fdelay,0s);}
+    /* 溢出捲動提示：右下角浮現可上下捲動的小箭頭（捲到底自動消失） */
+    .scrollcue{position:absolute;right:13px;bottom:12px;z-index:2;width:32px;height:32px;border-radius:50%;
+      display:none;align-items:center;justify-content:center;pointer-events:none;
+      background:rgba(16,23,51,.62);border:1px solid rgba(245,196,81,.6);color:var(--gold);
+      font-size:1.15rem;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.4);
+      animation:cuebounce 1.4s ease-in-out infinite;}
+    .wcard.can-scroll:not(.at-bottom) .scrollcue{display:flex;}
+    @keyframes cuebounce{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
     /* 卡頂金色細光條 */
     .wcard::before{content:"";position:absolute;top:0;left:clamp(20px,2.4vw,40px);right:clamp(20px,2.4vw,40px);height:2px;
       background:linear-gradient(90deg,transparent,rgba(245,196,81,.7),transparent);}
@@ -202,7 +210,17 @@
       display:flex;align-items:center;gap:9px;letter-spacing:.5px;}
     .wcard__to .dot{display:inline-block;font-size:.9em;}
     .wcard__msg{color:#fff;font-size:clamp(1.18rem,2vw,1.92rem);line-height:1.72;font-weight:500;
-      min-height:0;overflow-wrap:break-word;word-break:break-word;}
+      flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+      overflow-wrap:break-word;word-break:break-word;padding-right:6px;
+      scrollbar-width:thin;scrollbar-color:rgba(245,196,81,.55) transparent;}
+    .wcard__msg::-webkit-scrollbar{width:7px;}
+    .wcard__msg::-webkit-scrollbar-thumb{background:rgba(245,196,81,.5);border-radius:999px;}
+    .wcard__msg::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:999px;}
+    /* 文字塞不下時，底部柔和漸隱暗示「下面還有」；捲到底（.at-bottom）就移除遮罩讓最後一行完整呈現 */
+    .wcard.can-scroll .wcard__msg{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent);
+      mask-image:linear-gradient(to bottom,#000 calc(100% - 40px),transparent);}
+    .wcard.can-scroll.at-bottom .wcard__msg{-webkit-mask-image:none;mask-image:none;}
+    .wcard.can-scroll{animation:none;}   /* 長祝福捲動時停止漂浮，閱讀更穩 */
     .stage[data-len="len-m"] .wcard__msg{font-size:clamp(1.06rem,1.7vw,1.58rem);}
     .stage[data-len="len-l"] .wcard__msg{font-size:clamp(.96rem,1.45vw,1.34rem);line-height:1.62;}
     .stage[data-len="len-xl"] .wcard__msg{font-size:clamp(.84rem,1.22vw,1.1rem);line-height:1.56;}
@@ -337,6 +355,7 @@
       .flyheart{display:none;}
       .wlike__n.bump,.wlike.is-liked .wlike__h{animation:none;}
       .newwish-toast{transition:none;transform:translateX(-50%) translateY(0);}
+      .scrollcue{animation:none;}
     }
   </style>
 </head>
@@ -412,7 +431,11 @@
       // ⬇️ 與 script.js 相同的 GAS Web App /exec（祝福資料來源）。換端點時兩處都要改。
       var ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
       function batchSize() { var w = window.innerWidth; return w <= 680 ? 1 : (w <= 1100 ? 2 : 3); }
-      var ROTATE_MS = 9000;
+      var ROTATE_MS = 9000;            // 短祝福（不溢出）每批停留秒數
+      var AUTOSCROLL_PX_PER_S = 34;    // 長祝福自動往下捲的速度（投影可舒適閱讀）
+      var READ_PAD_MS = 2400;          // 自動捲動前後各停一下，讓人讀頭尾
+      var DWELL_CAP_MS = 22000;        // 單批最長停留上限，避免超長祝福卡死輪播
+      var MANUAL_IDLE_MS = 8000;       // 使用者手動捲動後，閒置多久恢復自動輪播
       var RELOAD_MS = 25000;   // 25 秒背景輪詢，準即時偵測審核通過的新祝福（無新祝福時靜默更新、不打斷輪播）
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -420,6 +443,7 @@
       var countEl = document.getElementById("count");
       var statusEl = document.getElementById("status");
       var wishes = [], batch = 0, rotateTimer = null, stageFilter = "全部", lastSeenMaxR = null;
+      var rafId = null, idleTimer = null, manualScroll = false;   // 自動捲動 / 手動捲動暫停狀態
 
       function maskName(n, c) { // 與主頁 / 跑馬燈同步：只有「六年X班」畢業生才去識別化，師長 / 其他完整顯示
         n = String(n || "").trim();
@@ -524,7 +548,7 @@
         stageFilter = b.getAttribute("data-c") || "全部";
         var bs = filtersEl.querySelectorAll(".schip");
         for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === b);
-        batch = 0; renderBatch(); startRotate();
+        batch = 0; renderBatch();
       });
 
       function renderBatch() {
@@ -557,17 +581,69 @@
           return '<div class="wcell"><div class="wcard" style="--fdur:' + fdur + 's;--fdelay:' + fdelay + 's;">' +
             '<div class="wcard__to"><span class="dot">💛</span>給 ' +
             esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</div><div class="wcard__msg">' +
-            esc(w.m) + "</div>" + like + "</div></div>";
+            esc(w.m) + "</div>" + like + '<span class="scrollcue" aria-hidden="true">⌄</span></div></div>';
         }).join("");
-        if (reduce) { stage.innerHTML = html; return; }
+        if (reduce) { stage.innerHTML = html; afterRender(); return; }
         stage.classList.add("fading");
-        setTimeout(function () { stage.innerHTML = html; stage.classList.remove("fading"); }, 700);
+        setTimeout(function () { stage.innerHTML = html; stage.classList.remove("fading"); afterRender(); }, 700);
       }
 
-      function startRotate() {
-        if (rotateTimer) clearInterval(rotateTimer);
-        if (getFiltered().length <= batchSize()) return;
-        rotateTimer = setInterval(function () { batch++; renderBatch(); }, ROTATE_MS);
+      // 內容就位後：標記溢出卡片、啟動自動捲動、依最長卡片決定本批停留時間並排下一批
+      function afterRender() {
+        clearAutoScroll();
+        manualScroll = false;
+        clearTimeout(idleTimer);
+        var cards = [].slice.call(stage.querySelectorAll(".wcard"));
+        cards.forEach(function (card) {
+          var m = card.querySelector(".wcard__msg");
+          if (!m) return;
+          m.scrollTop = 0;
+          var canScroll = (m.scrollHeight - m.clientHeight > 4);   // 文字塞不下 = 可捲動
+          card.classList.toggle("can-scroll", canScroll);
+          card.classList.toggle("at-bottom", !canScroll);          // 不溢出視同已到底（不顯示遮罩/箭頭）
+        });
+        var dwell = computeDwell(cards);
+        if (!reduce) runAutoScroll(cards, dwell);
+        scheduleNext(dwell);
+      }
+      // 依本批最長溢出量決定停留：要夠時間讓最長那張自動捲到底（前後各留 READ_PAD 讓人讀頭尾）
+      function computeDwell(cards) {
+        if (reduce) return ROTATE_MS;
+        var maxOv = 0;
+        cards.forEach(function (card) {
+          var m = card.querySelector(".wcard__msg");
+          if (m) maxOv = Math.max(maxOv, m.scrollHeight - m.clientHeight);
+        });
+        if (maxOv <= 4) return ROTATE_MS;
+        return Math.min(DWELL_CAP_MS, Math.max(ROTATE_MS, READ_PAD_MS * 2 + (maxOv / AUTOSCROLL_PX_PER_S) * 1000));
+      }
+      // 同步把所有溢出卡片以等速往下捲（手動接手即停）
+      function runAutoScroll(cards, dwell) {
+        var msgs = cards.map(function (c) { return c.querySelector(".wcard__msg"); })
+          .filter(function (m) { return m && (m.scrollHeight - m.clientHeight > 4); });
+        if (!msgs.length) return;
+        var startTs = null;
+        function frame(ts) {
+          if (manualScroll) { rafId = null; return; }
+          if (startTs === null) startTs = ts;
+          var elapsed = ts - startTs;
+          var px = (elapsed - READ_PAD_MS) * (AUTOSCROLL_PX_PER_S / 1000);   // 前段停在頂端讀開頭
+          msgs.forEach(function (m) {
+            var max = m.scrollHeight - m.clientHeight;
+            m.scrollTop = Math.max(0, Math.min(max, px));
+          });
+          rafId = (elapsed < dwell) ? requestAnimationFrame(frame) : null;
+        }
+        rafId = requestAnimationFrame(frame);
+      }
+      function clearAutoScroll() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+      // 排下一批：多批→換下批；單批但有長祝福→重捲同批（讓它循環讀完）；單批又不溢出→靜止不排程
+      function scheduleNext(dwell) {
+        if (rotateTimer) { clearTimeout(rotateTimer); rotateTimer = null; }
+        var multi = getFiltered().length > batchSize();
+        var overflow = !!stage.querySelector(".wcard.can-scroll");
+        if (!multi && !overflow) return;
+        rotateTimer = setTimeout(function () { if (multi) batch++; renderBatch(); }, dwell);
       }
 
       // 新祝福即時通知 toast（背景輪詢偵測到審核通過的新祝福時淡入，12 秒自動收起）
@@ -604,7 +680,7 @@
             statusEl.textContent = ws.length ? "祝福持續更新中" : "等待第一則祝福";
             buildStageFilters();
             // 首次載入或有新祝福才重置輪播（把最新祝福捲到最前）；無新祝福只靜默更新資料，不打斷正在進行的輪播
-            if (firstLoad || newCount > 0) { batch = 0; renderBatch(); startRotate(); }
+            if (firstLoad || newCount > 0) { batch = 0; renderBatch(); }
             if (newCount > 0) showNewWishToast(newCount);
           })
           .catch(function () { /* 靜默，保留上一批畫面 */ });
@@ -689,6 +765,30 @@
           .catch(function () { /* 樂觀更新已生效，靜默 */ });
       });
 
+      // 捲動到底就拿掉底部漸層遮罩 / 箭頭（scroll 不冒泡，用 capture 抓子元素的捲動；含程式自動捲與手動捲）
+      stage.addEventListener("scroll", function (e) {
+        var m = e.target;
+        if (!m || !m.classList || !m.classList.contains("wcard__msg")) return;
+        var card = m.closest ? m.closest(".wcard") : null;
+        if (card) card.classList.toggle("at-bottom", m.scrollTop + m.clientHeight >= m.scrollHeight - 4);
+      }, true);
+
+      // 使用者用滑鼠滾輪 / 手指滑動長祝福時：停掉自動捲與輪播，閒置 MANUAL_IDLE_MS 後再恢復（避免讀到一半被換走）
+      function onUserScrollIntent(e) {
+        var t = e.target;
+        var m = (t && t.closest) ? t.closest(".wcard__msg") : null;
+        if (!m || m.scrollHeight - m.clientHeight <= 4) return;   // 不在可捲動的長祝福上 → 不打斷輪播
+        manualScroll = true;
+        clearAutoScroll();
+        if (rotateTimer) { clearTimeout(rotateTimer); rotateTimer = null; }
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(function () { manualScroll = false; if (multiBatchNow()) { batch++; } renderBatch(); }, MANUAL_IDLE_MS);
+      }
+      function multiBatchNow() { return getFiltered().length > batchSize(); }
+      stage.addEventListener("wheel", onUserScrollIntent, { passive: true });
+      stage.addEventListener("touchstart", onUserScrollIntent, { passive: true });
+      stage.addEventListener("touchmove", onUserScrollIntent, { passive: true });
+
       var fsbtn = document.getElementById("fsbtn");
       function goFs() {
         var el = document.documentElement;
@@ -755,7 +855,7 @@
       setInterval(load, RELOAD_MS);
       window.addEventListener("focus", load);
       var rzTimer = null;
-      window.addEventListener("resize", function () { clearTimeout(rzTimer); rzTimer = setTimeout(function () { batch = 0; renderBatch(); startRotate(); }, 250); });
+      window.addEventListener("resize", function () { clearTimeout(rzTimer); rzTimer = setTimeout(function () { batch = 0; renderBatch(); }, 250); });
     })();
   </script>
 </body>
