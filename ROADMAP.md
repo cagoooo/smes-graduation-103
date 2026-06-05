@@ -1,6 +1,6 @@
 # 🗺️ 石門國小 第103屆畢業典禮網站 — 進度與未來規劃
 
-> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.14.0**｜後端 **v1.12.0**（GAS + LINE 通知 + 一鍵審核 + 愛心）
+> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.14.1**｜後端 **v1.12.0**（GAS + LINE 通知 + 一鍵審核 + 愛心）
 > 現場投影頁：https://cagoooo.github.io/smes-graduation-103/stage.html ｜祝福分享頁：https://cagoooo.github.io/smes-graduation-103/wish.html
 
 ---
@@ -38,6 +38,7 @@
 | **v1.13.1** | 祝福長內容**完整顯示**優化：投影頁移除文字截斷(`line-clamp`)，改依當批最長祝福**自動縮放字級**（len-s/m/l/xl）+ **一次顯示卡數隨螢幕自適應**（手機 1／平板 2／桌機 3），長祝福不再被截「…」；放大牆卡片改自然高度（`align-items:start`）。手機 375 實測 130 字長祝福完整無裁 |
 | **v1.13.2** | 祝福留言**專屬社群分享頁** `wish.html` + 主題 OG 圖 `assets/wish-og.png`（彩虹條 + 校徽 +「為畢業生寫下祝福」+ 愛心 + 引導文，PIL 微軟正黑中文不 tofu）；分享此連結到 LINE/FB 顯示「邀請寫祝福」卡片、點進自動跳留言區 `#wishform`；爬蟲讀 meta、真人 `location.replace` 跳轉；favicon 沿用石門校徽。獨立分享頁，不動主站 PWA |
 | **v1.14.0** | 現場投影頁 `stage.html` **星空夜空精修改版**（整合外部設計交接包・方向 A）：新增星雲微光 + 偶爾劃過的流星 + 閃爍星點背景、彩虹光弧拱高更柔；卡片交錯淡入進場 + 停留時極輕浮動 + 玻璃質感金光條；頁首加金線標語「啟程·感恩·祝福」+ 獎章式計數徽章（累計/N/則祝福）。**功能全保留**（GAS 即時資料 / 9 秒輪播 / 愛心飛心 / 字級＆卡數自適應 / 全螢幕 / wakeLock / reduce-motion 降級），純前端不動 GAS／不涉密鑰 |
+| **v1.14.1** | 投影祝福牆頁 `stage.html` 加**社群分享卡片**：星空風格專屬 OG 圖 `assets/stage-og.png`（夜空 + 星雲 + 星點 + 校徽 +「第103屆 畢業祝福牆」+ 金線標語 + 愛心，PIL 微軟正黑中文不 tofu）+ 完整 og/twitter meta（絕對 URL + `?v=` 防快取）+ 補齊 favicon（16/32/apple-touch）；分享 stage 連結到 LINE/FB 顯示「來看畢業祝福牆」卡片。`bump-version.ps1` 納入 stage.html 版本同步 |
 
 ### 功能檢核表
 
