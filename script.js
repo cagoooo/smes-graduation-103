@@ -380,19 +380,45 @@
           '<span class="wish-pager__info">第 ' + (curPage + 1) + ' / ' + totalPages + ' 頁</span>' +
           '<button type="button" class="wish-pager__btn" data-dir="next"' + (curPage >= totalPages - 1 ? " disabled" : "") + ' aria-label="下一頁">下一頁 ›</button>';
       }
-      function renderCards() {
+      var cardsTimers = [];
+      function clearCardsTimers() { cardsTimers.forEach(clearTimeout); cardsTimers = []; }
+      function clearCardsAnim() { cards.classList.remove("is-leaving", "is-entering", "lv-next", "lv-prev", "en-next", "en-prev"); }
+      // anim: "next" / "prev"（換頁，方向感知滑動）/ "fade"（切班級，淡入）/ 不傳 = 瞬間（初始載入、背景輪詢、放大牆同步）
+      function renderCards(anim) {
+        var reduceMo = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         var list = curFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === curFilter; });
         list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); }); // 愛心多的排前面（熱門優先）
         var totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
         if (curPage >= totalPages) curPage = totalPages - 1;
         if (curPage < 0) curPage = 0;
-        cards.innerHTML = list.slice(curPage * PAGE_SIZE, (curPage + 1) * PAGE_SIZE).map(cardHTML).join("");
-        renderPager(totalPages);
-        if (count) {
-          count.textContent = curFilter === "全部"
-            ? "目前已有 " + allWishes.length + " 則祝福 💛"
-            : curFilter + "：" + list.length + " 則（全校 " + allWishes.length + " 則）💛";
+        var html = list.slice(curPage * PAGE_SIZE, (curPage + 1) * PAGE_SIZE).map(cardHTML).join("");
+        var countText = curFilter === "全部"
+          ? "目前已有 " + allWishes.length + " 則祝福 💛"
+          : curFilter + "：" + list.length + " 則（全校 " + allWishes.length + " 則）💛";
+        function commit() {
+          cards.innerHTML = html;
+          if (count) count.textContent = countText;
+          renderPager(totalPages);
         }
+        // 沒指定轉場、或關閉動效、或目前無卡片可淡出 → 直接換
+        if (!anim || reduceMo || !cards.children.length) { clearCardsTimers(); clearCardsAnim(); commit(); return; }
+        clearCardsTimers();
+        // (1) 舊頁淡出滑走
+        cards.classList.remove("is-entering", "en-next", "en-prev");
+        cards.classList.add("is-leaving");
+        if (anim === "next") cards.classList.add("lv-next");
+        else if (anim === "prev") cards.classList.add("lv-prev");
+        // (2) 換內容 → 新卡片交錯滑入
+        cardsTimers.push(setTimeout(function () {
+          cards.classList.remove("is-leaving", "lv-next", "lv-prev");
+          commit();
+          void cards.offsetWidth; // 強制 reflow，動畫從頭播
+          cards.classList.add("is-entering");
+          if (anim === "next") cards.classList.add("en-next");
+          else if (anim === "prev") cards.classList.add("en-prev");
+          // (3) 進場結束清掉狀態 class，避免影響 hover / 後續渲染
+          cardsTimers.push(setTimeout(clearCardsAnim, 900));
+        }, 210));
       }
       function buildFilters() {
         if (!filters) return;
@@ -414,7 +440,7 @@
           var bs = filters.querySelectorAll(".wish-chip");
           for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === btn);
           curPage = 0; // 切班級回到第一頁
-          renderCards();
+          renderCards("fade");
         });
       }
       // 主頁祝福牆翻頁（左右切換，避免一次顯示全部越拉越長）
@@ -422,8 +448,9 @@
       if (wishPagerEl) wishPagerEl.addEventListener("click", function (e) {
         var b = e.target.closest ? e.target.closest(".wish-pager__btn") : null;
         if (!b || b.disabled) return;
-        curPage += (b.getAttribute("data-dir") === "next" ? 1 : -1);
-        renderCards();
+        var dir = b.getAttribute("data-dir") === "next" ? "next" : "prev";
+        curPage += (dir === "next" ? 1 : -1);
+        renderCards(dir);
         var wall = document.getElementById("wishWall");
         if (wall) { try { wall.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }
       });

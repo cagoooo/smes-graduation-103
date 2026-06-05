@@ -846,6 +846,29 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wish-pager__btn:disabled { opacity: .4; cursor: not-allowed; }
 .wish-pager__info { font-weight: 700; color: var(--ink-soft); font-size: .92rem; white-space: nowrap; }
 
+/* 換頁 / 切班級轉場：舊頁淡出滑走 → 換內容 → 新卡片交錯滑入（方向感知，提升絲滑感） */
+.wishwall__cards { overflow-x: clip; }   /* 滑入時不外溢出現橫向捲軸；仍保留垂直 hover 浮起陰影 */
+.wishwall__cards.is-leaving { opacity: 0; transition: opacity .2s ease, transform .2s ease; }
+.wishwall__cards.is-leaving.lv-next { transform: translateX(-26px); }
+.wishwall__cards.is-leaving.lv-prev { transform: translateX(26px); }
+.wishwall__cards.is-entering > .wish-card { animation: wishCardIn .5s cubic-bezier(.22, 1, .36, 1) both; }
+.wishwall__cards.is-entering.en-next > .wish-card { animation-name: wishCardInNext; }
+.wishwall__cards.is-entering.en-prev > .wish-card { animation-name: wishCardInPrev; }
+@keyframes wishCardIn     { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes wishCardInNext { from { opacity: 0; transform: translateX(42px) translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes wishCardInPrev { from { opacity: 0; transform: translateX(-42px) translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+.wishwall__cards.is-entering > .wish-card:nth-child(1) { animation-delay: 0s; }
+.wishwall__cards.is-entering > .wish-card:nth-child(2) { animation-delay: .06s; }
+.wishwall__cards.is-entering > .wish-card:nth-child(3) { animation-delay: .12s; }
+.wishwall__cards.is-entering > .wish-card:nth-child(4) { animation-delay: .18s; }
+.wishwall__cards.is-entering > .wish-card:nth-child(5) { animation-delay: .24s; }
+.wishwall__cards.is-entering > .wish-card:nth-child(6) { animation-delay: .3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wishwall__cards.is-leaving { opacity: 1; transform: none; transition: none; }
+  .wishwall__cards.is-entering > .wish-card { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .topticker__track { animation: none; }
 }
