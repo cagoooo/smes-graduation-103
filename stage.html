@@ -8,88 +8,159 @@
   <link rel="icon" href="favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
   <style>
     :root{
-      --navy-900:#141d3b; --navy-800:#1d2a52; --navy-700:#283a72;
-      --gold:#f5b942; --coral:#ff7a6b;
+      --navy-900:#0e1530; --navy-800:#16204a; --navy-700:#233268;
+      --gold:#f5c451; --gold-soft:#f8d98a; --coral:#ff7a6b; --coral-soft:#ff8a7a;
+      --ink:#ffffff;
       --font-sans:"Noto Sans TC",system-ui,"PingFang TC","Microsoft JhengHei",sans-serif;
       --font-serif:"Noto Serif TC","Noto Sans TC",serif;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     html,body{height:100%;}
     body{
-      font-family:var(--font-sans); color:#fff; background:var(--navy-900);
+      font-family:var(--font-sans); color:var(--ink); background:var(--navy-900);
       overflow:hidden; position:relative;
       display:flex; flex-direction:column;
       -webkit-font-smoothing:antialiased;
     }
-    /* 背景：夜空漸層 + 彩虹光弧 + 紙花 */
-    .sky{position:fixed;inset:0;z-index:-3;
-      background:radial-gradient(120% 90% at 50% -10%, #3a4f9e 0%, #233268 38%, #16204a 72%, #101733 100%);}
-    .rainbow{position:fixed;left:50%;bottom:-60%;transform:translateX(-50%);
-      width:160%;aspect-ratio:1/1;max-width:1600px;z-index:-2;border-radius:50%;
+
+    /* ===== 背景層：夜空漸層 + 雙彩虹光弧 + 星點 + 紙花 ===== */
+    .sky{position:fixed;inset:0;z-index:-4;
+      background:
+        radial-gradient(120% 95% at 50% -16%, #3a4f9e 0%, #28396f 30%, #1a2750 60%, #0e1530 100%);}
+    /* 星雲微光：幾抹柔和色霧，讓夜空有層次 */
+    .nebula{position:fixed;inset:-10%;z-index:-3;pointer-events:none;opacity:.9;
+      background:
+        radial-gradient(40% 32% at 16% 22%, rgba(138,108,255,.36), transparent 70%),
+        radial-gradient(44% 36% at 84% 28%, rgba(74,176,250,.32), transparent 72%),
+        radial-gradient(52% 42% at 50% 88%, rgba(58,186,200,.26), transparent 70%),
+        radial-gradient(32% 28% at 72% 68%, rgba(255,150,128,.17), transparent 72%),
+        radial-gradient(26% 22% at 34% 58%, rgba(125,95,255,.18), transparent 74%);
+      filter:blur(28px);animation:drift 26s ease-in-out infinite alternate;}
+    @keyframes drift{from{transform:translate3d(-1.5%,-1%,0) scale(1.02);}to{transform:translate3d(2%,1.5%,0) scale(1.06);}}
+    /* 地平線微光，讓卡片下方有層次 */
+    .glow{position:fixed;left:50%;bottom:-20%;transform:translateX(-50%);
+      width:130%;height:62%;z-index:-3;border-radius:50%;
+      background:radial-gradient(closest-side, rgba(96,128,235,.32), transparent 72%);
+      filter:blur(24px);}
+    /* 彩虹光弧：拱得更高、更柔 */
+    .rainbow{position:fixed;left:50%;bottom:-52%;transform:translateX(-50%);
+      width:184%;aspect-ratio:1/1;max-width:2000px;z-index:-3;border-radius:50%;
       background:radial-gradient(closest-side,
         transparent 60%, rgba(125,95,255,.16) 64%, rgba(69,170,242,.16) 70%,
-        rgba(46,204,113,.16) 76%, rgba(255,210,63,.18) 82%, rgba(255,159,67,.16) 88%, rgba(255,94,108,.16) 94%, transparent 98%);}
+        rgba(46,204,113,.16) 76%, rgba(255,210,63,.19) 82%, rgba(255,159,67,.16) 88%,
+        rgba(255,94,108,.15) 94%, transparent 99%);
+      filter:blur(6px);}
+    /* 流星 */
+    .shooting{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden;}
+    .shoot{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;
+      box-shadow:0 0 9px 1px rgba(255,255,255,.85);opacity:0;
+      animation:shoot var(--sdur,11s) ease-in infinite;animation-delay:var(--sdelay,0s);}
+    .shoot::after{content:"";position:absolute;top:50%;right:1px;width:150px;height:2px;
+      transform:translateY(-50%);transform-origin:right center;border-radius:2px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.9));}
+    @keyframes shoot{
+      0%{opacity:0;transform:translate(0,0) rotate(20deg) scale(.7);}
+      3%{opacity:1;}
+      16%{opacity:1;}
+      24%,100%{opacity:0;transform:translate(-380px,138px) rotate(20deg) scale(1);}}
+    .stars{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+    .star{position:absolute;background:#fff;border-radius:50%;
+      box-shadow:0 0 6px rgba(255,255,255,.55);animation:twinkle var(--tw,4s) ease-in-out infinite;}
+    @keyframes twinkle{0%,100%{opacity:var(--o0,.25);transform:scale(.8);}50%{opacity:var(--o1,1);transform:scale(1.15);}}
     .confetti{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
-    .confetti span{position:absolute;top:-16px;width:10px;height:15px;border-radius:2px;opacity:.85;animation:fall linear infinite;}
-    @keyframes fall{to{transform:translateY(110vh) rotate(540deg);}}
+    .confetti span{position:absolute;top:-18px;width:10px;height:15px;border-radius:2px;opacity:.85;animation:fall linear infinite;}
+    @keyframes fall{to{transform:translateY(112vh) rotate(560deg);}}
 
-    /* 頁首 */
-    .head{display:flex;align-items:center;gap:clamp(14px,2vw,26px);
-      padding:clamp(18px,3vh,34px) clamp(24px,4vw,60px);}
-    .head__logo{width:clamp(56px,7vw,92px);height:auto;filter:drop-shadow(0 4px 14px rgba(0,0,0,.4));}
+    /* ===== 頁首 ===== */
+    .head{display:flex;align-items:center;gap:clamp(14px,2vw,28px);
+      padding:clamp(20px,3.2vh,38px) clamp(26px,4vw,64px) clamp(10px,1.6vh,18px);position:relative;z-index:2;}
+    .head__logo{width:clamp(58px,7vw,96px);height:auto;
+      filter:drop-shadow(0 6px 18px rgba(0,0,0,.45));}
     .head__titles{flex:1;min-width:0;}
     .head__titles h1{font-family:var(--font-serif);font-weight:900;
-      font-size:clamp(1.6rem,3.4vw,3rem);line-height:1.15;
-      background:linear-gradient(90deg,#fff,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;}
-    .head__titles p{color:rgba(255,255,255,.78);font-size:clamp(.85rem,1.4vw,1.15rem);margin-top:4px;letter-spacing:1px;}
-    .head__count{flex-shrink:0;text-align:center;
-      background:rgba(245,185,66,.14);border:1px solid rgba(245,185,66,.4);border-radius:18px;
-      padding:clamp(8px,1.4vh,14px) clamp(14px,1.8vw,24px);}
-    .head__count b{display:block;font-size:clamp(1.6rem,3.2vw,2.8rem);font-weight:900;color:var(--gold);line-height:1;}
-    .head__count span{font-size:clamp(.7rem,1.1vw,.95rem);color:rgba(255,255,255,.8);}
+      font-size:clamp(1.7rem,3.5vw,3.2rem);line-height:1.12;letter-spacing:.5px;
+      background:linear-gradient(96deg,#ffffff 0%,var(--gold-soft) 60%,var(--gold) 100%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      text-shadow:0 2px 24px rgba(245,196,81,.18);}
+    .head__titles p{color:rgba(255,255,255,.76);font-size:clamp(.86rem,1.4vw,1.18rem);
+      margin-top:7px;letter-spacing:1.5px;}
+    /* 獎章式計數徽章 */
+    .head__count{position:relative;flex-shrink:0;text-align:center;
+      background:radial-gradient(120% 130% at 50% -10%, rgba(245,196,81,.26), rgba(245,196,81,.06) 70%);
+      border:1px solid rgba(245,196,81,.55);border-radius:18px;
+      padding:clamp(10px,1.6vh,16px) clamp(18px,2vw,30px);
+      box-shadow:0 12px 34px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.18), 0 0 26px rgba(245,196,81,.12);}
+    .head__count::before{content:"";position:absolute;inset:5px;border:1px solid rgba(245,196,81,.32);
+      border-radius:13px;pointer-events:none;}
+    .head__count-eye{display:block;font-size:clamp(.6rem,.85vw,.74rem);color:var(--gold-soft);
+      letter-spacing:3px;opacity:.85;margin-bottom:3px;}
+    .head__count b{display:block;font-size:clamp(1.7rem,3.3vw,3rem);font-weight:900;color:var(--gold);line-height:1;
+      font-family:var(--font-serif);text-shadow:0 0 20px rgba(245,196,81,.45);}
+    .head__count>span:last-child{font-size:clamp(.7rem,1.1vw,.98rem);color:rgba(255,255,255,.82);letter-spacing:2px;}
+    /* 標語金線 */
+    .slogan{display:flex;align-items:center;gap:13px;margin-top:12px;
+      color:var(--gold-soft);font-size:clamp(.72rem,1.05vw,.95rem);font-weight:700;letter-spacing:5px;}
+    .slogan__ln{height:1px;width:clamp(28px,4vw,54px);
+      background:linear-gradient(90deg,rgba(245,196,81,0),rgba(245,196,81,.85));}
 
-    /* 舞台：祝福大卡輪播 */
-    .stage{flex:1;display:grid;gap:clamp(16px,2vw,30px);align-content:center;
+    /* ===== 舞台：祝福大卡輪播 ===== */
+    .stage{flex:1;display:grid;gap:clamp(18px,2.1vw,34px);align-content:center;
       grid-template-columns:repeat(3,1fr);overflow:hidden;
-      padding:clamp(8px,1.5vh,20px) clamp(24px,4vw,60px) clamp(12px,2vh,24px);
-      transition:opacity .7s ease;}
+      padding:clamp(8px,1.5vh,20px) clamp(26px,4vw,64px) clamp(14px,2vh,26px);
+      transition:opacity .7s ease;position:relative;z-index:2;}
     .stage.fading{opacity:0;}
     @media (max-width:1100px){.stage{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:680px){.stage{grid-template-columns:1fr;}}
 
-    .wcard{background:rgba(255,255,255,.07);border:1px solid rgba(245,185,66,.28);
-      border-radius:22px;padding:clamp(22px,2.6vw,40px);
-      box-shadow:0 20px 50px rgba(0,0,0,.3);
-      display:flex;flex-direction:column;gap:14px;min-height:0;max-height:100%;overflow:hidden;
+    /* 卡片外層：負責交錯進場 */
+    .wcell{display:flex;min-height:0;max-height:100%;
       animation:rise .7s cubic-bezier(.22,1,.36,1) both;}
-    .wcard__to{color:var(--gold);font-weight:900;font-size:clamp(1.05rem,1.7vw,1.5rem);
-      display:flex;align-items:center;gap:8px;}
-    .wcard__msg{color:#fff;font-size:clamp(1.15rem,2vw,1.9rem);line-height:1.7;font-weight:500;
+    .wcell:nth-child(2){animation-delay:.16s;}
+    .wcell:nth-child(3){animation-delay:.32s;}
+    @keyframes rise{from{opacity:0;transform:translateY(30px) scale(.97);}to{opacity:1;transform:none;}}
+
+    .wcard{position:relative;flex:1;min-width:0;border-radius:24px;
+      padding:clamp(24px,2.7vw,44px);
+      background:linear-gradient(170deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+      border:1px solid rgba(245,196,81,.26);
+      box-shadow:0 26px 60px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.12);
+      backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+      display:flex;flex-direction:column;gap:clamp(12px,1.4vw,18px);min-height:0;max-height:100%;overflow:hidden;
+      animation:floaty var(--fdur,7s) ease-in-out infinite;animation-delay:var(--fdelay,0s);}
+    /* 卡頂金色細光條 */
+    .wcard::before{content:"";position:absolute;top:0;left:clamp(20px,2.4vw,40px);right:clamp(20px,2.4vw,40px);height:2px;
+      background:linear-gradient(90deg,transparent,rgba(245,196,81,.7),transparent);}
+    @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+
+    .wcard__to{color:var(--gold);font-weight:900;font-size:clamp(1.08rem,1.75vw,1.55rem);
+      display:flex;align-items:center;gap:9px;letter-spacing:.5px;}
+    .wcard__to .dot{display:inline-block;font-size:.9em;}
+    .wcard__msg{color:#fff;font-size:clamp(1.18rem,2vw,1.92rem);line-height:1.72;font-weight:500;
       min-height:0;overflow-wrap:break-word;word-break:break-word;}
-    /* 依當批最長祝福自動縮放字級，讓長內容也完整呈現（不再截斷） */
-    .stage[data-len="len-m"] .wcard__msg{font-size:clamp(1.05rem,1.7vw,1.55rem);}
-    .stage[data-len="len-l"] .wcard__msg{font-size:clamp(.95rem,1.4vw,1.3rem);line-height:1.6;}
-    .stage[data-len="len-xl"] .wcard__msg{font-size:clamp(.82rem,1.2vw,1.08rem);line-height:1.55;}
-    .wcard__like{margin-top:auto;align-self:flex-start;color:#ff8a7a;font-weight:900;
+    .stage[data-len="len-m"] .wcard__msg{font-size:clamp(1.06rem,1.7vw,1.58rem);}
+    .stage[data-len="len-l"] .wcard__msg{font-size:clamp(.96rem,1.45vw,1.34rem);line-height:1.62;}
+    .stage[data-len="len-xl"] .wcard__msg{font-size:clamp(.84rem,1.22vw,1.1rem);line-height:1.56;}
+
+    .wcard__like{margin-top:auto;align-self:flex-start;color:var(--coral-soft);font-weight:900;
       font-size:clamp(.95rem,1.4vw,1.3rem);padding-top:4px;}
-    /* 可按愛心鈕 */
     .wlike{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:9px;cursor:pointer;
-      background:rgba(255,122,107,.15);border:1.5px solid rgba(255,138,122,.5);border-radius:999px;
-      padding:9px 20px;font-family:inherit;font-weight:900;color:#ff8a7a;line-height:1;
+      background:linear-gradient(180deg, rgba(255,122,107,.2), rgba(255,122,107,.1));
+      border:1.5px solid rgba(255,138,122,.5);border-radius:999px;
+      padding:9px 21px;font-family:inherit;font-weight:900;color:var(--coral-soft);line-height:1;
       font-size:clamp(1rem,1.5vw,1.45rem);transition:transform .15s ease,background .2s,border-color .2s,color .2s;
       -webkit-tap-highlight-color:transparent;}
-    .wlike:hover{background:rgba(255,122,107,.26);}
+    .wlike:hover{background:rgba(255,122,107,.28);}
     .wlike:active{transform:scale(1.16);}
-    .wlike.is-liked{background:rgba(255,122,107,.32);border-color:#ff7a6b;color:#fff;cursor:default;}
+    .wlike.is-liked{background:rgba(255,122,107,.34);border-color:#ff7a6b;color:#fff;cursor:default;}
     .wlike__h{font-size:1.15em;line-height:1;transform-origin:center;}
     .wlike.is-liked .wlike__h{animation:heartpop .5s ease;}
     .wlike__n.bump{display:inline-block;animation:numbump .5s ease;}
     @keyframes numbump{0%{transform:scale(1);}40%{transform:scale(1.7);}100%{transform:scale(1);}}
     @keyframes heartpop{0%{transform:scale(1);}30%{transform:scale(1.5);}60%{transform:scale(.85);}100%{transform:scale(1);}}
-    /* 飛心特效層 */
+
     .fxlayer{position:fixed;inset:0;z-index:9;pointer-events:none;overflow:hidden;}
     .flyheart{position:fixed;font-size:clamp(1.4rem,2vw,2rem);pointer-events:none;will-change:transform,opacity;
       animation:flyup 1.3s ease-out forwards;}
@@ -97,33 +168,31 @@
       0%{transform:translate(-50%,-50%) scale(.5);opacity:0;}
       15%{opacity:1;}
       100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.25) rotate(var(--rot));opacity:0;}}
-    .wcard:nth-child(2){animation-delay:.12s;}
-    .wcard:nth-child(3){animation-delay:.24s;}
-    @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.98);}to{opacity:1;transform:none;}}
 
     .empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
       font-size:clamp(1.2rem,2.4vw,2rem);color:rgba(255,255,255,.7);padding:40px;}
 
-    /* 頁尾 */
+    /* ===== 頁尾 ===== */
     .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;
-      padding:clamp(10px,1.6vh,18px) clamp(24px,4vw,60px);
-      font-size:clamp(.75rem,1.2vw,1rem);color:rgba(255,255,255,.62);}
-    .foot__live{display:inline-flex;align-items:center;gap:7px;}
-    .foot__live::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--coral);
+      padding:clamp(10px,1.6vh,18px) clamp(26px,4vw,64px) clamp(14px,2vh,22px);
+      font-size:clamp(.76rem,1.2vw,1rem);color:rgba(255,255,255,.6);position:relative;z-index:2;}
+    .foot__live{display:inline-flex;align-items:center;gap:8px;}
+    .foot__live::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--coral);
       box-shadow:0 0 0 0 rgba(255,122,107,.6);animation:pulse 1.8s infinite;}
-    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,122,107,.55);}70%{box-shadow:0 0 0 12px rgba(255,122,107,0);}100%{box-shadow:0 0 0 0 rgba(255,122,107,0);}}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,122,107,.55);}70%{box-shadow:0 0 0 13px rgba(255,122,107,0);}100%{box-shadow:0 0 0 0 rgba(255,122,107,0);}}
 
-    /* 全螢幕鈕 */
     .fsbtn{position:fixed;top:14px;right:16px;z-index:5;
-      background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.28);
+      background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.26);
       border-radius:999px;padding:9px 16px;font-size:.9rem;font-weight:700;cursor:pointer;
       font-family:inherit;transition:background .2s;}
     .fsbtn:hover{background:rgba(255,255,255,.26);}
     :fullscreen .fsbtn{display:none;}
 
     @media (prefers-reduced-motion:reduce){
-      .confetti span{animation:none;display:none;}
-      .wcard{animation:none;}
+      .confetti span,.star{animation:none;}
+      .confetti span,.shooting{display:none;}
+      .nebula{animation:none;}
+      .wcard,.wcell{animation:none;}
       .stage{transition:none;}
       .flyheart{display:none;}
       .wlike__n.bump,.wlike.is-liked .wlike__h{animation:none;}
@@ -132,7 +201,11 @@
 </head>
 <body>
   <div class="sky"></div>
+  <div class="nebula"></div>
+  <div class="glow"></div>
   <div class="rainbow"></div>
+  <div class="shooting" id="shooting" aria-hidden="true"></div>
+  <div class="stars" id="stars" aria-hidden="true"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
 
   <header class="head">
@@ -140,8 +213,9 @@
     <div class="head__titles">
       <h1>第103屆 畢業祝福牆</h1>
       <p>桃園市龍潭區石門國民小學 · 115.6.10 畢業典禮</p>
+      <div class="slogan"><span class="slogan__ln"></span>啟程 · 感恩 · 祝福</div>
     </div>
-    <div class="head__count"><b id="count">—</b><span>則祝福</span></div>
+    <div class="head__count"><span class="head__count-eye">累計</span><b id="count">—</b><span>則祝福</span></div>
   </header>
 
   <main class="stage" id="stage">
@@ -160,9 +234,9 @@
     (function () {
       // ⬇️ 與 script.js 相同的 GAS Web App /exec（祝福資料來源）。換端點時兩處都要改。
       var ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
-      function batchSize() { var w = window.innerWidth; return w <= 680 ? 1 : (w <= 1100 ? 2 : 3); } // 手機1/平板2/桌機3，配合 grid 欄數，長祝福才放得下
-      var ROTATE_MS = 9000;   // 每批停留秒數
-      var RELOAD_MS = 90000;  // 多久重新抓一次資料（典禮中新審核祝福會進來）
+      function batchSize() { var w = window.innerWidth; return w <= 680 ? 1 : (w <= 1100 ? 2 : 3); }
+      var ROTATE_MS = 9000;
+      var RELOAD_MS = 90000;
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       var stage = document.getElementById("stage");
@@ -181,7 +255,6 @@
         });
       }
 
-      // 愛心：與主站共用 localStorage key，防同裝置重複按
       var LIKE_KEY = "smes_liked";
       function likedSet() { try { return JSON.parse(localStorage.getItem(LIKE_KEY) || "[]"); } catch (e) { return []; } }
       function hasLiked(r) { return likedSet().indexOf(r) !== -1; }
@@ -218,18 +291,21 @@
         var maxLen = 0;
         slice.forEach(function (w) { maxLen = Math.max(maxLen, String(w.m || "").length); });
         stage.setAttribute("data-len", maxLen <= 40 ? "len-s" : maxLen <= 90 ? "len-m" : maxLen <= 160 ? "len-l" : "len-xl");
-        var html = slice.map(function (w) {
+        var html = slice.map(function (w, idx) {
           var like;
-          if (w.r) { // 後端有回列號 → 可按愛心鈕（樂觀 +1 + 飛心）
+          if (w.r) {
             var liked = hasLiked(w.r);
             like = '<button type="button" class="wlike' + (liked ? " is-liked" : "") + '" data-row="' + w.r + '"' +
               (liked ? " disabled" : "") + '><span class="wlike__h">❤️</span><span class="wlike__n">' + (w.l || 0) + "</span></button>";
-          } else { // 舊後端無列號 → 唯讀顯示（降級）
+          } else {
             like = (w.l && w.l > 0) ? '<div class="wcard__like">❤️ ' + w.l + "</div>" : "";
           }
-          return '<div class="wcard"><div class="wcard__to">💛 給 ' +
+          var fdur = (6.2 + (idx % 3) * 0.9).toFixed(1);
+          var fdelay = (idx * 0.7).toFixed(1);
+          return '<div class="wcell"><div class="wcard" style="--fdur:' + fdur + 's;--fdelay:' + fdelay + 's;">' +
+            '<div class="wcard__to"><span class="dot">💛</span>給 ' +
             esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wcard__msg">' +
-            esc(w.m) + "</div>" + like + "</div>";
+            esc(w.m) + "</div>" + like + "</div></div>";
         }).join("");
         if (reduce) { stage.innerHTML = html; return; }
         stage.classList.add("fading");
@@ -238,7 +314,7 @@
 
       function startRotate() {
         if (rotateTimer) clearInterval(rotateTimer);
-        if (wishes.length <= batchSize()) return; // 不足一批不輪播
+        if (wishes.length <= batchSize()) return;
         rotateTimer = setInterval(function () { batch++; renderBatch(); }, ROTATE_MS);
       }
 
@@ -255,25 +331,62 @@
           .catch(function () { /* 靜默，保留上一批畫面 */ });
       }
 
-      // 紙花
+      // 星點
       (function () {
-        if (reduce) return;
-        var box = document.getElementById("confetti");
-        var colors = ["#ff5e6c", "#ff9f43", "#ffd23f", "#2ecc71", "#45aaf2", "#7d5fff", "#f5b942"];
+        var box = document.getElementById("stars");
         var frag = document.createDocumentFragment();
-        for (var i = 0; i < 36; i++) {
+        for (var i = 0; i < 90; i++) {
           var s = document.createElement("span");
-          s.style.left = Math.random() * 100 + "vw";
-          s.style.background = colors[i % colors.length];
-          s.style.animationDuration = (6 + Math.random() * 6) + "s";
-          s.style.animationDelay = (-Math.random() * 8) + "s";
-          s.style.opacity = (0.5 + Math.random() * 0.45).toFixed(2);
+          s.className = "star";
+          var sz = (1.3 + Math.random() * 2.4).toFixed(1);
+          s.style.left = (Math.random() * 100).toFixed(1) + "vw";
+          s.style.top = (Math.random() * 72).toFixed(1) + "vh";
+          s.style.width = sz + "px"; s.style.height = sz + "px";
+          s.style.setProperty("--tw", (2.6 + Math.random() * 3.6).toFixed(1) + "s");
+          s.style.setProperty("--o0", (0.12 + Math.random() * 0.25).toFixed(2));
+          s.style.setProperty("--o1", (0.6 + Math.random() * 0.4).toFixed(2));
+          s.style.animationDelay = (-Math.random() * 5).toFixed(1) + "s";
           frag.appendChild(s);
         }
         box.appendChild(frag);
       })();
 
-      // 愛心點擊（事件委派在 stage，不受輪播重渲染影響）：樂觀 +1 + 飛心 + 數字彈跳
+      // 流星（偶爾劃過）
+      (function () {
+        if (reduce) return;
+        var box = document.getElementById("shooting");
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < 4; i++) {
+          var s = document.createElement("span");
+          s.className = "shoot";
+          s.style.left = (52 + Math.random() * 44).toFixed(1) + "vw";
+          s.style.top = (2 + Math.random() * 38).toFixed(1) + "vh";
+          s.style.setProperty("--sdur", (9 + Math.random() * 7).toFixed(1) + "s");
+          s.style.setProperty("--sdelay", (-Math.random() * 16).toFixed(1) + "s");
+          frag.appendChild(s);
+        }
+        box.appendChild(frag);
+      })();
+
+      // 紙花
+      (function () {
+        if (reduce) return;
+        var box = document.getElementById("confetti");
+        var colors = ["#ff5e6c", "#ff9f43", "#ffd23f", "#2ecc71", "#45aaf2", "#7d5fff", "#f5c451"];
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < 34; i++) {
+          var s = document.createElement("span");
+          s.style.left = Math.random() * 100 + "vw";
+          s.style.background = colors[i % colors.length];
+          s.style.animationDuration = (7 + Math.random() * 6) + "s";
+          s.style.animationDelay = (-Math.random() * 9) + "s";
+          s.style.opacity = (0.5 + Math.random() * 0.45).toFixed(2);
+          s.style.transform = "rotate(" + (Math.random() * 360).toFixed(0) + "deg)";
+          frag.appendChild(s);
+        }
+        box.appendChild(frag);
+      })();
+
       stage.addEventListener("click", function (e) {
         var btn = e.target.closest ? e.target.closest(".wlike") : null;
         if (!btn || btn.disabled) return;
@@ -297,7 +410,6 @@
           .catch(function () { /* 樂觀更新已生效，靜默 */ });
       });
 
-      // 全螢幕（瀏覽器需使用者手勢）
       var fsbtn = document.getElementById("fsbtn");
       function goFs() {
         var el = document.documentElement;
@@ -307,7 +419,6 @@
       fsbtn.addEventListener("click", goFs);
       document.body.addEventListener("dblclick", goFs);
 
-      // 防螢幕休眠（盡力而為）
       var wakeLock = null;
       async function keepAwake() {
         try { if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {}
@@ -319,7 +430,6 @@
 
       load();
       setInterval(load, RELOAD_MS);
-      // 視窗尺寸變化（旋轉/縮放）→ 重算每批卡數
       var rzTimer = null;
       window.addEventListener("resize", function () { clearTimeout(rzTimer); rzTimer = setTimeout(function () { batch = 0; renderBatch(); startRotate(); }, 250); });
     })();

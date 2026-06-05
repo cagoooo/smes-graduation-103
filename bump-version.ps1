@@ -19,7 +19,7 @@ $old = $m.Groups[1].Value
 if ($old -eq $NewVersion) { Write-Host "Already at $NewVersion, nothing to do."; exit 0 }
 
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-foreach ($f in @('index.html', 'sw.js', 'version.json')) {
+foreach ($f in @('index.html', 'sw.js', 'version.json', 'wish.html')) {
   $p = Join-Path $root $f
   $c = [System.IO.File]::ReadAllText($p)
   $n = $c.Replace($old, $NewVersion)
