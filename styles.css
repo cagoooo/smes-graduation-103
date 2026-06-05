@@ -859,7 +859,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .teacher__cap {
   background: linear-gradient(90deg, var(--navy-800), var(--navy-700));
   color: #fff; padding: 10px 6px; font-weight: 700; letter-spacing: .5px;
-  font-size: clamp(.88rem, 1.4vw, 1rem);
+  font-size: clamp(.88rem, 1.4vw, 1rem); text-align: center;
 }
 .teacher__cap b { color: var(--gold); font-size: 1.18em; margin: 0 2px; }
 .notice-grid {

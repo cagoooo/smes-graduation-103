@@ -336,9 +336,15 @@
       var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
       var allWishes = [], curFilter = "全部";
-      function maskName(n) {
+      function isTeacherTarget(c) { // 給師長的祝福（老師名不去識別化，完整呈現）
+        c = String(c || "");
+        return c.indexOf("師長") !== -1 || c.indexOf("老師") !== -1;
+      }
+      function maskName(n, c) {
         n = String(n || "").trim();
-        if (n.length <= 2) return n; // 1~2 字完整顯示（如 王明）
+        if (isTeacherTarget(c)) return n;               // 給師長：完整顯示老師名
+        if (n.length <= 1) return n;                    // 單字無從去識別化
+        if (n.length === 2) return n.charAt(0) + "○";   // 兩字：遮末字（王○）
         return n.charAt(0) + new Array(n.length - 1).join("○") + n.charAt(n.length - 1); // 首+中遮+尾：王○明
       }
       function esc(s) {
@@ -363,7 +369,7 @@
             '<span class="wish-like__heart">❤️</span><span class="wish-like__n">' + (w.l || 0) + "</span></button>";
         }
         return '<div class="wish-card"><div class="wish-card__to">💛 給 ' +
-          esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wish-card__msg">' +
+          esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</div><div class="wish-card__msg">' +
           esc(w.m) + "</div>" + likeBtn + "</div>";
       }
       function renderCards() {
@@ -509,7 +515,7 @@
               var base = ws.slice();
               while (base.length < 8) base = base.concat(ws);
               var items = base.map(function (w) {
-                return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n)) + "</b> " + esc(clip(w.m, 38)) + "</span>";
+                return '<span class="tw">💛 <b>' + esc(w.c) + " " + esc(maskName(w.n, w.c)) + "</b> " + esc(clip(w.m, 38)) + "</span>";
               }).join("");
               tickerTrack.innerHTML = items + items;
               tickerTrack.style.animationDuration = Math.max(60, base.length * 9) + "s";
@@ -534,6 +540,19 @@
     if (pending) pending.hidden = true;
     form.hidden = false;
     var submit = document.getElementById("rsvpSubmit");
+
+    // 給師長祝福：選「感謝師長」→ 姓名欄改「老師姓名」並提示完整顯示（不去識別化）
+    (function () {
+      var clsSel = document.getElementById("rsvpClass");
+      var nameLabel = document.getElementById("rsvpNameLabel");
+      var nameInput = document.getElementById("rsvpName");
+      if (!clsSel || !nameLabel || !nameInput) return;
+      clsSel.addEventListener("change", function () {
+        var teacher = /師長|老師/.test(clsSel.value);
+        nameLabel.innerHTML = (teacher ? "老師姓名" : "畢業生姓名") + ' <span class="rsvp-req">*</span>';
+        nameInput.placeholder = teacher ? "請填寫老師姓名（完整顯示，不遮字）" : "請填寫畢業生姓名";
+      });
+    })();
 
     function finish() {
       form.hidden = true;
