@@ -175,39 +175,55 @@ var CARD_THEME_ = {
   failed:  { bg: '#991B1B', sub: '#FECACA', icon: '❌' }
 };
 
-// 組 Flex bubble：mega 寬卡 + 深色 header + emoji 獨立欄位（避免中文 label 被截）
+// 組 Flex bubble：giga 最寬卡 + 深色 header + 放大字級（手機/電腦都好讀）
+// fields：[{icon,label,value, block?}]，block:true 的欄位改全寬堆疊 + 內容放大（長祝福用）
 // actions：選填，footer 審核按鈕陣列 [{label, uri, primary, color}]
 function buildFlex_(status, title, fields, actions) {
   var t = CARD_THEME_[status] || CARD_THEME_.success;
   var now = Utilities.formatDate(new Date(), 'Asia/Taipei', 'MM/dd HH:mm');
   var header = [
-    { type: 'text', text: t.icon, color: '#FFFFFF', size: 'xl' },
-    { type: 'text', text: title, color: '#FFFFFF', weight: 'bold', size: 'lg', wrap: true, margin: 'sm' },
-    { type: 'text', text: '石門國小 畢業典禮網站', color: t.sub, size: 'sm', margin: 'xs' }
+    { type: 'text', text: t.icon, color: '#FFFFFF', size: 'xxl' },
+    { type: 'text', text: title, color: '#FFFFFF', weight: 'bold', size: 'xl', wrap: true, margin: 'sm' },
+    { type: 'text', text: '石門國小 畢業典禮網站', color: t.sub, size: 'md', margin: 'sm' }
   ];
   var body = fields.map(function (f) {
+    if (f.block) {
+      // 全寬堆疊：小標在上、內容放大全寬，長祝福不被擠壓
+      return {
+        type: 'box', layout: 'vertical', spacing: 'sm', paddingAll: '14px',
+        backgroundColor: '#F1F5F9', cornerRadius: '12px',
+        contents: [
+          { type: 'box', layout: 'horizontal', spacing: 'sm', contents: [
+            { type: 'text', text: f.icon, size: 'md', flex: 0, color: '#475569' },
+            { type: 'text', text: f.label, color: '#475569', size: 'sm', weight: 'bold', flex: 1, gravity: 'center' }
+          ] },
+          { type: 'text', text: f.value || '—', color: '#0F172A', size: 'lg', weight: 'bold', wrap: true }
+        ]
+      };
+    }
+    // 短欄位：水平排列，字級放大到 md，垂直置中
     return {
-      type: 'box', layout: 'horizontal', spacing: 'sm',
+      type: 'box', layout: 'horizontal', spacing: 'md',
       contents: [
-        { type: 'text', text: f.icon, size: 'sm', flex: 0, color: '#64748B' },
-        { type: 'text', text: f.label, color: '#64748B', size: 'sm', flex: 3, weight: 'bold' },
-        { type: 'text', text: f.value || '—', color: '#0F172A', size: 'sm', flex: 6, wrap: true }
+        { type: 'text', text: f.icon, size: 'md', flex: 0, color: '#475569', gravity: 'center' },
+        { type: 'text', text: f.label, color: '#475569', size: 'md', flex: 4, weight: 'bold', gravity: 'center' },
+        { type: 'text', text: f.value || '—', color: '#0F172A', size: 'md', flex: 7, wrap: true, weight: 'bold', gravity: 'center' }
       ]
     };
   });
   var footer = [];
   (actions || []).forEach(function (a) {
-    var btn = { type: 'button', height: 'sm', style: a.primary ? 'primary' : 'secondary',
+    var btn = { type: 'button', height: 'md', style: a.primary ? 'primary' : 'secondary',
       action: { type: 'uri', label: a.label, uri: a.uri } };
     if (a.color) btn.color = a.color;
     footer.push(btn);
   });
-  footer.push({ type: 'text', text: now, color: '#94A3B8', size: 'xs', align: 'end', wrap: true, margin: 'md' });
+  footer.push({ type: 'text', text: now, color: '#94A3B8', size: 'sm', align: 'end', wrap: true, margin: 'md' });
   return {
-    type: 'bubble', size: 'mega',
-    header: { type: 'box', layout: 'vertical', backgroundColor: t.bg, paddingAll: '16px', spacing: 'none', contents: header },
-    body: { type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '16px', contents: body },
-    footer: { type: 'box', layout: 'vertical', paddingAll: '12px', spacing: 'sm', contents: footer }
+    type: 'bubble', size: 'giga',
+    header: { type: 'box', layout: 'vertical', backgroundColor: t.bg, paddingAll: '20px', spacing: 'none', contents: header },
+    body: { type: 'box', layout: 'vertical', spacing: 'md', paddingAll: '20px', contents: body },
+    footer: { type: 'box', layout: 'vertical', paddingAll: '16px', spacing: 'md', contents: footer }
   };
 }
 
@@ -219,7 +235,7 @@ function notifyNewWish_(klass, name, message, total) {
     var fields = [
       { icon: '🎓', label: '班級', value: klass || '—' },
       { icon: '👤', label: '畢業生', value: name || '—' },
-      { icon: '💌', label: '祝福', value: clip_(message, 120) },
+      { icon: '💌', label: '祝福', value: clip_(message, 120), block: true },
       { icon: '📊', label: '累計', value: '第 ' + total + ' 則（待審核）' }
     ];
     var alt = '✅ 收到新祝福：' + (klass || '') + ' ' + (name || '');
@@ -242,7 +258,7 @@ function notifyError_(errMsg, klass, name) {
     var fields = [
       { icon: '🎓', label: '班級', value: klass || '—' },
       { icon: '👤', label: '畢業生', value: name || '—' },
-      { icon: '💥', label: '錯誤', value: clip_(errMsg, 200) }
+      { icon: '💥', label: '錯誤', value: clip_(errMsg, 200), block: true }
     ];
     var code = pushLine_([{ type: 'flex', altText: '❌ 祝福寫入失敗', contents: buildFlex_('failed', '祝福寫入失敗', fields) }]);
     if (code !== -1 && code !== 200) {
@@ -289,7 +305,7 @@ function testLineNotify() {
   var fields = [
     { icon: '🎓', label: '班級', value: '六年甲班' },
     { icon: '👤', label: '畢業生', value: '王小明' },
-    { icon: '💌', label: '祝福', value: '親愛的孩子，畢業快樂，前程似錦！（測試）' },
+    { icon: '💌', label: '祝福', value: '親愛的孩子，畢業快樂，前程似錦！（測試）', block: true },
     { icon: '📊', label: '累計', value: '第 ' + total + ' 則（測試）' }
   ];
   var code = pushLine_([{ type: 'flex', altText: '✅ LINE 通知測試', contents: buildFlex_('success', '收到一則新的畢業祝福', fields, moderateActions_(total + 1)) }]);
