@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.16" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -235,6 +235,23 @@
     .empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
       font-size:clamp(1.2rem,2.4vw,2rem);color:rgba(255,255,255,.7);padding:40px;}
 
+    /* 新祝福即時通知 toast（背景輪詢偵測到審核通過的新祝福時，金色 pill 自底部淡入；投影牆同時把最新祝福捲到最前） */
+    .newwish-toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(22px);
+      z-index:30;display:inline-flex;align-items:center;gap:11px;
+      font-family:inherit;font-size:clamp(1rem,2.1vw,1.4rem);font-weight:800;white-space:nowrap;
+      padding:15px 30px;border-radius:999px;border:1.6px solid var(--gold);
+      background:linear-gradient(120deg,var(--navy-800),var(--navy-700));color:#fff;
+      box-shadow:0 16px 44px rgba(16,23,51,.55), 0 0 32px rgba(245,196,81,.22);
+      opacity:0;pointer-events:none;
+      transition:opacity .4s ease, transform .45s cubic-bezier(.22,1,.36,1);}
+    .newwish-toast[hidden]{display:none;}
+    .newwish-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .newwish-toast__ico{font-size:1.3em;}
+    .newwish-toast__n{color:var(--gold);font-size:1.2em;margin:0 3px;font-family:var(--font-serif);font-weight:900;}
+    @media (max-width:680px){
+      .newwish-toast{bottom:148px;padding:12px 22px;white-space:normal;max-width:88vw;text-align:center;}
+    }
+
     /* ===== 頁尾 ===== */
     .foot{display:flex;align-items:center;justify-content:space-between;gap:16px;
       padding:clamp(10px,1.6vh,18px) clamp(26px,4vw,64px) clamp(14px,2vh,22px);
@@ -319,6 +336,7 @@
       .stage{transition:none;}
       .flyheart{display:none;}
       .wlike__n.bump,.wlike.is-liked .wlike__h{animation:none;}
+      .newwish-toast{transition:none;transform:translateX(-50%) translateY(0);}
     }
   </style>
 </head>
@@ -381,6 +399,12 @@
     </div>
   </div>
 
+  <!-- 新祝福即時通知：背景輪詢偵測到審核通過的新祝福時，金色 toast 自底部淡入（投影牆同時把最新祝福捲到最前） -->
+  <div class="newwish-toast" id="newWishToast" hidden role="status" aria-live="polite">
+    <span class="newwish-toast__ico" aria-hidden="true">💛</span>
+    <span>剛收到 <b class="newwish-toast__n">1</b> 則新祝福！</span>
+  </div>
+
   <div class="fxlayer" id="fxLayer" aria-hidden="true"></div>
 
   <script>
@@ -389,13 +413,13 @@
       var ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
       function batchSize() { var w = window.innerWidth; return w <= 680 ? 1 : (w <= 1100 ? 2 : 3); }
       var ROTATE_MS = 9000;
-      var RELOAD_MS = 90000;
+      var RELOAD_MS = 25000;   // 25 秒背景輪詢，準即時偵測審核通過的新祝福（無新祝福時靜默更新、不打斷輪播）
       var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       var stage = document.getElementById("stage");
       var countEl = document.getElementById("count");
       var statusEl = document.getElementById("status");
-      var wishes = [], batch = 0, rotateTimer = null, stageFilter = "全部";
+      var wishes = [], batch = 0, rotateTimer = null, stageFilter = "全部", lastSeenMaxR = null;
 
       function maskName(n, c) { // 與主頁 / 跑馬燈同步：只有「六年X班」畢業生才去識別化，師長 / 其他完整顯示
         n = String(n || "").trim();
@@ -546,15 +570,42 @@
         rotateTimer = setInterval(function () { batch++; renderBatch(); }, ROTATE_MS);
       }
 
+      // 新祝福即時通知 toast（背景輪詢偵測到審核通過的新祝福時淡入，12 秒自動收起）
+      var newWishToast = document.getElementById("newWishToast");
+      var newWishTimer = null;
+      function showNewWishToast(n) {
+        if (!newWishToast) return;
+        var nEl = newWishToast.querySelector(".newwish-toast__n");
+        if (nEl) nEl.textContent = n;
+        newWishToast.hidden = false;
+        requestAnimationFrame(function () { newWishToast.classList.add("show"); });
+        clearTimeout(newWishTimer);
+        newWishTimer = setTimeout(hideNewWishToast, 12000);
+      }
+      function hideNewWishToast() {
+        if (!newWishToast) return;
+        newWishToast.classList.remove("show");
+        clearTimeout(newWishTimer);
+        newWishTimer = setTimeout(function () { newWishToast.hidden = true; }, 450);
+      }
+
       function load() {
         fetch(ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var ws = (d && d.wishes) || [];
+            // 準即時通知：最新列號 maxR 變大 = LINE 審核通過的新祝福進來（首次載入只設基準、不提示）
+            var maxR = ws.reduce(function (m, w) { return Math.max(m, w.r || 0); }, 0);
+            var firstLoad = (lastSeenMaxR === null);
+            var newCount = firstLoad ? 0 : ws.filter(function (w) { return (w.r || 0) > lastSeenMaxR; }).length;
+            lastSeenMaxR = maxR;
             wishes = ws;
             countEl.textContent = ws.length;
             statusEl.textContent = ws.length ? "祝福持續更新中" : "等待第一則祝福";
-            batch = 0; buildStageFilters(); renderBatch(); startRotate();
+            buildStageFilters();
+            // 首次載入或有新祝福才重置輪播（把最新祝福捲到最前）；無新祝福只靜默更新資料，不打斷正在進行的輪播
+            if (firstLoad || newCount > 0) { batch = 0; renderBatch(); startRotate(); }
+            if (newCount > 0) showNewWishToast(newCount);
           })
           .catch(function () { /* 靜默，保留上一批畫面 */ });
       }
@@ -696,12 +747,13 @@
         try { if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {}
       }
       document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "visible") keepAwake();
+        if (document.visibilityState === "visible") { keepAwake(); load(); } // 切回分頁立即檢查有無新祝福
       });
       keepAwake();
 
       load();
       setInterval(load, RELOAD_MS);
+      window.addEventListener("focus", load);
       var rzTimer = null;
       window.addEventListener("resize", function () { clearTimeout(rzTimer); rzTimer = setTimeout(function () { batch = 0; renderBatch(); startRotate(); }, 250); });
     })();
