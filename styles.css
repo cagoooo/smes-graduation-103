@@ -728,6 +728,22 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wallbox[hidden] { display: none; }
 .wallbox__sky { position: absolute; inset: 0; z-index: 0;
   background: radial-gradient(120% 90% at 50% -10%, #3a4f9e 0%, #233268 38%, #16204a 72%, #101733 100%); }
+/* 底部各班導師灰白剪影（與封面 / 投影頁一致，捲動祝福時固定在後方守護） */
+.wallbox__teachers {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: clamp(0px, 1.2vw, 22px); padding: 0 clamp(8px, 3vw, 40px);
+  pointer-events: none;
+}
+.wallbox__teachers img {
+  height: clamp(150px, 30vh, 340px); width: auto;
+  filter: brightness(0) invert(0.92);   /* 彩色去背照 → 全黑 → 反白 → 灰白剪影 */
+  opacity: .14;
+}
+@media (max-width: 720px) {
+  .wallbox__teachers { gap: 2px; }
+  .wallbox__teachers img { height: clamp(108px, 20vh, 188px); opacity: .11; }
+}
 .wallbox__bar {
   position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   padding: clamp(14px, 2.5vw, 22px) clamp(16px, 4vw, 40px);
