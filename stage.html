@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.20" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.20" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.20" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -395,7 +395,7 @@
 
   <a class="homebtn" href="index.html#rsvp">← 回主頁</a>
   <div class="stage-ctrl">
-    <button class="fsbtn" id="bgmBtn" type="button" aria-label="背景音樂開關">🔇 音樂</button>
+    <button class="fsbtn" id="bgmBtn" type="button" aria-label="畢業歌〈風箏〉開關">🔇 畢業歌</button>
     <button class="fsbtn" id="fsbtn" type="button">⛶ 全螢幕</button>
   </div>
   <audio id="bgm" loop preload="none" src="assets/bgm-kite.mp3"></audio>
@@ -817,11 +817,11 @@
         function startBgm() {
           bgm.volume = 0;
           bgm.play().then(function () { fadeTo(0.55, 1600); }).catch(function () {});
-          bgmBtn.classList.add("is-playing"); bgmBtn.innerHTML = "🔊 音樂";
+          bgmBtn.classList.add("is-playing"); bgmBtn.innerHTML = "🔊 畢業歌";
           if (bgmChannel) bgmChannel.postMessage("playing");   // 通知主頁校歌暫停
         }
         function stopBgm() {
-          bgmBtn.classList.remove("is-playing"); bgmBtn.innerHTML = "🔇 音樂";
+          bgmBtn.classList.remove("is-playing"); bgmBtn.innerHTML = "🔇 畢業歌";
           if (!bgm.paused) fadeTo(0, 600);
         }
         bgmBtn.addEventListener("click", function () {
