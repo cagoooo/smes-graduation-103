@@ -336,13 +336,10 @@
       var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
       var allWishes = [], curFilter = "全部";
-      function isTeacherTarget(c) { // 給師長的祝福（老師名不去識別化，完整呈現）
-        c = String(c || "");
-        return c.indexOf("師長") !== -1 || c.indexOf("老師") !== -1;
-      }
       function maskName(n, c) {
         n = String(n || "").trim();
-        if (isTeacherTarget(c)) return n;               // 給師長：完整顯示老師名
+        // 僅「六年X班」畢業生需去識別化保護未成年隱私；師長 / 其他（校友、職員、家屬…）一律完整顯示
+        if (String(c || "").indexOf("班") === -1) return n;
         if (n.length <= 1) return n;                    // 單字無從去識別化
         if (n.length === 2) return n.charAt(0) + "○";   // 兩字：遮末字（王○）
         return n.charAt(0) + new Array(n.length - 1).join("○") + n.charAt(n.length - 1); // 首+中遮+尾：王○明
