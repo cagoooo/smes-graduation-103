@@ -14,6 +14,9 @@
 # 根目錄原始音檔（已複製最佳化檔名到 assets/bgm-kite.mp3，原始中文檔名不進 repo）
 /*.mp3
 
+# 直播導播機換場墊片（含導師肖像衍生剪影）— 本機 OBS/vMix 素材，不公開部署
+director-scenes/
+
 # 本地預覽／工具設定
 .claude/
 
