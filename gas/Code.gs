@@ -374,35 +374,35 @@ function htmlPage_(emoji, title, sub, bodyHtml, tone) {
     '<title>' + escHtml_(title) + '</title><style>' +
     '*{box-sizing:border-box;}' +
     // 矮視窗（LINE 內建瀏覽器頂部還有橫幅）用 margin:auto 置中，內容超高時可上下捲動不裁切
-    'body{margin:0;min-height:100dvh;display:flex;padding:22px;-webkit-tap-highlight-color:transparent;' +
+    'body{margin:0;min-height:100dvh;display:flex;padding:14px;-webkit-tap-highlight-color:transparent;' +
     'font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;' +
     'color:#fff;background:radial-gradient(120% 90% at 50% -10%,#3a4f9e 0%,#233268 42%,#16204a 76%,#101733 100%);}' +
-    '.card{margin:auto;width:100%;max-width:430px;background:rgba(255,255,255,.06);' +
-    'border:1px solid rgba(245,185,66,.32);border-radius:24px;padding:32px 24px 22px;text-align:center;' +
+    '.card{margin:auto;width:100%;max-width:560px;background:rgba(255,255,255,.06);' +
+    'border:1px solid rgba(245,185,66,.32);border-radius:26px;padding:34px 26px 26px;text-align:center;' +
     'box-shadow:0 30px 70px rgba(0,0,0,.42);animation:rise .55s cubic-bezier(.2,.9,.25,1) both;}' +
-    '.halo{position:relative;width:92px;height:92px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}' +
+    '.halo{position:relative;width:104px;height:104px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}' +
     '.halo::before{content:"";position:absolute;inset:0;border-radius:50%;' +
     'background:radial-gradient(circle,rgba(110,231,183,.55),transparent 68%);animation:pulse 2.4s ease-in-out infinite;}' +
     '.halo.mute::before{background:radial-gradient(circle,rgba(148,163,184,.42),transparent 68%);animation:none;}' +
     '.halo.warn::before{background:radial-gradient(circle,rgba(248,180,80,.5),transparent 68%);animation:none;}' +
-    '.emoji{font-size:3.3rem;line-height:1;position:relative;animation:pop .6s .1s cubic-bezier(.18,1.4,.4,1) both;}' +
-    'h1{font-size:1.5rem;margin:2px 0 8px;font-weight:900;letter-spacing:.5px;}' +
-    '.sub{color:#cdd6f4;font-size:.95rem;line-height:1.75;margin:0 auto;max-width:32ch;}' +
-    '.pill{display:inline-flex;align-items:center;gap:6px;margin:16px auto 0;padding:7px 16px;' +
-    'border-radius:999px;font-weight:800;font-size:.9rem;}' +
+    '.emoji{font-size:3.9rem;line-height:1;position:relative;animation:pop .6s .1s cubic-bezier(.18,1.4,.4,1) both;}' +
+    'h1{font-size:1.75rem;margin:2px 0 10px;font-weight:900;letter-spacing:.5px;}' +
+    '.sub{color:#cdd6f4;font-size:1.08rem;line-height:1.8;margin:0 auto;max-width:30ch;}' +
+    '.pill{display:inline-flex;align-items:center;gap:6px;margin:18px auto 0;padding:10px 20px;' +
+    'border-radius:999px;font-weight:800;font-size:1.05rem;}' +
     '.pill.ok{background:rgba(16,185,129,.18);color:#6ee7b7;border:1px solid rgba(110,231,183,.45);}' +
     '.pill.mute{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(203,213,225,.3);}' +
-    '.quote{position:relative;background:rgba(0,0,0,.24);border-radius:16px;padding:15px 17px;text-align:left;' +
-    'font-size:.96rem;line-height:1.8;margin:16px 0 2px;border-left:4px solid #f5b942;}' +
-    '.quote .who{color:#f5b942;font-weight:800;display:block;margin-bottom:5px;}' +
+    '.quote{position:relative;background:rgba(0,0,0,.24);border-radius:18px;padding:20px 22px;text-align:left;' +
+    'font-size:1.18rem;line-height:1.95;margin:18px 0 4px;border-left:5px solid #f5b942;}' +
+    '.quote .who{color:#f5b942;font-weight:800;display:block;margin-bottom:9px;font-size:1.22rem;}' +
     '.quote .msg{color:#eef2ff;white-space:pre-wrap;word-break:break-word;}' +
-    '.btns{display:flex;flex-direction:column;gap:11px;margin-top:18px;}' +
-    'a.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 18px;border-radius:999px;' +
-    'text-decoration:none;font-weight:800;font-size:1rem;transition:transform .14s ease,box-shadow .2s ease;}' +
+    '.btns{display:flex;flex-direction:column;gap:13px;margin-top:22px;}' +
+    'a.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:17px 20px;border-radius:999px;' +
+    'text-decoration:none;font-weight:800;font-size:1.15rem;transition:transform .14s ease,box-shadow .2s ease;}' +
     'a.btn:active{transform:scale(.97);}' +
     '.btn-go{background:linear-gradient(180deg,#ffd06b,#f5b942);color:#141d3b;box-shadow:0 12px 26px rgba(245,185,66,.4);}' +
     '.btn-alt{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.26);}' +
-    '.foot{margin-top:20px;font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.7;}' +
+    '.foot{margin-top:24px;font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.75;}' +
     '.foot a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}' +
     '.foot a:hover{color:#f5b942;border-bottom-color:#f5b942;}' +
     '.foot .heart{display:inline-block;margin:0 1px;filter:saturate(1.1);}' +
@@ -420,6 +420,9 @@ function htmlPage_(emoji, title, sub, bodyHtml, tone) {
     '<a href="' + authorUrl + '" target="_blank" rel="noopener noreferrer">阿凱老師</a></div>' +
     '</div></body></html>';
   return HtmlService.createHtmlOutput(html)
+    // ⚠️ GAS 把頁面包進 iframe，<head> 裡的 <meta viewport> 會被忽略，
+    // 必須用 addMetaTag 注入到外層頁面，手機才會以裝置寬度排版（不然會用 980px 桌機寬再縮小→字超小）。
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setTitle(title);
 }
