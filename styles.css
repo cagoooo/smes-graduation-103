@@ -826,6 +826,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wish-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
 .wish-card__to { font-size: .82rem; color: var(--gold-deep); font-weight: 700; margin-bottom: 8px; }
 .wish-card__msg { color: var(--ink); line-height: 1.7; word-break: break-word; }
+/* 主頁祝福牆分頁（左右切換，避免一次顯示全部越拉越長） */
+.wish-pager { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 2.5vw, 20px);
+  margin-top: clamp(22px, 3.5vw, 32px); }
+.wish-pager[hidden] { display: none; }
+.wish-pager__btn { font-family: inherit; font-size: .92rem; font-weight: 700; cursor: pointer;
+  padding: 9px 18px; border-radius: 999px; border: 1.5px solid var(--navy-700);
+  background: var(--white); color: var(--navy-700); box-shadow: var(--shadow-sm);
+  transition: transform .15s var(--ease), background .2s, color .2s, opacity .2s; }
+.wish-pager__btn:hover:not(:disabled) { background: var(--navy-700); color: #fff; transform: translateY(-2px); }
+.wish-pager__btn:disabled { opacity: .4; cursor: not-allowed; }
+.wish-pager__info { font-weight: 700; color: var(--ink-soft); font-size: .92rem; white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
   .topticker__track { animation: none; }

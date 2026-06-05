@@ -369,10 +369,25 @@
           esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</div><div class="wish-card__msg">' +
           esc(w.m) + "</div>" + likeBtn + "</div>";
       }
+      var curPage = 0, PAGE_SIZE = 6; // 主頁祝福牆分頁，避免越拉越長
+      function renderPager(totalPages) {
+        var pager = document.getElementById("wishPager");
+        if (!pager) return;
+        if (totalPages <= 1) { pager.hidden = true; pager.innerHTML = ""; return; }
+        pager.hidden = false;
+        pager.innerHTML =
+          '<button type="button" class="wish-pager__btn" data-dir="prev"' + (curPage <= 0 ? " disabled" : "") + ' aria-label="上一頁">‹ 上一頁</button>' +
+          '<span class="wish-pager__info">第 ' + (curPage + 1) + ' / ' + totalPages + ' 頁</span>' +
+          '<button type="button" class="wish-pager__btn" data-dir="next"' + (curPage >= totalPages - 1 ? " disabled" : "") + ' aria-label="下一頁">下一頁 ›</button>';
+      }
       function renderCards() {
         var list = curFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === curFilter; });
         list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); }); // 愛心多的排前面（熱門優先）
-        cards.innerHTML = list.map(cardHTML).join("");
+        var totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        if (curPage >= totalPages) curPage = totalPages - 1;
+        if (curPage < 0) curPage = 0;
+        cards.innerHTML = list.slice(curPage * PAGE_SIZE, (curPage + 1) * PAGE_SIZE).map(cardHTML).join("");
+        renderPager(totalPages);
         if (count) {
           count.textContent = curFilter === "全部"
             ? "目前已有 " + allWishes.length + " 則祝福 💛"
@@ -398,9 +413,20 @@
           curFilter = btn.getAttribute("data-class") || "全部";
           var bs = filters.querySelectorAll(".wish-chip");
           for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === btn);
+          curPage = 0; // 切班級回到第一頁
           renderCards();
         });
       }
+      // 主頁祝福牆翻頁（左右切換，避免一次顯示全部越拉越長）
+      var wishPagerEl = document.getElementById("wishPager");
+      if (wishPagerEl) wishPagerEl.addEventListener("click", function (e) {
+        var b = e.target.closest ? e.target.closest(".wish-pager__btn") : null;
+        if (!b || b.disabled) return;
+        curPage += (b.getAttribute("data-dir") === "next" ? 1 : -1);
+        renderCards();
+        var wall = document.getElementById("wishWall");
+        if (wall) { try { wall.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }
+      });
       // 飛心 + 數字彈跳動效（卡片牆與放大牆共用）
       var reduceM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       function bumpNum(el) { if (reduceM || !el) return; el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
