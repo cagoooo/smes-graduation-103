@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.18" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.18" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.18" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.19" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -798,9 +798,11 @@
       fsbtn.addEventListener("click", goFs);
       document.body.addEventListener("dblclick", goFs);
 
-      // 背景音樂：畢業歌〈風箏〉。瀏覽器 autoplay 政策需使用者點一下才播；漸入漸出更柔和
+      // 背景音樂：畢業歌〈風箏〉。瀏覽器 autoplay 政策需使用者點一下才播；漸入漸出更柔和。
+      // 跨分頁互斥：按下開啟畢業歌時廣播 "playing" → 主頁校歌卡拉OK版自動暫停，避免兩種音軌同時播。
       var bgm = document.getElementById("bgm");
       var bgmBtn = document.getElementById("bgmBtn");
+      var bgmChannel = ("BroadcastChannel" in window) ? new BroadcastChannel("smes-grad-bgm") : null;
       if (bgm && bgmBtn) {
         var bgmFade = null;
         function fadeTo(target, ms) {
@@ -812,16 +814,21 @@
             if (i >= steps) { clearInterval(bgmFade); bgmFade = null; if (target === 0) bgm.pause(); }
           }, 50);
         }
+        function startBgm() {
+          bgm.volume = 0;
+          bgm.play().then(function () { fadeTo(0.55, 1600); }).catch(function () {});
+          bgmBtn.classList.add("is-playing"); bgmBtn.innerHTML = "🔊 音樂";
+          if (bgmChannel) bgmChannel.postMessage("playing");   // 通知主頁校歌暫停
+        }
+        function stopBgm() {
+          bgmBtn.classList.remove("is-playing"); bgmBtn.innerHTML = "🔇 音樂";
+          if (!bgm.paused) fadeTo(0, 600);
+        }
         bgmBtn.addEventListener("click", function () {
-          if (bgm.paused) {
-            bgm.volume = 0;
-            bgm.play().then(function () { fadeTo(0.55, 1600); }).catch(function () {});
-            bgmBtn.classList.add("is-playing"); bgmBtn.innerHTML = "🔊 音樂";
-          } else {
-            fadeTo(0, 600);
-            bgmBtn.classList.remove("is-playing"); bgmBtn.innerHTML = "🔇 音樂";
-          }
+          if (bgm.paused) startBgm(); else stopBgm();
         });
+        // 其他分頁（主頁校歌）開始播 → 本頁畢業歌暫停，避免雙軌
+        if (bgmChannel) bgmChannel.onmessage = function (e) { if (e.data === "playing") stopBgm(); };
       }
 
       // 掃碼留祝福：可關閉收合成迷你鈕、點 QR 放大方便掃描

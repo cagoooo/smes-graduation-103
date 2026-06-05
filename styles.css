@@ -933,6 +933,29 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .newwish-toast__cta { color: var(--gold); font-weight: 800; margin-left: 4px; }
 @media (max-width: 520px) { .newwish-toast { bottom: 16px; padding: 11px 18px; white-space: normal; max-width: 92vw; text-align: center; } }
 
+/* 校歌 BGM 開關（主頁左下角浮動鈕；播放中金色脈動光環） */
+.bgm-toggle {
+  position: fixed; left: 18px; bottom: 18px; z-index: 350;
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font-family: inherit; font-size: .9rem; font-weight: 800; color: #fff;
+  padding: 10px 16px; border-radius: 999px; border: 1.5px solid rgba(245, 196, 81, .6);
+  background: linear-gradient(120deg, var(--navy-800), var(--navy-700));
+  box-shadow: 0 8px 24px rgba(16, 23, 51, .4);
+  transition: transform .15s ease, border-color .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.bgm-toggle:hover { transform: translateY(-2px); border-color: var(--gold); }
+.bgm-toggle:active { transform: scale(.96); }
+.bgm-toggle__ico { font-size: 1.15em; line-height: 1; }
+.bgm-toggle.is-playing { border-color: var(--gold); animation: bgmpulse 2.2s ease-out infinite; }
+@keyframes bgmpulse {
+  0%   { box-shadow: 0 8px 24px rgba(16, 23, 51, .4), 0 0 0 0 rgba(245, 196, 81, .55); }
+  70%  { box-shadow: 0 8px 24px rgba(16, 23, 51, .4), 0 0 0 13px rgba(245, 196, 81, 0); }
+  100% { box-shadow: 0 8px 24px rgba(16, 23, 51, .4), 0 0 0 0 rgba(245, 196, 81, 0); }
+}
+@media (max-width: 520px) { .bgm-toggle { left: 12px; bottom: 12px; padding: 9px 13px; font-size: .82rem; } }
+@media (prefers-reduced-motion: reduce) { .bgm-toggle.is-playing { animation: none; } }
+
 .blessing {
   margin-top: clamp(34px, 6vw, 54px); text-align: center;
   background: linear-gradient(150deg, var(--navy-800), var(--navy-700));
