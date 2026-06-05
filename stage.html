@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.10" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.10" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.11" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.11" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.10" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.11" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -263,19 +263,50 @@
       .stage-ctrl .fsbtn{padding:6px 10px;font-size:.78rem;}
       .head{padding-top:56px;}
     }
-    /* 掃碼留祝福卡片（現場家長手機掃描 → 開啟祝福表單） */
+    /* 掃碼留祝福卡片（可關閉收合、可點擊放大；現場家長手機掃描 → 開啟祝福表單） */
     .qrwish{position:fixed;left:18px;bottom:58px;z-index:4;
-      display:flex;align-items:center;gap:11px;text-decoration:none;
+      display:flex;align-items:center;gap:11px;
       background:rgba(255,255,255,.95);border-radius:16px;padding:11px 15px 11px 11px;
-      box-shadow:0 12px 34px rgba(0,0,0,.45);border:1px solid rgba(245,196,81,.55);
-      transition:transform .2s ease,box-shadow .2s ease;}
-    .qrwish:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.5);}
-    .qrwish img{width:92px;height:92px;display:block;border-radius:7px;}
+      box-shadow:0 12px 34px rgba(0,0,0,.45);border:1px solid rgba(245,196,81,.55);}
+    .qrwish[hidden]{display:none;}
+    .qrwish__zoom{padding:0;border:0;background:none;cursor:zoom-in;line-height:0;transition:transform .2s ease;}
+    .qrwish__zoom:hover{transform:scale(1.04);}
+    .qrwish__zoom img{width:92px;height:92px;display:block;border-radius:7px;}
     .qrwish__txt{color:#16204a;font-weight:900;font-size:1.02rem;line-height:1.35;letter-spacing:.5px;}
+    .qrwish__close{position:absolute;top:-9px;right:-9px;width:26px;height:26px;border-radius:50%;
+      border:0;cursor:pointer;background:#16204a;color:#fff;font-size:1.05rem;line-height:1;
+      display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.4);}
+    .qrwish__close:hover{background:#2a3a6e;}
+    /* 收合後的迷你浮鈕 */
+    .qrmini{position:fixed;left:14px;bottom:52px;z-index:4;width:52px;height:52px;border-radius:50%;
+      border:1px solid rgba(245,196,81,.55);cursor:pointer;font-size:1.5rem;
+      background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(0,0,0,.4);
+      display:flex;align-items:center;justify-content:center;transition:transform .2s ease;}
+    .qrmini[hidden]{display:none;}
+    .qrmini:hover{transform:translateY(-2px);}
+    /* 放大 QR overlay */
+    .qrmodal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+      background:rgba(8,12,28,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px;}
+    .qrmodal[hidden]{display:none;}
+    .qrmodal__box{position:relative;background:#fff;border-radius:22px;padding:clamp(22px,4vw,34px);
+      display:flex;flex-direction:column;align-items:center;gap:16px;
+      box-shadow:0 30px 70px rgba(0,0,0,.6);max-width:92vw;}
+    .qrmodal__box img{width:min(64vw,360px);height:auto;display:block;border-radius:10px;}
+    .qrmodal__title{color:#16204a;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);text-align:center;}
+    .qrmodal__link{color:#fff;background:linear-gradient(120deg,#2e2a6b,#1b2768);text-decoration:none;
+      font-weight:800;font-size:clamp(.95rem,3.2vw,1.1rem);padding:11px 24px;border-radius:999px;
+      border:1px solid rgba(245,196,81,.5);}
+    .qrmodal__link:hover{background:linear-gradient(120deg,#3d3890,#273594);}
+    .qrmodal__close{position:absolute;top:-14px;right:-14px;width:40px;height:40px;border-radius:50%;
+      border:0;cursor:pointer;background:#16204a;color:#fff;font-size:1.6rem;line-height:1;
+      display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.5);}
+    .qrmodal__close:hover{background:#2a3a6e;}
     @media (max-width:680px){
       .qrwish{left:10px;bottom:46px;gap:8px;padding:8px 12px 8px 8px;border-radius:13px;}
-      .qrwish img{width:62px;height:62px;}
+      .qrwish__zoom img{width:62px;height:62px;}
       .qrwish__txt{font-size:.8rem;}
+      .qrmini{left:10px;bottom:42px;width:46px;height:46px;font-size:1.3rem;}
+      .qrmodal__box img{width:74vw;}
     }
 
     @media (prefers-reduced-motion:reduce){
@@ -330,11 +361,23 @@
   </div>
   <audio id="bgm" loop preload="none" src="assets/bgm-kite.mp3"></audio>
 
-  <!-- 掃碼留祝福：現場家長手機掃描即可開啟祝福表單 -->
-  <a class="qrwish" href="index.html#wishform" aria-label="掃描 QR Code 或點此留下祝福">
-    <img src="assets/qr-wish.png" alt="留祝福 QR Code" width="92" height="92" decoding="async" />
+  <!-- 掃碼留祝福：現場家長手機掃描即可開啟祝福表單（可關閉、點 QR 放大） -->
+  <div class="qrwish" id="qrWish">
+    <button class="qrwish__zoom" id="qrZoom" type="button" aria-label="放大 QR Code 方便掃描">
+      <img src="assets/qr-wish.png" alt="留祝福 QR Code" width="92" height="92" decoding="async" />
+    </button>
     <span class="qrwish__txt">📱 掃我<br>留下祝福</span>
-  </a>
+    <button class="qrwish__close" id="qrClose" type="button" aria-label="關閉 QR">×</button>
+  </div>
+  <button class="qrmini" id="qrMini" type="button" hidden aria-label="顯示留祝福 QR Code">📱</button>
+  <div class="qrmodal" id="qrModal" hidden role="dialog" aria-modal="true" aria-label="掃碼留下祝福">
+    <div class="qrmodal__box">
+      <button class="qrmodal__close" id="qrModalClose" type="button" aria-label="關閉">×</button>
+      <img src="assets/qr-wish.png" alt="留祝福 QR Code（放大）" />
+      <p class="qrmodal__title">📱 掃描 QR Code 留下祝福</p>
+      <a class="qrmodal__link" href="index.html#wishform">✍️ 或點此直接留祝福</a>
+    </div>
+  </div>
 
   <div class="fxlayer" id="fxLayer" aria-hidden="true"></div>
 
@@ -626,6 +669,24 @@
             bgmBtn.classList.remove("is-playing"); bgmBtn.innerHTML = "🔇 音樂";
           }
         });
+      }
+
+      // 掃碼留祝福：可關閉收合成迷你鈕、點 QR 放大方便掃描
+      var qrWish = document.getElementById("qrWish");
+      var qrMini = document.getElementById("qrMini");
+      var qrModal = document.getElementById("qrModal");
+      if (qrWish && qrMini) {
+        var qrClose = document.getElementById("qrClose");
+        var qrZoom = document.getElementById("qrZoom");
+        if (qrClose) qrClose.addEventListener("click", function () { qrWish.hidden = true; qrMini.hidden = false; });
+        qrMini.addEventListener("click", function () { qrMini.hidden = true; qrWish.hidden = false; });
+        if (qrZoom && qrModal) {
+          var qrModalClose = document.getElementById("qrModalClose");
+          qrZoom.addEventListener("click", function () { qrModal.hidden = false; });
+          if (qrModalClose) qrModalClose.addEventListener("click", function () { qrModal.hidden = true; });
+          qrModal.addEventListener("click", function (e) { if (e.target === qrModal) qrModal.hidden = true; });
+          document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !qrModal.hidden) qrModal.hidden = true; });
+        }
       }
 
       var wakeLock = null;
