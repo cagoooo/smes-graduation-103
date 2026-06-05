@@ -601,7 +601,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .live-stage { text-align: center; }
 
 /* =========================================================
-   畢業歌〈啟程〉MV 嵌入
+   畢業歌〈風箏〉MV 嵌入
    ========================================================= */
 .section--song { background: var(--paper); }
 .song-stage { max-width: 860px; margin: clamp(30px, 5vw, 48px) auto 0; text-align: center; }
