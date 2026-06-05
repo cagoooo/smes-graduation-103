@@ -16,6 +16,7 @@
  */
 var SHEET_ID = '1Y0R7ypyhFtHg1O_P9CHp7MM7_3GZ_WpOr3t1dHNNceg';
 var SHEET_NAME = '回條';
+var SITE_WALL_URL = 'https://cagoooo.github.io/smes-graduation-103/#rsvp'; // 前端祝福牆（審核頁「前往查看」用）
 var HEADERS = ['送出時間', '班級', '畢業生姓名', '出席人數', '祝福悄悄話', '公開(填1或打勾)', '愛心'];
 
 function getSheet_() {
@@ -341,35 +342,61 @@ function escHtml_(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// 畢業典禮風格的審核結果頁
-function htmlPage_(emoji, title, sub, bodyHtml) {
+// 畢業典禮風格的審核結果頁（tone: 'ok' 綠光暈脈動 / 'mute' 灰靜止 / 'warn' 琥珀靜止）
+function htmlPage_(emoji, title, sub, bodyHtml, tone) {
+  var halo = (tone === 'mute' || tone === 'warn') ? tone : 'ok';
+  var authorUrl = 'https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5';
   var html =
     '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">' +
+    '<meta name="theme-color" content="#1d2a52">' +
     '<title>' + escHtml_(title) + '</title><style>' +
-    'body{margin:0;font-family:"Noto Sans TC",system-ui,"Microsoft JhengHei",sans-serif;' +
-    'background:linear-gradient(160deg,#141d3b,#283a72);color:#fff;min-height:100vh;' +
-    'display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}' +
-    '.card{background:rgba(255,255,255,.06);border:1px solid rgba(245,185,66,.35);' +
-    'border-radius:20px;padding:32px 26px;max-width:420px;width:100%;text-align:center;' +
-    'box-shadow:0 24px 60px rgba(0,0,0,.35);}' +
-    '.emoji{font-size:3rem;line-height:1;margin-bottom:10px;}' +
-    'h1{font-size:1.35rem;margin:0 0 6px;}' +
-    '.sub{color:#cdd6f4;font-size:.95rem;margin-bottom:8px;line-height:1.6;}' +
-    '.quote{background:rgba(0,0,0,.22);border-radius:14px;padding:16px 18px;text-align:left;' +
-    'font-size:.95rem;line-height:1.75;margin:18px 0;}' +
-    '.quote b{color:#f5b942;}' +
-    '.btns{display:flex;flex-direction:column;gap:10px;margin-top:8px;}' +
-    'a.btn{display:block;padding:13px 18px;border-radius:999px;text-decoration:none;font-weight:700;}' +
-    '.btn-go{background:#f5b942;color:#141d3b;}' +
-    '.btn-alt{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);}' +
-    '.foot{margin-top:18px;font-size:.8rem;color:rgba(255,255,255,.55);}' +
+    '*{box-sizing:border-box;}' +
+    // 矮視窗（LINE 內建瀏覽器頂部還有橫幅）用 margin:auto 置中，內容超高時可上下捲動不裁切
+    'body{margin:0;min-height:100dvh;display:flex;padding:22px;-webkit-tap-highlight-color:transparent;' +
+    'font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;' +
+    'color:#fff;background:radial-gradient(120% 90% at 50% -10%,#3a4f9e 0%,#233268 42%,#16204a 76%,#101733 100%);}' +
+    '.card{margin:auto;width:100%;max-width:430px;background:rgba(255,255,255,.06);' +
+    'border:1px solid rgba(245,185,66,.32);border-radius:24px;padding:32px 24px 22px;text-align:center;' +
+    'box-shadow:0 30px 70px rgba(0,0,0,.42);animation:rise .55s cubic-bezier(.2,.9,.25,1) both;}' +
+    '.halo{position:relative;width:92px;height:92px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}' +
+    '.halo::before{content:"";position:absolute;inset:0;border-radius:50%;' +
+    'background:radial-gradient(circle,rgba(110,231,183,.55),transparent 68%);animation:pulse 2.4s ease-in-out infinite;}' +
+    '.halo.mute::before{background:radial-gradient(circle,rgba(148,163,184,.42),transparent 68%);animation:none;}' +
+    '.halo.warn::before{background:radial-gradient(circle,rgba(248,180,80,.5),transparent 68%);animation:none;}' +
+    '.emoji{font-size:3.3rem;line-height:1;position:relative;animation:pop .6s .1s cubic-bezier(.18,1.4,.4,1) both;}' +
+    'h1{font-size:1.5rem;margin:2px 0 8px;font-weight:900;letter-spacing:.5px;}' +
+    '.sub{color:#cdd6f4;font-size:.95rem;line-height:1.75;margin:0 auto;max-width:32ch;}' +
+    '.pill{display:inline-flex;align-items:center;gap:6px;margin:16px auto 0;padding:7px 16px;' +
+    'border-radius:999px;font-weight:800;font-size:.9rem;}' +
+    '.pill.ok{background:rgba(16,185,129,.18);color:#6ee7b7;border:1px solid rgba(110,231,183,.45);}' +
+    '.pill.mute{background:rgba(148,163,184,.16);color:#cbd5e1;border:1px solid rgba(203,213,225,.3);}' +
+    '.quote{position:relative;background:rgba(0,0,0,.24);border-radius:16px;padding:15px 17px;text-align:left;' +
+    'font-size:.96rem;line-height:1.8;margin:16px 0 2px;border-left:4px solid #f5b942;}' +
+    '.quote .who{color:#f5b942;font-weight:800;display:block;margin-bottom:5px;}' +
+    '.quote .msg{color:#eef2ff;white-space:pre-wrap;word-break:break-word;}' +
+    '.btns{display:flex;flex-direction:column;gap:11px;margin-top:18px;}' +
+    'a.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 18px;border-radius:999px;' +
+    'text-decoration:none;font-weight:800;font-size:1rem;transition:transform .14s ease,box-shadow .2s ease;}' +
+    'a.btn:active{transform:scale(.97);}' +
+    '.btn-go{background:linear-gradient(180deg,#ffd06b,#f5b942);color:#141d3b;box-shadow:0 12px 26px rgba(245,185,66,.4);}' +
+    '.btn-alt{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.26);}' +
+    '.foot{margin-top:20px;font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.7;}' +
+    '.foot a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}' +
+    '.foot a:hover{color:#f5b942;border-bottom-color:#f5b942;}' +
+    '.foot .heart{display:inline-block;margin:0 1px;filter:saturate(1.1);}' +
+    '@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.97);}to{opacity:1;transform:none;}}' +
+    '@keyframes pop{0%{opacity:0;transform:scale(.4) rotate(-10deg);}60%{transform:scale(1.12);}100%{opacity:1;transform:none;}}' +
+    '@keyframes pulse{0%,100%{transform:scale(.92);opacity:.7;}50%{transform:scale(1.08);opacity:1;}}' +
+    '@media (prefers-reduced-motion:reduce){.card,.emoji{animation:none;}.halo::before{animation:none;}}' +
     '</style></head><body><div class="card">' +
-    '<div class="emoji">' + emoji + '</div>' +
+    '<div class="halo ' + halo + '"><div class="emoji">' + emoji + '</div></div>' +
     '<h1>' + escHtml_(title) + '</h1>' +
     '<div class="sub">' + escHtml_(sub) + '</div>' +
     (bodyHtml || '') +
-    '<div class="foot">石門國小 第103屆畢業典禮 · 祝福審核</div>' +
+    '<div class="foot">石門國小 第103屆畢業典禮 · 祝福審核<br>' +
+    'Made with <span class="heart" aria-label="愛心">❤️</span> by ' +
+    '<a href="' + authorUrl + '" target="_blank" rel="noopener noreferrer">阿凱老師</a></div>' +
     '</div></body></html>';
   return HtmlService.createHtmlOutput(html)
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
@@ -380,12 +407,12 @@ function htmlPage_(emoji, title, sub, bodyHtml) {
 function handleModerate_(e) {
   var p = (e && e.parameter) || {};
   if (p.k !== getModToken_()) {
-    return htmlPage_('🔒', '連結無效', '審核權杖不符，請從 LINE 通知卡片重新點按。', '');
+    return htmlPage_('🔒', '連結無效', '審核權杖不符，請從 LINE 通知卡片重新點按。', '', 'warn');
   }
   var row = parseInt(p.row, 10);
   var sh = getSheet_();
   if (!(row >= 2 && row <= sh.getLastRow())) {
-    return htmlPage_('⚠️', '找不到這筆祝福', '可能已被刪除或列號變動，請改用試算表審核。', '');
+    return htmlPage_('⚠️', '找不到這筆祝福', '可能已被刪除或列號變動，請改用試算表審核。', '', 'warn');
   }
   var makePublic = (p.v === '1');
   sh.getRange(row, 6).setValue(makePublic ? 1 : ''); // F 欄：公開
@@ -396,14 +423,26 @@ function handleModerate_(e) {
   var msg = String(sh.getRange(row, 5).getValue() || '').trim();
   var base = webAppUrl_();
   var k = encodeURIComponent(getModToken_());
-  var quote = '<div class="quote"><b>' + escHtml_(klass) + '　' + escHtml_(name) + '</b><br>' + escHtml_(msg) + '</div>';
+  var toggleHide = base + '?action=moderate&row=' + row + '&v=0&k=' + k;
+  var togglePub = base + '?action=moderate&row=' + row + '&v=1&k=' + k;
+  var wallBtn = '<a class="btn btn-alt" href="' + SITE_WALL_URL + '" target="_blank" rel="noopener noreferrer">🔍 前往祝福牆查看</a>';
+  var quote = '<div class="quote"><span class="who">' + escHtml_(klass) + '　' + escHtml_(name) +
+    '</span><span class="msg">' + escHtml_(msg) + '</span></div>';
 
   if (makePublic) {
-    return htmlPage_('✅', '已公開到祝福牆', '這則祝福將顯示在網站祝福牆（約數分鐘內同步，家長重整即見）。', quote +
-      '<div class="btns"><a class="btn btn-alt" href="' + base + '?action=moderate&row=' + row + '&v=0&k=' + k + '">改為維持隱藏</a></div>');
+    var bodyPub = '<div class="pill ok">🟢 目前狀態：公開中</div>' + quote +
+      '<div class="btns">' +
+      '<a class="btn btn-go" href="' + SITE_WALL_URL + '" target="_blank" rel="noopener noreferrer">🔍 前往祝福牆查看</a>' +
+      '<a class="btn btn-alt" href="' + toggleHide + '">🙈 改為維持隱藏</a>' +
+      '</div>';
+    return htmlPage_('✅', '已公開到祝福牆', '這則祝福將顯示在網站祝福牆（約數分鐘內同步，家長重整即見）。', bodyPub, 'ok');
   }
-  return htmlPage_('🙈', '已維持隱藏', '這則祝福不會顯示在網站祝福牆。', quote +
-    '<div class="btns"><a class="btn btn-go" href="' + base + '?action=moderate&row=' + row + '&v=1&k=' + k + '">改為通過公開</a></div>');
+  var bodyHide = '<div class="pill mute">🔒 目前狀態：隱藏中</div>' + quote +
+    '<div class="btns">' +
+    '<a class="btn btn-go" href="' + togglePub + '">✅ 改為通過公開</a>' +
+    wallBtn +
+    '</div>';
+  return htmlPage_('🙈', '已維持隱藏', '這則祝福不會顯示在網站祝福牆。', bodyHide, 'mute');
 }
 
 /**
