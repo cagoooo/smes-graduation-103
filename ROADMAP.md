@@ -1,7 +1,7 @@
 # 🗺️ 石門國小 第103屆畢業典禮網站 — 進度與未來規劃
 
-> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.13.1**｜後端 **v1.12.0**（GAS + LINE 通知 + 一鍵審核 + 愛心）
-> 現場投影頁：https://cagoooo.github.io/smes-graduation-103/stage.html
+> 線上網址：https://cagoooo.github.io/smes-graduation-103/ ｜前端 **v1.13.2**｜後端 **v1.12.0**（GAS + LINE 通知 + 一鍵審核 + 愛心）
+> 現場投影頁：https://cagoooo.github.io/smes-graduation-103/stage.html ｜祝福分享頁：https://cagoooo.github.io/smes-graduation-103/wish.html
 
 ---
 
@@ -36,6 +36,7 @@
 | **v1.12.0** | 祝福牆愛心互動：卡片牆可按 ❤️（樂觀更新 + localStorage 防同裝置重複、依愛心數排序「熱門優先」）；**投影頁愛心也可點按**（點擊飛出愛心粒子向上飄散 + 數字彈跳 + 紅心 pop 動效，現場觸控大螢幕／家長手機都能互動衝人氣）；GAS 後端加「愛心」欄(G) + `doGet?action=like` + `LockService` 防並發，僅對已公開祝福計數；前端優雅降級（舊後端無資料時不顯示愛心鈕、不報錯）。**需重新部署 GAS 才生效** |
 | **v1.13.0** | 主站「🔍 放大看完整祝福牆」全螢幕沉浸 overlay：點按鈕一次看全部祝福大卡（RWD `auto-fill` grid、深色背景）、每卡可按愛心飛心、依班級篩選、ESC／點背景／× 關閉、開啟時鎖背景捲動；愛心點擊改 `document` 委派（涵蓋卡片牆 + 放大牆）+ 飛心粒子／數字彈跳動效共用，關閉時同步回卡片牆 |
 | **v1.13.1** | 祝福長內容**完整顯示**優化：投影頁移除文字截斷(`line-clamp`)，改依當批最長祝福**自動縮放字級**（len-s/m/l/xl）+ **一次顯示卡數隨螢幕自適應**（手機 1／平板 2／桌機 3），長祝福不再被截「…」；放大牆卡片改自然高度（`align-items:start`）。手機 375 實測 130 字長祝福完整無裁 |
+| **v1.13.2** | 祝福留言**專屬社群分享頁** `wish.html` + 主題 OG 圖 `assets/wish-og.png`（彩虹條 + 校徽 +「為畢業生寫下祝福」+ 愛心 + 引導文，PIL 微軟正黑中文不 tofu）；分享此連結到 LINE/FB 顯示「邀請寫祝福」卡片、點進自動跳留言區 `#wishform`；爬蟲讀 meta、真人 `location.replace` 跳轉；favicon 沿用石門校徽。獨立分享頁，不動主站 PWA |
 
 ### 功能檢核表
 
@@ -62,6 +63,7 @@
 - [x] 現場投影祝福牆（stage.html 大螢幕全螢幕輪播）+ 祝福牆依班級篩選
 - [x] 祝福牆愛心互動（卡片/投影顯示 ❤️ 數 + 樂觀更新 + 防重複 + 依愛心排序，GAS LockService 防並發）
 - [x] 放大看完整祝福牆（主站全螢幕沉浸 overlay：全部祝福大卡 RWD grid + 愛心飛心 + 班級篩選 + 鎖捲動）
+- [x] 祝福留言專屬社群分享頁 wish.html + 主題 OG 圖（LINE/FB 顯示「邀請寫祝福」卡片，點進直達留言區）
 - [x] 隱私把關：內部分工、經費、個資文件不公開部署
 - [x] footer 阿凱老師署名連結石門國小教師頁
 
