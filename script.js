@@ -720,15 +720,17 @@
     });
   }
 
-  /* ---------- 校歌卡拉OK版 BGM（主頁背景音樂 + 跨分頁互斥，避免與 stage 畢業歌雙軌） ----------
-     用 BroadcastChannel("smes-grad-bgm")：哪一頁開始播就廣播 "playing"，另一分頁收到就暫停自己的音樂。
-     （BroadcastChannel 僅限同瀏覽器跨分頁，不會跨裝置，投影機端只開 stage 不受影響。） */
+  /* ---------- 校歌重編版 BGM（主頁背景音樂・預設自動開啟 + 跨分頁互斥，避免與 stage 畢業歌雙軌） ----------
+     預設 intentOn=true（開啟）：載入即嘗試自動播放；瀏覽器 autoplay 政策會擋帶聲音的自動播放，
+     故在使用者第一個互動（點 / 滑 / 按鍵）瞬間補播；按一下按鈕即靜音。
+     BroadcastChannel("smes-grad-bgm")：哪一頁開始播就廣播 "playing"，另一分頁收到即靜音
+     （僅同瀏覽器跨分頁、不跨裝置，投影機端只開 stage 不受影響）。 */
   (function () {
     var audio = document.getElementById("schoolBgm");
     var btn = document.getElementById("bgmToggle");
     if (!audio || !btn) return;
     var ico = btn.querySelector(".bgm-toggle__ico");
-    var fadeId = null, started = false, userPaused = false;
+    var fadeId = null, intentOn = true;          // 預設開啟播放
     var channel = ("BroadcastChannel" in window) ? new BroadcastChannel("smes-grad-bgm") : null;
     var VOL = 0.5;
 
@@ -741,44 +743,41 @@
         if (i >= steps) { clearInterval(fadeId); fadeId = null; if (after) after(); }
       }, 50);
     }
-    function setBtn(playing) {
-      btn.classList.toggle("is-playing", playing);
-      btn.setAttribute("aria-pressed", playing ? "true" : "false");
-      if (ico) ico.textContent = playing ? "🔊" : "🎵";
+    function setBtn() {
+      btn.classList.toggle("is-playing", intentOn);
+      btn.setAttribute("aria-pressed", intentOn ? "true" : "false");
+      if (ico) ico.textContent = intentOn ? "🔊" : "🔇";
     }
     function play(broadcast) {
-      started = true; userPaused = false;
+      intentOn = true; setBtn();
       audio.volume = 0;
-      audio.play().then(function () { fadeTo(VOL, 1600); }).catch(function () {});
-      setBtn(true);
-      if (broadcast && channel) channel.postMessage("playing");   // 通知 stage 畢業歌暫停
+      audio.play().then(function () {
+        fadeTo(VOL, 1600);
+        if (broadcast && channel) channel.postMessage("playing");   // 真的播了才通知 stage 暫停
+      }).catch(function () { /* autoplay 被擋，等首個互動補播 */ });
     }
-    function pause(isUser) {
-      if (isUser) userPaused = true;
-      setBtn(false);
-      if (audio.paused) return;
-      fadeTo(0, 500, function () { audio.pause(); });
+    function mute() {
+      intentOn = false; setBtn();
+      if (!audio.paused) fadeTo(0, 500, function () { audio.pause(); });
     }
-    btn.addEventListener("click", function () {
-      if (audio.paused) play(true); else pause(true);
-    });
-    // 其他分頁（stage 按下開啟畢業歌）開始播 → 主頁校歌自動暫停，避免兩種音軌同時播
-    if (channel) channel.onmessage = function (e) { if (e.data === "playing") pause(false); };
+    btn.addEventListener("click", function () { if (intentOn) mute(); else play(true); });
 
-    // 首次互動自動帶入校歌（autoplay 政策需使用者手勢；只試一次，按音樂鈕本身則交給按鈕處理）
+    // 其他分頁（stage 按下開啟畢業歌）開始播 → 主頁校歌自動靜音，避免兩種音軌同時播
+    if (channel) channel.onmessage = function (e) { if (e.data === "playing") mute(); };
+
+    // 首個互動補播（autoplay 政策需使用者手勢；按到音樂鈕本身則交給 click 處理）
     function teardown() {
-      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
-        window.removeEventListener(ev, tryAutostart);
-      });
+      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { window.removeEventListener(ev, onGesture); });
     }
-    function tryAutostart(e) {
+    function onGesture(e) {
       if (e && e.target && e.target.closest && e.target.closest("#bgmToggle")) { teardown(); return; }
       teardown();
-      if (started || userPaused) return;
-      play(true);
+      if (intentOn && audio.paused) play(true);
     }
-    ["pointerdown", "keydown", "touchstart"].forEach(function (ev) {
-      window.addEventListener(ev, tryAutostart, { passive: true });
-    });
+    ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { window.addEventListener(ev, onGesture, { passive: true }); });
+
+    // 預設開啟：顯示開啟狀態並先嘗試自動播放（被擋則等首個互動補播）
+    setBtn();
+    play(true);
   })();
 })();
