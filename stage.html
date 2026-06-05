@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.22" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.22" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.23" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.23" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.22" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.23" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -321,14 +321,16 @@
       display:flex;align-items:center;justify-content:center;transition:transform .2s ease;}
     .qrmini[hidden]{display:none;}
     .qrmini:hover{transform:translateY(-2px);}
-    /* 放大 QR overlay */
+    /* 放大 QR overlay：overflow-y:auto + box margin:auto → 放得下置中、放不下可上下自由捲動不裁切 */
     .qrmodal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+      overflow-y:auto;-webkit-overflow-scrolling:touch;
       background:rgba(8,12,28,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px;}
     .qrmodal[hidden]{display:none;}
-    .qrmodal__box{position:relative;background:#fff;border-radius:22px;padding:clamp(22px,4vw,34px);
+    .qrmodal__box{position:relative;margin:auto;background:#fff;border-radius:22px;padding:clamp(22px,4vw,34px);
       display:flex;flex-direction:column;align-items:center;gap:16px;
       box-shadow:0 30px 70px rgba(0,0,0,.6);max-width:92vw;}
-    .qrmodal__box img{width:min(64vw,360px);height:auto;display:block;border-radius:10px;}
+    /* QR 寬度同時受視窗寬與高限制：矮視窗自動縮小先盡量塞進畫面，仍塞不下才靠捲動 */
+    .qrmodal__box img{width:min(64vw,360px,56vh);height:auto;display:block;border-radius:10px;}
     .qrmodal__title{color:#16204a;font-weight:900;font-size:clamp(1.1rem,4vw,1.5rem);text-align:center;}
     .qrmodal__link{color:#fff;background:linear-gradient(120deg,#2e2a6b,#1b2768);text-decoration:none;
       font-weight:800;font-size:clamp(.95rem,3.2vw,1.1rem);padding:11px 24px;border-radius:999px;
@@ -343,7 +345,7 @@
       .qrwish__zoom img{width:62px;height:62px;}
       .qrwish__txt{font-size:.8rem;}
       .qrmini{left:10px;bottom:42px;width:46px;height:46px;font-size:1.3rem;}
-      .qrmodal__box img{width:74vw;}
+      .qrmodal__box img{width:min(74vw,64vh);}
     }
 
     @media (prefers-reduced-motion:reduce){
