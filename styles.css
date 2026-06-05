@@ -916,6 +916,23 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .notice h3 { color: var(--navy-800); font-size: 1.08rem; margin-bottom: 4px; }
 .notice p { color: var(--ink-soft); font-size: .92rem; }
 
+/* 新祝福即時通知 toast（背景輪詢偵測到審核通過的新祝福時淡入，點擊前往祝福牆） */
+.newwish-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+  z-index: 360; display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+  font-family: inherit; font-size: clamp(.92rem, 2.6vw, 1.05rem); font-weight: 700; white-space: nowrap;
+  padding: 13px 22px; border-radius: 999px; border: 1.5px solid var(--gold);
+  background: linear-gradient(120deg, var(--navy-800), var(--navy-700)); color: #fff;
+  box-shadow: 0 14px 38px rgba(16,23,51,.5); opacity: 0; pointer-events: none;
+  transition: opacity .35s ease, transform .35s var(--ease);
+}
+.newwish-toast[hidden] { display: none; }
+.newwish-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.newwish-toast__ico { font-size: 1.2em; }
+.newwish-toast__n { color: var(--gold); font-size: 1.15em; margin: 0 2px; }
+.newwish-toast__cta { color: var(--gold); font-weight: 800; margin-left: 4px; }
+@media (max-width: 520px) { .newwish-toast { bottom: 16px; padding: 11px 18px; white-space: normal; max-width: 92vw; text-align: center; } }
+
 .blessing {
   margin-top: clamp(34px, 6vw, 54px); text-align: center;
   background: linear-gradient(150deg, var(--navy-800), var(--navy-700));

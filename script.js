@@ -335,7 +335,7 @@
       var count = document.getElementById("wishCount");
       var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
-      var allWishes = [], curFilter = "全部";
+      var allWishes = [], curFilter = "全部", lastSeenMaxR = null;
       function maskName(n, c) {
         n = String(n || "").trim();
         // 僅「六年X班」畢業生需去識別化保護未成年隱私；師長 / 其他（校友、職員、家屬…）一律完整顯示
@@ -520,12 +520,41 @@
         renderWall();
       });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && wallBox && !wallBox.hidden) closeWall(); });
+      // 新祝福即時通知 toast
+      var newWishToast = document.getElementById("newWishToast");
+      var newWishTimer = null;
+      function showNewWishToast(n) {
+        if (!newWishToast) return;
+        var nEl = newWishToast.querySelector(".newwish-toast__n");
+        if (nEl) nEl.textContent = n;
+        newWishToast.hidden = false;
+        requestAnimationFrame(function () { newWishToast.classList.add("show"); });
+        clearTimeout(newWishTimer);
+        newWishTimer = setTimeout(hideNewWishToast, 12000);
+      }
+      function hideNewWishToast() {
+        if (!newWishToast) return;
+        newWishToast.classList.remove("show");
+        clearTimeout(newWishTimer);
+        newWishTimer = setTimeout(function () { newWishToast.hidden = true; }, 400);
+      }
+      if (newWishToast) newWishToast.addEventListener("click", function () {
+        hideNewWishToast();
+        var t = document.getElementById("rsvp");
+        if (t) { try { t.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }
+      });
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var ws = (d && d.wishes) || [];
             if (!ws.length) { wall.hidden = true; if (ticker) ticker.hidden = true; return; }
+            // 準即時通知：最新列號變大 = LINE 審核通過的新祝福進來 → 跳 toast（首次載入只設基準、不提示）
+            var maxR = ws.reduce(function (m, w) { return Math.max(m, w.r || 0); }, 0);
+            if (lastSeenMaxR !== null && maxR > lastSeenMaxR) {
+              showNewWishToast(ws.filter(function (w) { return (w.r || 0) > lastSeenMaxR; }).length);
+            }
+            lastSeenMaxR = maxR;
             allWishes = ws;
             if (curFilter !== "全部" && !ws.some(function (w) { return w.c === curFilter; })) curFilter = "全部";
             buildFilters();
@@ -549,8 +578,9 @@
           .catch(function () { /* 抓不到就不顯示，靜默 */ });
       }
       load();
-      setInterval(load, 3 * 60 * 1000);
+      setInterval(load, 25 * 1000);   // 25 秒背景輪詢，準即時偵測審核通過的新祝福
       window.addEventListener("focus", load);
+      document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") load(); }); // 切回分頁立即檢查
     })();
 
     var form = document.getElementById("rsvpForm");
