@@ -503,13 +503,22 @@
       var wallCountEl = document.getElementById("wallCount");
       var wallFiltersEl = document.getElementById("wallFilters");
       var wallScroll = document.getElementById("wallScroll");
-      var wallFilter = "全部";
-      function renderWall() {
+      var wallFilter = "全部", wallAnimTimer = null;
+      // animate=true（切班級）→ 卡片交錯淡入進場；不傳 = 瞬間（開牆、背景輪詢同步）
+      function renderWall(animate) {
         if (!wallGrid) return;
         var list = wallFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === wallFilter; });
         list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); });
         wallGrid.innerHTML = list.map(cardHTML).join("");
         if (wallCountEl) wallCountEl.textContent = wallFilter === "全部" ? "（" + allWishes.length + " 則）" : "（" + wallFilter + " " + list.length + " 則）";
+        var reduceMo = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        clearTimeout(wallAnimTimer);
+        wallGrid.classList.remove("is-entering");
+        if (animate && !reduceMo) {
+          void wallGrid.offsetWidth; // 強制 reflow，動畫從頭播
+          wallGrid.classList.add("is-entering");
+          wallAnimTimer = setTimeout(function () { wallGrid.classList.remove("is-entering"); }, 1000);
+        }
       }
       function buildWallFilters() {
         if (!wallFiltersEl) return;
@@ -544,7 +553,13 @@
         wallFilter = b.getAttribute("data-class") || "全部";
         var bs = wallFiltersEl.querySelectorAll(".wall-chip");
         for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === b);
-        renderWall();
+        renderWall(true);
+        // 切標籤後絲滑捲回最上面，從第一張卡片開始閱讀（關動效時直接歸零）
+        if (wallScroll) {
+          var reduceMo = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (reduceMo) { wallScroll.scrollTop = 0; }
+          else { try { wallScroll.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) { wallScroll.scrollTop = 0; } }
+        }
       });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && wallBox && !wallBox.hidden) closeWall(); });
       // 新祝福即時通知 toast

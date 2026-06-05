@@ -788,6 +788,22 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   border-color: rgba(255, 255, 255, .45); box-shadow: 0 12px 32px rgba(8, 14, 34, .32); }
 .wallbox__grid .wish-card__to { font-size: clamp(1rem, 1.6vw, 1.25rem); }
 .wallbox__grid .wish-card__msg { font-size: clamp(1.05rem, 1.6vw, 1.3rem); color: #1a2036; }
+/* 切換班級標籤後：卡片交錯淡入上升（配合捲動回頂，從最上面開始閱讀，絲滑進場） */
+.wallbox__grid.is-entering > .wish-card { animation: wallCardIn .52s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes wallCardIn { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: none; } }
+.wallbox__grid.is-entering > .wish-card:nth-child(1) { animation-delay: .02s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(2) { animation-delay: .06s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(3) { animation-delay: .10s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(4) { animation-delay: .14s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(5) { animation-delay: .18s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(6) { animation-delay: .22s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(7) { animation-delay: .26s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(8) { animation-delay: .30s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(9) { animation-delay: .34s; }
+.wallbox__grid.is-entering > .wish-card:nth-child(n+10) { animation-delay: .38s; }  /* 第10張之後同延遲，避免長清單尾端拖太久 */
+@media (prefers-reduced-motion: reduce) {
+  .wallbox__grid.is-entering > .wish-card { animation: none; }
+}
 /* 手機端放大牆 RWD：單欄、卡片留白縮放、底部留白讓六導師合影可見（放最後以覆寫桌機 padding） */
 @media (max-width: 720px) {
   .wallbox__scroll { padding: 16px 14px; padding-bottom: clamp(150px, 26vh, 250px); }
