@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.1" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.1" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.2" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.2" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.1" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.2" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -109,6 +109,27 @@
       mask-image:linear-gradient(to top,transparent 0%,#000 15%,#000 100%);}
     .stage-teacher.show{opacity:.4;transform:translateY(0);}
     @media (max-width:680px){.stage-teacher{height:56vh;right:-44px;}.stage-teacher.show{opacity:.24;}}
+    /* 六班導師合體（其他 / 師長篩選時一次呈現全部六位，全局一致） */
+    .stage-teachers{position:fixed;left:0;right:0;bottom:0;z-index:-1;
+      display:flex;align-items:flex-end;justify-content:center;
+      gap:clamp(0px,1vw,20px);padding:0 clamp(10px,3vw,50px);pointer-events:none;
+      opacity:0;transition:opacity .8s ease;}
+    .stage-teachers.show{opacity:.36;}
+    .stage-teachers img{height:min(72vh,640px);width:auto;
+      filter:drop-shadow(0 0 30px rgba(96,128,235,.42));
+      -webkit-mask-image:linear-gradient(to top,transparent 0%,#000 14%,#000 100%);
+      mask-image:linear-gradient(to top,transparent 0%,#000 14%,#000 100%);}
+    @media (max-width:680px){.stage-teachers img{height:42vh;}.stage-teachers.show{opacity:.22;}}
+    /* 班級篩選 chips */
+    .stage-filters{position:relative;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;
+      gap:9px;padding:2px clamp(20px,4vw,60px) clamp(8px,1.4vh,16px);}
+    .stage-filters[hidden]{display:none;}
+    .schip{font-family:inherit;font-size:clamp(.78rem,1.4vw,.96rem);font-weight:700;cursor:pointer;
+      white-space:nowrap;padding:7px 16px;border-radius:999px;-webkit-tap-highlight-color:transparent;
+      background:rgba(255,255,255,.1);color:rgba(255,255,255,.82);
+      border:1px solid rgba(255,255,255,.24);transition:background .2s,color .2s,border-color .2s;}
+    .schip:hover{border-color:var(--gold);color:var(--gold);}
+    .schip.is-active{background:var(--gold);color:var(--navy-900);border-color:var(--gold);}
 
     /* ===== 頁首 ===== */
     .head{display:flex;align-items:center;gap:clamp(14px,2vw,28px);
@@ -250,6 +271,9 @@
   <div class="stars" id="stars" aria-hidden="true"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
   <img class="stage-teacher" id="stageTeacher" alt="" aria-hidden="true" />
+  <div class="stage-teachers" id="stageTeachersAll" aria-hidden="true">
+    <img src="assets/teachers/601.webp" alt="" /><img src="assets/teachers/602.webp" alt="" /><img src="assets/teachers/603.webp" alt="" /><img src="assets/teachers/604.webp" alt="" /><img src="assets/teachers/605.webp" alt="" /><img src="assets/teachers/606.webp" alt="" />
+  </div>
 
   <header class="head">
     <img class="head__logo" src="assets/logo.png" alt="石門國小校徽" />
@@ -260,6 +284,8 @@
     </div>
     <div class="head__count"><span class="head__count-eye">累計</span><b id="count">—</b><span>則祝福</span></div>
   </header>
+
+  <div class="stage-filters" id="stageFilters" hidden aria-label="依班級篩選祝福"></div>
 
   <main class="stage" id="stage">
     <div class="empty" id="empty">祝福載入中…</div>
@@ -286,12 +312,22 @@
       var stage = document.getElementById("stage");
       var countEl = document.getElementById("count");
       var statusEl = document.getElementById("status");
-      var wishes = [], batch = 0, rotateTimer = null;
+      var wishes = [], batch = 0, rotateTimer = null, stageFilter = "全部";
 
-      function maskName(n) {
+      function maskName(n, c) { // 與主頁 / 跑馬燈同步：只有「六年X班」畢業生才去識別化，師長 / 其他完整顯示
         n = String(n || "").trim();
-        if (n.length <= 2) return n;
+        if (String(c || "").indexOf("班") === -1) return n;
+        if (n.length <= 1) return n;
+        if (n.length === 2) return n.charAt(0) + "○";
         return n.charAt(0) + new Array(n.length - 1).join("○") + n.charAt(n.length - 1);
+      }
+      function classMatch(w, f) {
+        var c = String(w.c || "");
+        if (f === "師長") return c.indexOf("師長") !== -1 || c.indexOf("老師") !== -1;
+        return c === f;
+      }
+      function getFiltered() {
+        return stageFilter === "全部" ? wishes : wishes.filter(function (w) { return classMatch(w, stageFilter); });
       }
       function esc(s) {
         return String(s).replace(/[&<>"]/g, function (c) {
@@ -325,36 +361,80 @@
       // 投影頁背景：依當前批主要班級淡入該班導師照
       var teacherEl = document.getElementById("stageTeacher");
       var curTeacher = null;
+      var teacherTimer = null;
       function setTeacher(cls) {
-        if (!teacherEl || cls === curTeacher) return;
+        if (cls === curTeacher) return;
         curTeacher = cls;
-        if (!cls) { teacherEl.classList.remove("show"); return; }
+        if (teacherTimer) { clearTimeout(teacherTimer); teacherTimer = null; } // 清掉上一次的淡入排程，避免競態又把單張喚回
+        if (!teacherEl) return;
         teacherEl.classList.remove("show");
-        setTimeout(function () {
+        if (!cls) return; // null → 確保單張隱藏（其他 / 師長改用六班合體）
+        teacherTimer = setTimeout(function () {
           teacherEl.src = "assets/teachers/60" + cls + ".webp";
           teacherEl.classList.add("show");
         }, reduce ? 0 : 360);
       }
 
-      function renderBatch() {
-        if (!wishes.length) {
-          stage.innerHTML = '<div class="empty">祝福即將開始收集，敬請期待 💛</div>';
-          return;
-        }
-        var total = wishes.length;
-        var bs = batchSize();
-        var start = (batch * bs) % total;
-        var slice = [];
-        for (var i = 0; i < Math.min(bs, total); i++) slice.push(wishes[(start + i) % total]);
-        var maxLen = 0;
-        slice.forEach(function (w) { maxLen = Math.max(maxLen, String(w.m || "").length); });
-        stage.setAttribute("data-len", maxLen <= 40 ? "len-s" : maxLen <= 90 ? "len-m" : maxLen <= 160 ? "len-l" : "len-xl");
-        // 當前批主要班級 → 背景淡入該班導師照
+      // 六班合體背景（其他 / 師長篩選時整排呈現）
+      var teachersAllEl = document.getElementById("stageTeachersAll");
+      var curAll = false;
+      function setTeachersAll(show) {
+        if (!teachersAllEl || show === curAll) return;
+        curAll = show;
+        teachersAllEl.classList.toggle("show", show);
+      }
+
+      // 依目前篩選決定背景導師：單班→該班；其他/師長→六班合體；全部→當前批主要班級
+      function updateBg(slice) {
+        if (stageFilter === "師長" || stageFilter === "其他") { setTeacher(null); setTeachersAll(true); return; }
+        setTeachersAll(false);
+        var fm = String(stageFilter).match(/六年([1-6])班/);
+        if (fm) { setTeacher(fm[1]); return; }
         var cc = {};
         slice.forEach(function (w) { var m = String(w.c || "").match(/六年([1-6])班/); if (m) cc[m[1]] = (cc[m[1]] || 0) + 1; });
         var topC = null, topN = 0;
         for (var ck in cc) if (cc[ck] > topN) { topN = cc[ck]; topC = ck; }
         setTeacher(topC);
+      }
+
+      // 班級篩選 chips（依實際出現的對象動態建立）
+      var filtersEl = document.getElementById("stageFilters");
+      function buildStageFilters() {
+        if (!filtersEl) return;
+        var classes = [];
+        wishes.forEach(function (w) { var c = String(w.c || "").trim(); if (c && classes.indexOf(c) === -1) classes.push(c); });
+        if (classes.length <= 1) { filtersEl.hidden = true; filtersEl.innerHTML = ""; return; }
+        classes.sort();
+        filtersEl.innerHTML = ["全部"].concat(classes).map(function (c) {
+          return '<button type="button" class="schip' + (c === stageFilter ? " is-active" : "") + '" data-c="' + esc(c) + '">' + esc(c) + "</button>";
+        }).join("");
+        filtersEl.hidden = false;
+      }
+      if (filtersEl) filtersEl.addEventListener("click", function (e) {
+        var b = e.target;
+        if (!b.classList || !b.classList.contains("schip")) return;
+        stageFilter = b.getAttribute("data-c") || "全部";
+        var bs = filtersEl.querySelectorAll(".schip");
+        for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("is-active", bs[i] === b);
+        batch = 0; renderBatch(); startRotate();
+      });
+
+      function renderBatch() {
+        var list = getFiltered();
+        if (!list.length) {
+          stage.innerHTML = '<div class="empty">這個分類目前還沒有祝福 💛</div>';
+          setTeacher(null); setTeachersAll(false);
+          return;
+        }
+        var total = list.length;
+        var bs = batchSize();
+        var start = (batch * bs) % total;
+        var slice = [];
+        for (var i = 0; i < Math.min(bs, total); i++) slice.push(list[(start + i) % total]);
+        var maxLen = 0;
+        slice.forEach(function (w) { maxLen = Math.max(maxLen, String(w.m || "").length); });
+        stage.setAttribute("data-len", maxLen <= 40 ? "len-s" : maxLen <= 90 ? "len-m" : maxLen <= 160 ? "len-l" : "len-xl");
+        updateBg(slice);
         var html = slice.map(function (w, idx) {
           var like;
           if (w.r) {
@@ -368,7 +448,7 @@
           var fdelay = (idx * 0.7).toFixed(1);
           return '<div class="wcell"><div class="wcard" style="--fdur:' + fdur + 's;--fdelay:' + fdelay + 's;">' +
             '<div class="wcard__to"><span class="dot">💛</span>給 ' +
-            esc(w.c) + " " + esc(maskName(w.n)) + '</div><div class="wcard__msg">' +
+            esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</div><div class="wcard__msg">' +
             esc(w.m) + "</div>" + like + "</div></div>";
         }).join("");
         if (reduce) { stage.innerHTML = html; return; }
@@ -378,7 +458,7 @@
 
       function startRotate() {
         if (rotateTimer) clearInterval(rotateTimer);
-        if (wishes.length <= batchSize()) return;
+        if (getFiltered().length <= batchSize()) return;
         rotateTimer = setInterval(function () { batch++; renderBatch(); }, ROTATE_MS);
       }
 
@@ -390,7 +470,7 @@
             wishes = ws;
             countEl.textContent = ws.length;
             statusEl.textContent = ws.length ? "祝福持續更新中" : "等待第一則祝福";
-            batch = 0; renderBatch(); startRotate();
+            batch = 0; buildStageFilters(); renderBatch(); startRotate();
           })
           .catch(function () { /* 靜默，保留上一批畫面 */ });
       }
