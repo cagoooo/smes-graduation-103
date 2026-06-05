@@ -11,6 +11,9 @@
 # 原始平面圖 PDF（已產生 assets/campus-map.png；含同等資訊，不重複進 repo）
 *.pdf
 
+# 根目錄原始音檔（已複製最佳化檔名到 assets/bgm-kite.mp3，原始中文檔名不進 repo）
+/*.mp3
+
 # 本地預覽／工具設定
 .claude/
 
