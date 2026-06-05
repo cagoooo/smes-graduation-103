@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.14" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.14" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.14" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.15" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -115,8 +115,9 @@
       gap:6px;padding:0 8px;pointer-events:none;
       opacity:0;transition:opacity .8s ease;}
     .stage-teachers.show{opacity:.36;}
-    /* 六張一律平分寬度（不分斷點）：手機/平板/桌機任何寬度六位導師都全進畫面，max-height 限高不過大 */
-    .stage-teachers img{width:calc((100vw - 46px)/6);height:auto;max-height:min(72vh,640px);
+    /* 六張平分寬度 + height:auto 純等比（永不壓扁變形）；width 取 min 上限避免超寬螢幕高度過大。
+       ⚠️ 不可加 max-height：width 固定時 max-height 截高會把人像壓扁變胖（602 踩雷） */
+    .stage-teachers img{width:min(calc((100vw - 46px)/6), 300px);height:auto;
       filter:drop-shadow(0 0 30px rgba(96,128,235,.42));
       -webkit-mask-image:linear-gradient(to top,transparent 0%,#000 14%,#000 100%);
       mask-image:linear-gradient(to top,transparent 0%,#000 14%,#000 100%);}
