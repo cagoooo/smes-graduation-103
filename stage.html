@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.1" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.1" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.2" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.2" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.1" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.14.2" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -100,6 +100,15 @@
     .confetti{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;}
     .confetti span{position:absolute;top:-18px;width:10px;height:15px;border-radius:2px;opacity:.85;animation:fall linear infinite;}
     @keyframes fall{to{transform:translateY(112vh) rotate(560deg);}}
+    /* 背景導師照（依當前批主要班級淡入，半透明融入星空） */
+    .stage-teacher{position:fixed;right:clamp(-50px,1vw,30px);bottom:0;z-index:-1;
+      height:min(84vh,780px);width:auto;pointer-events:none;
+      opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease;
+      filter:drop-shadow(0 0 46px rgba(96,128,235,.45));
+      -webkit-mask-image:linear-gradient(to top,transparent 0%,#000 15%,#000 100%);
+      mask-image:linear-gradient(to top,transparent 0%,#000 15%,#000 100%);}
+    .stage-teacher.show{opacity:.4;transform:translateY(0);}
+    @media (max-width:680px){.stage-teacher{height:56vh;right:-44px;}.stage-teacher.show{opacity:.24;}}
 
     /* ===== 頁首 ===== */
     .head{display:flex;align-items:center;gap:clamp(14px,2vw,28px);
@@ -234,6 +243,7 @@
   <div class="shooting" id="shooting" aria-hidden="true"></div>
   <div class="stars" id="stars" aria-hidden="true"></div>
   <div class="confetti" id="confetti" aria-hidden="true"></div>
+  <img class="stage-teacher" id="stageTeacher" alt="" aria-hidden="true" />
 
   <header class="head">
     <img class="head__logo" src="assets/logo.png" alt="石門國小校徽" />
@@ -305,6 +315,20 @@
         }
       }
 
+      // 投影頁背景：依當前批主要班級淡入該班導師照
+      var teacherEl = document.getElementById("stageTeacher");
+      var curTeacher = null;
+      function setTeacher(cls) {
+        if (!teacherEl || cls === curTeacher) return;
+        curTeacher = cls;
+        if (!cls) { teacherEl.classList.remove("show"); return; }
+        teacherEl.classList.remove("show");
+        setTimeout(function () {
+          teacherEl.src = "assets/teachers/60" + cls + ".webp";
+          teacherEl.classList.add("show");
+        }, reduce ? 0 : 360);
+      }
+
       function renderBatch() {
         if (!wishes.length) {
           stage.innerHTML = '<div class="empty">祝福即將開始收集，敬請期待 💛</div>';
@@ -318,6 +342,12 @@
         var maxLen = 0;
         slice.forEach(function (w) { maxLen = Math.max(maxLen, String(w.m || "").length); });
         stage.setAttribute("data-len", maxLen <= 40 ? "len-s" : maxLen <= 90 ? "len-m" : maxLen <= 160 ? "len-l" : "len-xl");
+        // 當前批主要班級 → 背景淡入該班導師照
+        var cc = {};
+        slice.forEach(function (w) { var m = String(w.c || "").match(/六年([1-6])班/); if (m) cc[m[1]] = (cc[m[1]] || 0) + 1; });
+        var topC = null, topN = 0;
+        for (var ck in cc) if (cc[ck] > topN) { topN = cc[ck]; topC = ck; }
+        setTeacher(topC);
         var html = slice.map(function (w, idx) {
           var like;
           if (w.r) {
