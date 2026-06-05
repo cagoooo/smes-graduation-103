@@ -713,7 +713,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wish-like__n { min-width: 1ch; text-align: left; }
 
 /* 放大看完整祝福牆 — 入口按鈕 */
-.wishwall__more { text-align: center; margin-top: clamp(20px, 4vw, 32px); }
+.wishwall__more { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: clamp(20px, 4vw, 32px); }
 .btn-wallzoom {
   display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
   font-family: inherit; font-size: 1rem; font-weight: 700;
@@ -722,13 +722,19 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   transition: transform .15s var(--ease), background .2s, color .2s;
 }
 .btn-wallzoom:hover { background: var(--navy-700); color: #fff; transform: translateY(-2px); }
+/* 第二種版本入口：現場星空投影頁（stage.html），星空藍紫漸層以區別放大牆 */
+.btn-wallzoom--stage {
+  background: linear-gradient(120deg, #2e2a6b, #1b2768); color: #fff; text-decoration: none;
+  border-color: rgba(125, 95, 255, .55);
+}
+.btn-wallzoom--stage:hover { background: linear-gradient(120deg, #3d3890, #273594); color: #fff; }
 
 /* 放大看完整祝福牆 — 全螢幕 overlay */
 .wallbox { position: fixed; inset: 0; z-index: 320; display: flex; flex-direction: column; }
 .wallbox[hidden] { display: none; }
 .wallbox__sky { position: absolute; inset: 0; z-index: 0;
   background: radial-gradient(120% 90% at 50% -10%, #3a4f9e 0%, #233268 38%, #16204a 72%, #101733 100%); }
-/* 底部各班導師灰白剪影（與封面 / 投影頁一致，捲動祝福時固定在後方守護） */
+/* 底部各班導師完整肖像（彩色半透明、底部淡出融入夜空，捲動祝福時固定在後方守護） */
 .wallbox__teachers {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 0;
   display: flex; align-items: flex-end; justify-content: center;
@@ -736,13 +742,14 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   pointer-events: none;
 }
 .wallbox__teachers img {
-  height: clamp(150px, 30vh, 340px); width: auto;
-  filter: brightness(0) invert(0.92);   /* 彩色去背照 → 全黑 → 反白 → 灰白剪影 */
-  opacity: .14;
+  height: clamp(170px, 34vh, 380px); width: auto;
+  opacity: .38;   /* 完整彩色導師肖像、半透明融入夜空背景 */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
 }
 @media (max-width: 720px) {
   .wallbox__teachers { gap: 2px; }
-  .wallbox__teachers img { height: clamp(108px, 20vh, 188px); opacity: .11; }
+  .wallbox__teachers img { height: clamp(120px, 24vh, 220px); opacity: .3; }
 }
 .wallbox__bar {
   position: relative; z-index: 2; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
