@@ -30,14 +30,15 @@ const leaf = (x, y, deg, ry, rx, fill) =>
   `<ellipse rx="${rx}" ry="${ry}" fill="${fill}" transform="translate(${x},${y}) rotate(${deg})"/>`;
 
 // 四角擺放：原點在外框角點，圖形畫在 +x,+y 象限，用 scale 翻轉鏡像到四角
-function corners(inset, localSvg) {
+function corners(inset, localSvg, which = 'all') {
   const t = [
     `translate(${inset},${inset}) scale(1,1)`,         // 左上
     `translate(${W - inset},${inset}) scale(-1,1)`,     // 右上
     `translate(${inset},${H - inset}) scale(1,-1)`,     // 左下
     `translate(${W - inset},${H - inset}) scale(-1,-1)`,// 右下
   ];
-  return t.map(tr => `<g transform="${tr}">${localSvg}</g>`).join('');
+  const use = which === 'top' ? t.slice(0, 2) : t;   // 導師版下排放人像，省略下方角飾
+  return use.map(tr => `<g transform="${tr}">${localSvg}</g>`).join('');
 }
 
 // 優雅金色捲角（兩條平行貝茲弧 + 寶石 + 細絲）
@@ -115,7 +116,7 @@ function bottomGreeting(big, en, cFill, cEn) {
   s += `<line x1="${cx - 250}" y1="${y + 34}" x2="${cx - 30}" y2="${y + 34}" stroke="${cFill}" stroke-width="1.4"/>`;
   s += `<line x1="${cx + 30}" y1="${y + 34}" x2="${cx + 250}" y2="${y + 34}" stroke="${cFill}" stroke-width="1.4"/>`;
   s += diamond(cx, y + 34, 7, cFill);
-  s += `<text x="${cx}" y="${y + 64}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="22" fill="${cEn}" letter-spacing="5">${en}</text>`;
+  if (en) s += `<text x="${cx}" y="${y + 64}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="22" fill="${cEn}" letter-spacing="5">${en}</text>`;
   return s;
 }
 
@@ -185,12 +186,12 @@ const DEFS = `
 const outlined = (svg) => `<g filter="url(#outline)">${svg}</g>`;
 
 // ───────── 四種主題 ─────────
-function themeGoldRoyal() {
+function themeGoldRoyal(teacher = false) {
   const G = 'url(#gold)', GS = '#caa14a';
   let s = DEFS;
-  s += outlined(border(46, 16, 3, 1.4, G, 18) + corners(46, scrollCorner(G, GS)));
+  s += outlined(border(46, 16, 3, 1.4, G, 18) + corners(46, scrollCorner(G, GS), teacher ? 'top' : 'all'));
   s += plaque({ fillBg: 'rgba(12,22,46,0.84)', stroke: G, c1: '#fff7e4', c2: '#ecd9a6' });
-  s += outlined(bottomGreeting('畢 業 快 樂', 'CONGRATULATIONS · ' + YEAR_EN, G, '#ecd9a6'));
+  s += outlined(bottomGreeting('畢 業 快 樂', teacher ? '' : ('CONGRATULATIONS · ' + YEAR_EN), G, '#ecd9a6'));
   return s;
 }
 
@@ -207,7 +208,7 @@ function themeNavyAcademic() {
   return s;
 }
 
-function themeConfettiJoy() {
+function themeConfettiJoy(teacher = false) {
   const pal = ['#ff5e6c', '#ff9f43', '#ffd23f', '#2ecc71', '#45aaf2', '#7d5fff'];
   let s = DEFS;
   s += confettiEdges(pal, 20260606);
@@ -215,7 +216,7 @@ function themeConfettiJoy() {
   s += `<rect x="44" y="44" width="${W - 88}" height="${H - 88}" rx="26" fill="none" stroke="url(#rainbow)" stroke-width="7"/>`;
   s += `<rect x="62" y="62" width="${W - 124}" height="${H - 124}" rx="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 12" opacity="0.85"/>`;
   // 角落小帽（彩色）
-  s += corners(64, mortarboard(70, 70, 0.85, '#ffd23f', '#ff5e6c'));
+  s += corners(64, mortarboard(70, 70, 0.85, '#ffd23f', '#ff5e6c'), teacher ? 'top' : 'all');
   // 白色置中銘牌
   const bw = 720, bh = 100, bx = (W - bw) / 2, by = 30;
   s += `<g filter="url(#soft)"><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="50" fill="rgba(255,255,255,0.94)" stroke="url(#rainbow)" stroke-width="3"/></g>`;
@@ -225,7 +226,7 @@ function themeConfettiJoy() {
   // 底部
   const cx = W / 2, y = 966;
   let bot = `<text x="${cx}" y="${y}" text-anchor="middle" font-family="${CN}" font-size="44" font-weight="700" letter-spacing="12"><tspan fill="#ff5e6c">鵬</tspan><tspan fill="#ff9f43">程</tspan><tspan fill="#2ecc71">萬</tspan><tspan fill="#45aaf2">里</tspan></text>`;
-  bot += `<text x="${cx}" y="${y + 42}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="24" fill="#ffffff" letter-spacing="5">${YEAR_EN}</text>`;
+  if (!teacher) bot += `<text x="${cx}" y="${y + 42}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="24" fill="#ffffff" letter-spacing="5">${YEAR_EN}</text>`;
   s += `<g filter="url(#textsh)">${bot}</g>`;
   return s;
 }
@@ -248,6 +249,9 @@ const THEMES = [
   ['02_confetti_joy', themeConfettiJoy],
   ['03_navy_academic', themeNavyAcademic],
   ['04_minimal_clean', themeMinimalClean],
+  // 導師版底框（拿掉底部英文小字 + 省略下方角飾，騰出下排放六位導師人像）
+  ['01_gold_royal_tbase', () => themeGoldRoyal(true)],
+  ['02_confetti_joy_tbase', () => themeConfettiJoy(true)],
 ];
 
 for (const [name, fn] of THEMES) {
