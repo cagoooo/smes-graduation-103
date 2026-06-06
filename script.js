@@ -336,6 +336,27 @@
       var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
       var allWishes = [], curFilter = "全部", lastSeenMaxR = null;
+
+      // 從 wish.html 連結進來會帶 #wishform，目的地是「也為畢業生留下祝福」輸入區。
+      // 但祝福牆卡片是非同步載入的，瀏覽器的錨點跳轉發生在卡片長出來之前 → 表單被擠到下方，
+      // 使用者落點變成牆中間還要往下滑。於是在牆首次渲染、版面穩定後，補捲一次到表單（一次性，不影響之後的輪詢）。
+      var formScrollPending = (location.hash === "#wishform");
+      function correctFormScroll() {
+        if (!formScrollPending) return;
+        formScrollPending = false; // 一次性：之後的 25 秒背景輪詢不再干擾使用者捲動
+        var target = document.getElementById("wishform");
+        if (!target) return;
+        // 即時定位（非平滑）：表單在長頁最底，平滑捲 ~14000px 既慢、又會被卡片/圖片載入位移打斷而失敗；
+        // 從 wish.html 連結落地本來就該「直接到表單」。多排幾次涵蓋卡片 / 圖片 / 字型陸續載入造成的高度位移。
+        function go() {
+          try { target.scrollIntoView({ behavior: "instant", block: "start" }); }
+          catch (_) { try { target.scrollIntoView(); } catch (e) {} }
+        }
+        go();
+        requestAnimationFrame(go);
+        setTimeout(go, 300);
+        setTimeout(go, 800);
+      }
       function maskName(n, c) {
         n = String(n || "").trim();
         // 僅「六年X班」畢業生需去識別化保護未成年隱私；師長 / 其他（校友、職員、家屬…）一律完整顯示
@@ -590,7 +611,7 @@
           .then(function (r) { return r.json(); })
           .then(function (d) {
             var ws = (d && d.wishes) || [];
-            if (!ws.length) { wall.hidden = true; if (ticker) ticker.hidden = true; return; }
+            if (!ws.length) { wall.hidden = true; if (ticker) ticker.hidden = true; correctFormScroll(); return; }
             // 準即時通知：最新列號變大 = LINE 審核通過的新祝福進來 → 跳 toast（首次載入只設基準、不提示）
             var maxR = ws.reduce(function (m, w) { return Math.max(m, w.r || 0); }, 0);
             if (lastSeenMaxR !== null && maxR > lastSeenMaxR) {
@@ -602,6 +623,7 @@
             buildFilters();
             renderCards();
             wall.hidden = false;
+            correctFormScroll(); // 牆已渲染、版面穩定 → 若是從 wish.html(#wishform) 進來，補捲到表單
             if (wallOpenBtn) wallOpenBtn.hidden = false; // 有祝福才顯示「放大看完整祝福牆」
             if (wallBox && !wallBox.hidden) { buildWallFilters(); renderWall(); } // 放大牆開著時同步更新
             // 置頂跑馬燈：維持「全部」祝福（不受班級篩選影響）；祝福少時補滿、無縫循環、速度放慢
@@ -617,7 +639,7 @@
               ticker.hidden = false;
             }
           })
-          .catch(function () { /* 抓不到就不顯示，靜默 */ });
+          .catch(function () { correctFormScroll(); /* 抓不到就不顯示，靜默（仍補捲到表單） */ });
       }
       load();
       setInterval(load, 25 * 1000);   // 25 秒背景輪詢，準即時偵測審核通過的新祝福
