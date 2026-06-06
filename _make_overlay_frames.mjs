@@ -120,6 +120,14 @@ function bottomGreeting(big, en, cFill, cEn) {
   return s;
 }
 
+// 底部祝賀「膠囊」：有底色、貼齊最底線（導師版用，字疊在現場畫面上也看得清楚）
+function greetingPill(innerFn, pillFill, pillStroke, inset, pw = 372) {
+  const cx = W / 2, ph = 66, yB = H - inset - 6, py = yB - ph;
+  let s = `<g filter="url(#soft)"><rect x="${cx - pw / 2}" y="${py}" width="${pw}" height="${ph}" rx="${ph / 2}" fill="${pillFill}" stroke="${pillStroke}" stroke-width="2"/></g>`;
+  s += innerFn(cx, py + ph / 2 + 15);
+  return s;
+}
+
 // 邊緣紙花（只灑在四邊帶狀區，中央淨空）
 function confettiEdges(palette, seed) {
   const r = rng(seed);
@@ -188,10 +196,15 @@ const outlined = (svg) => `<g filter="url(#outline)">${svg}</g>`;
 // ───────── 四種主題 ─────────
 function themeGoldRoyal(teacher = false) {
   const G = 'url(#gold)', GS = '#caa14a';
+  const INSET = 28;  // 外框更往外擴，中央留白更大
   let s = DEFS;
-  s += outlined(border(46, 16, 3, 1.4, G, 18) + corners(46, scrollCorner(G, GS), teacher ? 'top' : 'all'));
+  s += outlined(border(INSET, 14, 3, 1.4, G, 18) + corners(INSET, scrollCorner(G, GS), teacher ? 'top' : 'all'));
   s += plaque({ fillBg: 'rgba(12,22,46,0.84)', stroke: G, c1: '#fff7e4', c2: '#ecd9a6' });
-  s += outlined(bottomGreeting('畢 業 快 樂', teacher ? '' : ('CONGRATULATIONS · ' + YEAR_EN), G, '#ecd9a6'));
+  if (teacher) {
+    s += greetingPill((cx, by2) => `<text x="${cx}" y="${by2}" text-anchor="middle" font-family="${CN}" font-size="40" font-weight="700" fill="${G}" letter-spacing="12">畢 業 快 樂</text>`, 'rgba(12,22,46,0.86)', G, INSET);
+  } else {
+    s += outlined(bottomGreeting('畢 業 快 樂', 'CONGRATULATIONS · ' + YEAR_EN, G, '#ecd9a6'));
+  }
   return s;
 }
 
@@ -213,21 +226,26 @@ function themeConfettiJoy(teacher = false) {
   let s = DEFS;
   s += confettiEdges(pal, 20260606);
   // 彩虹外框 + 內白虛線
-  s += `<rect x="44" y="44" width="${W - 88}" height="${H - 88}" rx="26" fill="none" stroke="url(#rainbow)" stroke-width="7"/>`;
-  s += `<rect x="62" y="62" width="${W - 124}" height="${H - 124}" rx="18" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 12" opacity="0.85"/>`;
+  const INSET = 28;  // 外框更往外擴，中央留白更大
+  s += `<rect x="${INSET}" y="${INSET}" width="${W - 2 * INSET}" height="${H - 2 * INSET}" rx="24" fill="none" stroke="url(#rainbow)" stroke-width="7"/>`;
+  s += `<rect x="${INSET + 16}" y="${INSET + 16}" width="${W - 2 * (INSET + 16)}" height="${H - 2 * (INSET + 16)}" rx="16" fill="none" stroke="#ffffff" stroke-width="2" stroke-dasharray="2 12" opacity="0.85"/>`;
   // 角落小帽（彩色）
-  s += corners(64, mortarboard(70, 70, 0.85, '#ffd23f', '#ff5e6c'), teacher ? 'top' : 'all');
+  s += corners(INSET + 18, mortarboard(70, 70, 0.85, '#ffd23f', '#ff5e6c'), teacher ? 'top' : 'all');
   // 白色置中銘牌
   const bw = 720, bh = 100, bx = (W - bw) / 2, by = 30;
   s += `<g filter="url(#soft)"><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="50" fill="rgba(255,255,255,0.94)" stroke="url(#rainbow)" stroke-width="3"/></g>`;
   s += `<image href="${LOGO}" x="${bx + 26}" y="${by + 20}" width="60" height="60"/>`;
   s += `<text x="${bx + 104}" y="${by + 44}" font-family="${CN}" font-size="22" fill="#5566aa" font-weight="700">${SCHOOL_SHORT}・${EVENT}</text>`;
   s += `<text x="${bx + 104}" y="${by + 84}" font-family="${CN}" font-size="40" font-weight="700" fill="#ff5e6c">畢業快樂 <tspan fill="#45aaf2">GRADUATION</tspan> <tspan fill="#2ecc71">2026</tspan></text>`;
-  // 底部
-  const cx = W / 2, y = 966;
-  let bot = `<text x="${cx}" y="${y}" text-anchor="middle" font-family="${CN}" font-size="44" font-weight="700" letter-spacing="12"><tspan fill="#ff5e6c">鵬</tspan><tspan fill="#ff9f43">程</tspan><tspan fill="#2ecc71">萬</tspan><tspan fill="#45aaf2">里</tspan></text>`;
-  if (!teacher) bot += `<text x="${cx}" y="${y + 42}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="24" fill="#ffffff" letter-spacing="5">${YEAR_EN}</text>`;
-  s += `<g filter="url(#textsh)">${bot}</g>`;
+  // 底部祝賀
+  if (teacher) {
+    s += greetingPill((cx, by2) => `<text x="${cx}" y="${by2}" text-anchor="middle" font-family="${CN}" font-size="40" font-weight="700" letter-spacing="12"><tspan fill="#ff5e6c">鵬</tspan><tspan fill="#ff9f43">程</tspan><tspan fill="#2ecc71">萬</tspan><tspan fill="#45aaf2">里</tspan></text>`, 'rgba(255,255,255,0.95)', 'url(#rainbow)', INSET);
+  } else {
+    const cx = W / 2, y = 966;
+    let bot = `<text x="${cx}" y="${y}" text-anchor="middle" font-family="${CN}" font-size="44" font-weight="700" letter-spacing="12"><tspan fill="#ff5e6c">鵬</tspan><tspan fill="#ff9f43">程</tspan><tspan fill="#2ecc71">萬</tspan><tspan fill="#45aaf2">里</tspan></text>`;
+    bot += `<text x="${cx}" y="${y + 42}" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="24" fill="#ffffff" letter-spacing="5">${YEAR_EN}</text>`;
+    s += `<g filter="url(#textsh)">${bot}</g>`;
+  }
   return s;
 }
 
