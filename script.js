@@ -525,6 +525,47 @@
       var wallFiltersEl = document.getElementById("wallFilters");
       var wallScroll = document.getElementById("wallScroll");
       var wallFilter = "全部", wallAnimTimer = null;
+
+      // 放大牆「自動緩捲」：開牆後緩緩往下走，讓人不用滑也能看完所有祝福；
+      // 使用者一捲動/觸碰/按方向鍵就暫停，閒置幾秒後自動恢復；捲到底停一下再平滑回頂循環；尊重 prefers-reduced-motion。
+      var WALL_PXPS = 30, WALL_START_DELAY_MS = 1200, WALL_END_PAUSE_MS = 2600, WALL_IDLE_MS = 4000;
+      var wallAuto = { on: false, raf: null, timer: null, lastTs: null, carry: 0 };
+      function wallReduce() { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+      function wallClearTimers() {
+        if (wallAuto.raf) { cancelAnimationFrame(wallAuto.raf); wallAuto.raf = null; }
+        if (wallAuto.timer) { clearTimeout(wallAuto.timer); wallAuto.timer = null; }
+      }
+      function wallKick(delay) { // delay 毫秒後（重新）開始往下緩捲
+        wallClearTimers(); wallAuto.lastTs = null; wallAuto.carry = 0;
+        wallAuto.timer = setTimeout(function () { wallAuto.raf = requestAnimationFrame(wallStep); }, delay);
+      }
+      function wallStep(ts) {
+        if (!wallAuto.on || !wallScroll) { wallAuto.raf = null; return; }
+        if (wallAuto.lastTs == null) wallAuto.lastTs = ts;
+        var dt = ts - wallAuto.lastTs; wallAuto.lastTs = ts;
+        var max = wallScroll.scrollHeight - wallScroll.clientHeight;
+        if (max <= 1) { wallAuto.carry = 0; wallAuto.raf = requestAnimationFrame(wallStep); return; } // 內容還沒溢出 → 等
+        wallAuto.carry += WALL_PXPS * dt / 1000; // 用時間差累積，確保不同更新率下速度一致
+        var px = Math.floor(wallAuto.carry);
+        if (px > 0) {
+          wallAuto.carry -= px;
+          if (wallScroll.scrollTop >= max - 1) { // 到底 → 停一下 → 平滑回頂 → 續捲
+            wallClearTimers();
+            wallAuto.timer = setTimeout(function () {
+              if (!wallAuto.on) return;
+              try { wallScroll.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) { wallScroll.scrollTop = 0; }
+              wallKick(1000);
+            }, WALL_END_PAUSE_MS);
+            return;
+          }
+          wallScroll.scrollTop += px; // 直接設 scrollTop＝即時（不受 CSS scroll-behavior 影響），小步累積成緩捲
+        }
+        wallAuto.raf = requestAnimationFrame(wallStep);
+      }
+      function wallAutoStart() { if (!wallScroll || wallReduce()) return; wallAuto.on = true; wallKick(WALL_START_DELAY_MS); }
+      function wallAutoStop() { wallAuto.on = false; wallClearTimers(); }
+      function wallAutoBump() { if (wallAuto.on) wallKick(WALL_IDLE_MS); } // 使用者操作 → 暫停，閒置後恢復
+
       // animate=true（切班級）→ 卡片交錯淡入進場；不傳 = 瞬間（開牆、背景輪詢同步）
       function renderWall(animate) {
         if (!wallGrid) return;
@@ -558,9 +599,11 @@
         wallBox.hidden = false; wallBox.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
         if (wallScroll) wallScroll.scrollTop = 0;
+        wallAutoStart(); // 開牆後自動緩緩往下捲
       }
       function closeWall() {
         if (!wallBox) return;
+        wallAutoStop();
         wallBox.hidden = true; wallBox.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
         renderCards(); // 同步放大牆按過的愛心回卡片牆
@@ -581,8 +624,17 @@
           if (reduceMo) { wallScroll.scrollTop = 0; }
           else { try { wallScroll.scrollTo({ top: 0, behavior: "smooth" }); } catch (_) { wallScroll.scrollTop = 0; } }
         }
+        wallAutoBump(); // 切班級後暫停自動捲，閒置後再從頂端續捲
       });
-      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && wallBox && !wallBox.hidden) closeWall(); });
+      // 使用者一捲動 / 觸碰 / 拖曳 → 暫停自動緩捲（不監聽 scroll 事件，否則自動捲自己會觸發成無限暫停）
+      if (wallScroll) ["wheel", "touchstart", "pointerdown", "mousedown"].forEach(function (ev) {
+        wallScroll.addEventListener(ev, wallAutoBump, { passive: true });
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && wallBox && !wallBox.hidden) { closeWall(); return; }
+        if (wallBox && !wallBox.hidden &&
+          ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"].indexOf(e.key) !== -1) wallAutoBump();
+      });
       // 新祝福即時通知 toast
       var newWishToast = document.getElementById("newWishToast");
       var newWishTimer = null;
