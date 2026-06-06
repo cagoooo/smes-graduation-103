@@ -17,6 +17,9 @@
 # 直播導播機換場墊片（含導師肖像衍生剪影）— 本機 OBS/vMix 素材，不公開部署
 director-scenes/
 
+# 導播機透明外框 overlay（中央去背疊圖、含校景預覽合成）— 本機 OBS/vMix 素材，不公開部署
+overlay-frames/
+
 # 本地預覽／工具設定
 .claude/
 
