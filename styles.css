@@ -980,7 +980,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   padding: 10px 16px; border-radius: 999px; border: 1.5px solid rgba(245, 196, 81, .6);
   background: linear-gradient(120deg, var(--navy-800), var(--navy-700));
   box-shadow: 0 8px 24px rgba(16, 23, 51, .4);
-  transition: transform .15s ease, border-color .2s ease;
+  transition: transform .15s ease, border-color .2s ease, bottom .4s var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .bgm-toggle:hover { transform: translateY(-2px); border-color: var(--gold); }
@@ -1071,34 +1071,45 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    版本更新提示 banner
    ========================================================= */
 .update-banner {
-  position: fixed; left: 50%; bottom: -120px; transform: translateX(-50%);
-  z-index: 200; display: flex; align-items: center; gap: 12px;
-  background: var(--navy-800); color: #fff;
+  position: fixed; left: 50%; bottom: -160px; transform: translateX(-50%);
+  z-index: 360; display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, var(--navy-800), var(--navy-700)); color: #fff;
   padding: 14px 16px 14px 20px; border-radius: 16px;
-  box-shadow: var(--shadow-lg); border: 1px solid rgba(245,185,66,.4);
-  max-width: calc(100vw - 32px); transition: bottom .45s var(--ease), opacity .3s;
-  opacity: 0; font-size: .92rem;
+  box-shadow: var(--shadow-lg); border: 1px solid rgba(245,185,66,.45);
+  max-width: calc(100vw - 24px); transition: bottom .45s var(--ease), opacity .3s;
+  opacity: 0; font-size: .95rem;
   pointer-events: none; /* 隱藏時不可攔截點擊，否則會蓋住「回到頂端」按鈕 */
 }
-.update-banner.is-visible { bottom: 18px; opacity: 1; pointer-events: auto; }
-.update-banner__ico { font-size: 1.2rem; }
-.update-banner__text { flex: 1; }
+.update-banner.is-visible { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); opacity: 1; pointer-events: auto; }
+.update-banner__msg { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.update-banner__ico { font-size: 1.4rem; flex-shrink: 0; }
+.update-banner__text { line-height: 1.5; }
+.update-banner__actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .update-banner__btn {
   flex-shrink: 0; background: var(--gold); color: var(--navy-900);
-  border: none; border-radius: 999px; padding: 9px 18px; font-weight: 700;
-  font-size: .9rem; cursor: pointer; font-family: inherit; transition: background .2s, transform .2s;
+  border: none; border-radius: 999px; padding: 10px 20px; font-weight: 800;
+  font-size: .95rem; cursor: pointer; font-family: inherit; white-space: nowrap;
+  transition: background .2s, transform .2s;
 }
 .update-banner__btn:hover { background: #ffca5a; transform: translateY(-1px); }
+.update-banner__btn:active { transform: scale(.97); }
 .update-banner__close {
   flex-shrink: 0; background: transparent; color: rgba(255,255,255,.7);
-  border: none; font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 0 4px;
+  border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 0 6px;
 }
 .update-banner__close:hover { color: #fff; }
 
-@media (max-width: 480px) {
-  .update-banner { left: 12px; right: 12px; transform: none; flex-wrap: wrap; }
-  .update-banner.is-visible { bottom: 12px; }
-  .update-banner__text { flex-basis: 100%; }
+@media (max-width: 520px) {
+  .update-banner {
+    left: 12px; right: 12px; transform: none;
+    flex-direction: column; align-items: stretch; gap: 12px; padding: 16px;
+  }
+  .update-banner.is-visible { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .update-banner__actions { gap: 8px; }
+  .update-banner__btn { flex: 1; padding: 13px 18px; font-size: 1.02rem; }
+  .update-banner__close { font-size: 1.6rem; padding: 0 10px; }
+  /* banner 顯示時把左下角「校歌重編版」鈕抬到 banner 上方，避免重疊（高度由 script.js 量測寫入 --bgm-lift） */
+  body.has-update-banner .bgm-toggle { bottom: var(--bgm-lift, 130px); }
 }
 
 /* =========================================================

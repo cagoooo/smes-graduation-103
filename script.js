@@ -712,8 +712,17 @@
       if (bannerShown || !banner || dismissedThisSession()) return;
       bannerShown = true;
       banner.classList.add("is-visible");
+      document.body.classList.add("has-update-banner");
+      // 依 banner 實際高度，把左下角「校歌重編版」鈕抬到 banner 上方避免重疊（手機限定，由 CSS media query 套用）
+      requestAnimationFrame(function () {
+        var h = banner.offsetHeight || 0;
+        if (h) document.documentElement.style.setProperty("--bgm-lift", (h + 24) + "px");
+      });
     }
-    function hideUpdateBanner() { if (banner) banner.classList.remove("is-visible"); }
+    function hideUpdateBanner() {
+      if (banner) banner.classList.remove("is-visible");
+      document.body.classList.remove("has-update-banner");
+    }
     if (updClose) updClose.addEventListener("click", function () {
       hideUpdateBanner();
       try { sessionStorage.setItem("swUpdateDismissed", "1"); } catch (_) {} // 本次工作階段不再提示
