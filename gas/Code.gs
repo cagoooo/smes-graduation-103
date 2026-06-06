@@ -76,7 +76,7 @@ function doPost(e) {
     name = (data.name || '').toString().trim().slice(0, 30);
     klass = (data['class'] || '').toString().trim().slice(0, 20);
     if (!name || !klass) return json_({ ok: false, error: 'missing required fields' });
-    message = (data.message || '').toString().slice(0, 300);
+    message = (data.message || '').toString().slice(0, 500); // 上限 500 字（須與前端 textarea maxlength 一致）
     var sh = getSheet_();
     sh.appendRow([
       new Date(),
