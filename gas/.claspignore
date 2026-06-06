@@ -1,0 +1,4 @@
+# 只推送 Apps Script 需要的檔案，其餘（部署說明.md / .clasp.json 等）一律忽略
+**/**
+!Code.gs
+!appsscript.json
