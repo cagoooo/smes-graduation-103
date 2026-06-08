@@ -88,10 +88,10 @@ function doPost(e) {
       0   // G 欄（愛心）初始 0
     ]);
     var total = Math.max(0, sh.getLastRow() - 1); // 扣掉標題列
-    notifyNewWish_(klass, name, message, total);  // best-effort LINE 通知（成功）
+    notifyFreeNewWish_(klass, name, message, total); // best-effort 通知（Email 為主 + Google Chat 選配，避開 LINE 200/月 額度）
     return json_({ ok: true });
   } catch (err) {
-    notifyError_(String(err), klass, name);        // best-effort LINE 通知（失敗）
+    notifyFreeError_(String(err), klass, name);      // best-effort 失敗通知（Email / Chat）
     return json_({ ok: false, error: String(err) });
   }
 }
@@ -264,6 +264,69 @@ function notifyError_(errMsg, klass, name) {
     if (code !== -1 && code !== 200) {
       pushLine_([{ type: 'text', text: '❌ 祝福寫入失敗\n班級：' + (klass || '—') + '\n畢業生：' + (name || '—') + '\n錯誤：' + clip_(errMsg, 200) }]);
     }
+  } catch (e) { /* best-effort */ }
+}
+
+/* ============================================================
+ *  免費無上限通知管道（Email 為主 + Google Chat 選配）
+ *  - 取代受 LINE 免費方案 200 則/月 額度限制的 push（畢典爆量時會用罄而靜默失敗）
+ *  - Email 收件者：指令碼屬性 NOTIFY_EMAIL；未設定則自動寄給 web app 擁有者（阿凱老師）
+ *  - Google Chat：設定指令碼屬性 GOOGLE_CHAT_WEBHOOK 後自動啟用（免費、無則數上限）
+ * ============================================================ */
+function notifyTargets_() {
+  var p = PropertiesService.getScriptProperties();
+  var email = (p.getProperty('NOTIFY_EMAIL') || '').trim();
+  if (!email) { try { email = Session.getEffectiveUser().getEmail() || ''; } catch (e) {} }
+  return { email: email, chat: (p.getProperty('GOOGLE_CHAT_WEBHOOK') || '').trim() };
+}
+
+function notifyFreeNewWish_(klass, name, message, total) {
+  var row = total + 1;
+  var t = notifyTargets_();
+  var base = webAppUrl_(), k = encodeURIComponent(getModToken_());
+  var approve = base ? base + '?action=moderate&row=' + row + '&v=1&k=' + k : '';
+  var hide = base ? base + '?action=moderate&row=' + row + '&v=0&k=' + k : '';
+  try {
+    if (t.email) {
+      var html =
+        '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">' +
+        '<div style="background:#065F46;color:#fff;padding:16px 20px">' +
+        '<div style="font-size:20px;font-weight:bold">🎓 收到一則新的畢業祝福</div>' +
+        '<div style="color:#A7F3D0;font-size:13px;margin-top:4px">石門國小 畢業典禮網站</div></div>' +
+        '<div style="padding:18px 20px;color:#0f172a;font-size:15px;line-height:1.8">' +
+        '<p><b>班級：</b>' + escHtml_(klass || '—') + '</p>' +
+        '<p><b>畢業生：</b>' + escHtml_(name || '—') + '</p>' +
+        '<p><b>祝福：</b><br>' + escHtml_(message || '—') + '</p>' +
+        '<p style="color:#64748b;font-size:13px">累計第 ' + total + ' 則（待審核）</p>';
+      if (approve) html +=
+        '<div style="margin-top:14px">' +
+        '<a href="' + approve + '" style="display:inline-block;background:#065F46;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;margin-right:8px">✅ 通過公開</a>' +
+        '<a href="' + hide + '" style="display:inline-block;background:#e2e8f0;color:#0f172a;text-decoration:none;padding:10px 18px;border-radius:8px">🙈 維持隱藏</a></div>';
+      html += '</div></div>';
+      MailApp.sendEmail({
+        to: t.email,
+        subject: '🎓 新祝福｜' + (klass || '—') + ' ' + (name || '—'),
+        htmlBody: html,
+        body: '收到一則新的畢業祝福\n班級：' + (klass || '—') + '\n畢業生：' + (name || '—') + '\n祝福：' + (message || '—') + '\n累計第 ' + total + ' 則（待審核）' + textModerateLinks_(row),
+        name: '石門畢典祝福通知'
+      });
+    }
+  } catch (e) { /* best-effort */ }
+  try {
+    if (t.chat) {
+      var txt = '🎓 *收到新祝福*\n*班級：* ' + (klass || '—') + '\n*畢業生：* ' + (name || '—') +
+        '\n*祝福：* ' + clip_(message, 200) + '\n累計第 ' + total + ' 則（待審核）' + textModerateLinks_(row);
+      UrlFetchApp.fetch(t.chat, { method: 'post', contentType: 'application/json; charset=utf-8', payload: JSON.stringify({ text: txt }), muteHttpExceptions: true });
+    }
+  } catch (e) { /* best-effort */ }
+}
+
+function notifyFreeError_(errMsg, klass, name) {
+  try {
+    var t = notifyTargets_();
+    var line = '❌ 祝福寫入失敗\n班級：' + (klass || '—') + '\n畢業生：' + (name || '—') + '\n錯誤：' + clip_(errMsg, 200);
+    if (t.email) MailApp.sendEmail({ to: t.email, subject: '❌ 畢典祝福寫入失敗', body: line, name: '石門畢典祝福通知' });
+    if (t.chat) UrlFetchApp.fetch(t.chat, { method: 'post', contentType: 'application/json; charset=utf-8', payload: JSON.stringify({ text: line }), muteHttpExceptions: true });
   } catch (e) { /* best-effort */ }
 }
 
