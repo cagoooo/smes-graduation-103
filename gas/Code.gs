@@ -104,10 +104,62 @@ function handleLike_(e) {
   }
 }
 
+/* ============================================================
+ *  打卡機照片上傳（POST，Content-Type: text/plain 免 CORS preflight）
+ *  - base64 jpeg → 存 Drive 資料夾（知道連結即可看）→ 回傳可掃 QR 的連結
+ *  - 只給「掃 QR 帶走自己的照片」用；不公開、不上祝福牆（隱私）
+ *  - 首次需在編輯器執行 authorize() 授權 Drive（見檔尾）
+ * ============================================================ */
+var PHOTO_FOLDER_NAME = '石門畢業典禮 · 打卡照';
+
+function getPhotoFolder_() {
+  var p = PropertiesService.getScriptProperties();
+  var id = p.getProperty('PHOTO_FOLDER_ID');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  var folder = DriveApp.createFolder(PHOTO_FOLDER_NAME);
+  p.setProperty('PHOTO_FOLDER_ID', folder.getId());
+  return folder;
+}
+
+function handlePhotoUpload_(data) {
+  try {
+    var b64 = String(data.image || '').replace(/^data:image\/\w+;base64,/, '');
+    if (!b64) return json_({ ok: false, error: 'no image' });
+    if (b64.length > 9000000) return json_({ ok: false, error: 'image too large' }); // ~6.7MB 保護
+    var bytes = Utilities.base64Decode(b64);
+    var ts = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyyMMdd_HHmmss');
+    var file = getPhotoFolder_().createFile(Utilities.newBlob(bytes, 'image/jpeg', '畢業打卡_' + ts + '.jpg'));
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    var id = file.getId();
+    return json_({ ok: true, id: id,
+      view: 'https://drive.google.com/file/d/' + id + '/view',
+      img: 'https://drive.google.com/uc?export=view&id=' + id });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) }); // 多半是「尚未授權 Drive」→ 編輯器跑 authorize()
+  }
+}
+
+/**
+ * 【選配】刪除超過 N 天的打卡照（隱私保存期限）。
+ * 用法：編輯器設「時間驅動」每日觸發本函數即可自動清理。預設 30 天。
+ */
+function cleanupOldPhotos_() {
+  var DAYS = 30;
+  var cutoff = new Date(Date.now() - DAYS * 24 * 60 * 60 * 1000);
+  var it = getPhotoFolder_().getFiles();
+  var n = 0;
+  while (it.hasNext()) {
+    var f = it.next();
+    if (f.getDateCreated() < cutoff) { f.setTrashed(true); n++; }
+  }
+  return '已清理 ' + n + ' 張超過 ' + DAYS + ' 天的打卡照';
+}
+
 function doPost(e) {
   var klass = '', name = '', message = '';
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (data.action === 'photo') return handlePhotoUpload_(data); // 打卡機照片上傳 → 存 Drive 回傳連結
     name = (data.name || '').toString().trim().slice(0, 30);
     klass = (data['class'] || '').toString().trim().slice(0, 20);
     if (!name || !klass) return json_({ ok: false, error: 'missing required fields' });
@@ -601,11 +653,14 @@ function handleModerate_(e) {
 
 /**
  * 部署後若跳授權，請在編輯器選此函數按「執行」一次完成授權
- * （含試算表讀寫 + 對外連線兩項權限）。順便初始化審核 token。
+ * （含試算表讀寫 + 對外連線 + Drive 三項權限）。順便初始化審核 token 與打卡照資料夾。
+ * ⚠️ 新增 Drive（打卡機照片）後，授權完請到「部署 → 管理部署 → 編輯 → 版本：新版本」重新部署一次，
+ *    clasp 部署不一定會綁進剛授權的新範圍（與 MailApp 同類雷）。/exec 網址不變。
  */
 function authorize() {
   getSheet_();
   lineCreds_();
   getModToken_();
+  try { getPhotoFolder_(); } catch (e) {} // 觸發 Drive 授權 + 預建「打卡照」資料夾
   return 'authorized';
 }
