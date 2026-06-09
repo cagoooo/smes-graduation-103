@@ -28,6 +28,14 @@
   .main{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
   /* 面板：風格縮圖 + 控制鈕 + 提示 */
   .panel{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;}
+  /* 固定左上角「回主頁」按鈕：任何狀態都看得到，家長隨時回得去 */
+  .topback{position:fixed;top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));z-index:30;
+    display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.28);color:#fff;text-decoration:none;font-weight:700;
+    font-size:.84rem;padding:8px 14px;border-radius:999px;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+    box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .12s ease,background .2s ease;}
+  .topback:hover{background:rgba(255,255,255,.22);}
+  .topback:active{transform:scale(.95);}
   header{text-align:center;margin:4px 0 7px;}
   header .logo{width:48px;height:48px;vertical-align:middle;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
   header h1{display:inline-block;vertical-align:middle;margin-left:8px;font-size:clamp(1.15rem,4.4vw,1.6rem);font-weight:900;letter-spacing:.5px;}
@@ -116,6 +124,7 @@
 </style>
 </head>
 <body>
+  <a class="topback" href="./" aria-label="回畢業典禮主頁">← 回主頁</a>
   <header>
     <img class="logo" src="assets/logo.png" alt="石門國小校徽">
     <h1>📸 畢業打卡機</h1>

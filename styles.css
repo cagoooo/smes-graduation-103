@@ -1160,3 +1160,28 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   .section, .hero { padding: 20px 0; }
   .reveal { opacity: 1 !important; transform: none !important; }
 }
+
+/* ===== 線上打卡拍照機 介紹區塊 ===== */
+.section--photobooth { background: linear-gradient(180deg, var(--navy-800) 0%, var(--navy-900) 100%); }
+.section--photobooth .section__title { color: #fff; }
+.section--photobooth .section__title::after { background: var(--gold); }
+.section--photobooth .section__intro { color: #cdd6f4; }
+.pb-showcase { display: flex; gap: 36px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+.pb-preview { position: relative; flex: 0 0 auto; width: min(248px, 64vw); border-radius: 20px; overflow: hidden;
+  display: block; box-shadow: 0 18px 48px rgba(0,0,0,.45); border: 1px solid rgba(245,185,66,.45);
+  background: #0e1530; transition: transform .2s ease, box-shadow .2s ease; }
+.pb-preview:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+.pb-preview img { display: block; width: 100%; height: auto; }
+.pb-preview__badge { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(20,29,59,.86);
+  color: var(--gold); font-weight: 800; text-align: center; padding: 11px 8px; font-size: .98rem; letter-spacing: .5px; }
+.pb-info { flex: 1 1 340px; max-width: 460px; }
+.pb-feats { list-style: none; margin: 0 0 24px; padding: 0; }
+.pb-feats li { padding: 11px 2px; border-bottom: 1px dashed rgba(255,255,255,.16); color: #eaf0ff; font-size: 1.04rem; line-height: 1.65; }
+.pb-feats li:last-child { border-bottom: none; }
+.pb-feats b { color: var(--gold); }
+.pb-cta { font-size: 1.16rem; padding: 16px 34px; }
+@media (max-width: 680px) {
+  .pb-showcase { gap: 22px; }
+  .pb-info { flex-basis: 100%; text-align: center; }
+  .pb-feats li { text-align: left; }
+}
