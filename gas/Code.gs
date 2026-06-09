@@ -18,6 +18,7 @@ var SHEET_ID = '1Y0R7ypyhFtHg1O_P9CHp7MM7_3GZ_WpOr3t1dHNNceg';
 var SHEET_NAME = '回條';
 var SITE_WALL_URL = 'https://cagoooo.github.io/smes-graduation-103/#rsvp'; // 前端祝福牆（審核頁「前往查看」用）
 var HEADERS = ['送出時間', '班級', '畢業生姓名', '出席人數', '祝福悄悄話', '公開(填1或打勾)', '愛心'];
+var LATEST_VIEW_NAME = '🆕 最新在最上'; // 唯讀檢視分頁：把「回條」新到舊鏡像顯示（不影響原分頁列序）
 
 function getSheet_() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
@@ -38,6 +39,40 @@ function getSheet_() {
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * 建立／確保「🆕 最新在最上」唯讀檢視分頁。
+ * - 用 QUERY 把「回條」整批「新到舊」鏡像顯示，並放到最左（第一個分頁）。
+ * - 純公式鏡像 → 不改動「回條」任何一列的位置，審核按鈕／愛心的「列號」定位完全不受影響。
+ * - 自我修復：缺了就補建；已存在就略過（不強制切換目前分頁，避免打斷正在編輯的老師）。
+ * 回傳 'created' | 'exists' | 'error:...'
+ */
+function ensureLatestView_() {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    if (ss.getSheetByName(LATEST_VIEW_NAME)) return 'exists';
+    var v = ss.insertSheet(LATEST_VIEW_NAME, 0); // index 0 → 排到最左
+    // setFormula 一律吃逗號語法（與試算表語系無關，避開分號 locale 雷）；
+    // 第三個參數 1＝把「回條」第 1 列當標題帶出，其餘資料以 A 欄(送出時間)新到舊排序。
+    v.getRange('A1').setFormula(
+      "=QUERY('" + SHEET_NAME + "'!A:G,\"select * where A is not null order by A desc\",1)"
+    );
+    v.setFrozenRows(1);
+    try {
+      v.setColumnWidth(1, 150); // 送出時間
+      v.setColumnWidth(5, 460); // 祝福悄悄話（加寬好讀）
+      v.setTabColor('#0f9d58');
+    } catch (e2) { /* 樣式失敗不影響功能 */ }
+    return 'created';
+  } catch (e) {
+    return 'error:' + e;
+  }
+}
+
+/** 【手動一次性】在 Apps Script 編輯器選此函數按「執行」，立刻建立「最新在最上」檢視分頁。 */
+function setupLatestFirstView() {
+  return ensureLatestView_();
 }
 
 function isPublic_(v) {
@@ -89,6 +124,7 @@ function doPost(e) {
     ]);
     var total = Math.max(0, sh.getLastRow() - 1); // 扣掉標題列
     notifyFreeNewWish_(klass, name, message, total); // best-effort 通知（Email 為主 + Google Chat 選配，避開 LINE 200/月 額度）
+    ensureLatestView_(); // 自我修復：確保「最新在最上」檢視分頁存在（鏡像公式，不影響本列定位）
     return json_({ ok: true });
   } catch (err) {
     notifyFreeError_(String(err), klass, name);      // best-effort 失敗通知（Email / Chat）
@@ -130,7 +166,7 @@ function doGet(e) {
   if (action === 'like') {
     return handleLike_(e); // 祝福牆愛心 +1
   }
-  return json_({ ok: true, service: 'smes-grad-103-rsvp' });
+  return json_({ ok: true, service: 'smes-grad-103-rsvp', latestView: ensureLatestView_() });
 }
 
 /* ============================================================
