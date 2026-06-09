@@ -22,8 +22,12 @@
     display:flex;flex-direction:column;align-items:center;
     padding:max(10px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom));
   }
-  /* 取景台容器：吃掉 header / 控制列以外的剩餘高度，置中 stage（stage 尺寸由 JS 精準算，保 9:16 又不溢出） */
+  /* 工作區：手機=直向堆疊（取景台在上、面板在下）；桌機/寬螢幕=橫向兩欄（取景台在左、面板在右），善用左右留白 */
+  .workspace{flex:1 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  /* 取景台容器：吃掉剩餘高度，置中 stage（stage 尺寸由 JS 精準算，保 9:16 又不溢出） */
   .main{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
+  /* 面板：風格縮圖 + 控制鈕 + 提示 */
+  .panel{width:100%;display:flex;flex-direction:column;align-items:center;gap:6px;}
   header{text-align:center;margin:4px 0 7px;}
   header .logo{width:48px;height:48px;vertical-align:middle;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
   header h1{display:inline-block;vertical-align:middle;margin-left:8px;font-size:clamp(1.15rem,4.4vw,1.6rem);font-weight:900;letter-spacing:.5px;}
@@ -87,8 +91,8 @@
   .modal .qrwrap img{display:block;width:min(62vw,230px);height:min(62vw,230px);}
   .modal .qrOpen{display:inline-block;margin-bottom:12px;}
   .modal .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-  /* 矮螢幕（小手機 / 橫放）：再精簡 chrome，把空間讓給取景台 */
-  @media (max-height:730px){
+  /* 矮螢幕「窄」手機：再精簡 chrome，把空間讓給取景台（限窄螢幕，不影響桌機兩欄） */
+  @media (max-height:730px) and (max-width:879px){
     header .sub{display:none;}
     header .logo{width:40px;height:40px;}
     .hint{display:none;}
@@ -96,6 +100,19 @@
     footer{padding-top:6px;}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+  /* ===== 桌機 / 寬螢幕：兩欄（取景台左、面板右），取景台變大、左右留白被善用 ===== */
+  @media (min-width:880px){
+    .workspace{flex-direction:row;align-items:stretch;justify-content:center;gap:26px;max-width:900px;margin:0 auto;}
+    .main{flex:0 0 auto;width:auto;}
+    .panel{flex:0 0 296px;width:296px;justify-content:center;gap:14px;}
+    .panel .frames{flex-wrap:wrap;justify-content:center;max-width:296px;overflow:visible;padding:2px;}
+    .panel .frames button{width:84px;height:150px;}
+    .panel .hint{display:block !important;max-width:282px;font-size:.86rem;margin-top:4px;}
+    header{margin:8px 0 14px;}
+    header .sub{display:block !important;}
+    header .logo{width:54px;height:54px;}
+    header h1{font-size:1.7rem;}
+  }
 </style>
 </head>
 <body>
@@ -105,6 +122,7 @@
     <div class="sub">石門國小 第103屆畢業典禮 · 和六位班導師一起入鏡</div>
   </header>
 
+  <div class="workspace" id="workspace">
   <div class="main" id="main">
     <div class="stage" id="stage">
       <div class="placeholder" id="placeholder">📷 按下方「開啟相機」<br>站進框內，和導師們一起拍張畢業照！</div>
@@ -115,6 +133,7 @@
       <div class="uploading hide" id="uploading"><span class="spin"></span>上傳中…</div>
     </div>
   </div>
+  <div class="panel" id="panel">
 
   <div class="frames" id="frames" aria-label="選擇外框風格"></div>
 
@@ -139,8 +158,12 @@
     <button class="btn pill pill-alt" id="retakeBtn">↩️ 重拍</button>
   </div>
 
-  <input type="file" id="fileInput" accept="image/*" class="hide">
   <div class="err hide" id="err"></div>
+  <div class="hint" id="hint">小提示：預設用 📷 <b>後鏡頭</b>拍完整合照（畫質更清楚）；想自拍按 <b>🔄</b> 切換前鏡頭。人對準中央框最好看，拍完可下載或分享。</div>
+  </div><!-- /panel -->
+  </div><!-- /workspace -->
+
+  <input type="file" id="fileInput" accept="image/*" class="hide">
 
   <!-- 掃 QR 帶走照片 -->
   <div class="modal hide" id="qrModal" role="dialog" aria-modal="true" aria-label="掃描帶走照片">
@@ -152,7 +175,6 @@
       <div class="row"><button class="btn pill pill-alt" id="qrClose">完成</button></div>
     </div>
   </div>
-  <div class="hint" id="hint">小提示：預設用 📷 <b>後鏡頭</b>拍完整合照（畫質更清楚）；想自拍按 <b>🔄</b> 切換前鏡頭。人對準中央框最好看，拍完可下載或分享。</div>
 
   <footer>
     <a class="back" href="./">← 回畢業典禮網站</a>
@@ -352,14 +374,24 @@
   if(!(navigator.canShare)){ $("shareBtn").classList.add("hide"); }
 
   // 取景台尺寸：保 9:16 又同時不超過容器寬與高（跨瀏覽器穩，不靠 svh calc）
-  var mainEl=$("main");
+  var mainEl=$("main"), wsEl=$("workspace");
   function fitStage(){
-    var availW = mainEl.clientWidth * 0.96;
-    var availH = mainEl.clientHeight - 4;
-    if(availW<=0 || availH<=0) return;
-    var w = Math.min(availW, availH * 9 / 16);
+    var w, h;
+    if(window.matchMedia("(min-width:880px)").matches){
+      // 桌機兩欄：取景台依「可用高度」放到最大，main 縮成 stage 寬（貼齊右側面板、無內部空隙）
+      var availH = (mainEl.clientHeight || wsEl.clientHeight) - 6;
+      if(availH<=0) availH = window.innerHeight*0.8;
+      h = availH; w = h * 9/16;
+      var capW = Math.min(window.innerWidth - 296 - 80, 480);   // 不擠到右側面板
+      if(w > capW){ w = capW; h = w * 16/9; }
+    } else {
+      // 手機/直向：取景台填滿剩餘空間（保 9:16 又不溢出）
+      var availW = mainEl.clientWidth * 0.96, availH2 = mainEl.clientHeight - 4;
+      if(availW<=0 || availH2<=0) return;
+      w = Math.min(availW, availH2 * 9/16); h = w * 16/9;
+    }
     stage.style.width = Math.round(w) + "px";
-    stage.style.height = Math.round(w * 16 / 9) + "px";
+    stage.style.height = Math.round(h) + "px";
   }
   window.addEventListener("resize", fitStage);
   window.addEventListener("orientationchange", function(){ setTimeout(fitStage,200); });
