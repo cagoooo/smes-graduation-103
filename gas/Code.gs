@@ -121,6 +121,17 @@ function getPhotoFolder_() {
   return folder;
 }
 
+/**
+ * 【一次性・打卡機照片用】在編輯器選此函數按「執行」。
+ * 因為會用到 DriveApp，第一次執行會「強制跳出 Drive 授權視窗」——選 ipad@ → 進階 → 允許。
+ * 不包 try/catch：沒授權會直接報錯（這正是我們要的，逼出授權）；成功則回傳資料夾連結。
+ */
+function setupPhotos() {
+  var folder = getPhotoFolder_();
+  Logger.log('打卡照資料夾就緒：' + folder.getUrl());
+  return '✅ 打卡照資料夾已就緒：' + folder.getUrl();
+}
+
 function handlePhotoUpload_(data) {
   try {
     var b64 = String(data.image || '').replace(/^data:image\/\w+;base64,/, '');
@@ -129,13 +140,48 @@ function handlePhotoUpload_(data) {
     var bytes = Utilities.base64Decode(b64);
     var ts = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyyMMdd_HHmmss');
     var file = getPhotoFolder_().createFile(Utilities.newBlob(bytes, 'image/jpeg', '畢業打卡_' + ts + '.jpg'));
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // ⚠️ 學校網域禁「對外公開分享」(setSharing ANYONE 會「存取遭拒」)，
+    //    故照片保持私有，改由本 Web App 以擁有者身分「代理供圖」(action=pic)，繞過分享限制。
     var id = file.getId();
-    return json_({ ok: true, id: id,
-      view: 'https://drive.google.com/file/d/' + id + '/view',
-      img: 'https://drive.google.com/uc?export=view&id=' + id });
+    // 去掉 /a/<網域>/ 前綴 → 用公開網址，家長(非校內帳號)也能直接開
+    var base = (webAppUrl_() || '').replace(/\/a\/[^/]+\//, '/');
+    return json_({ ok: true, id: id, view: base + '?action=pic&id=' + id });
   } catch (err) {
-    return json_({ ok: false, error: String(err) }); // 多半是「尚未授權 Drive」→ 編輯器跑 authorize()
+    return json_({ ok: false, error: String(err) });
+  }
+}
+
+// 代理供圖：家長掃 QR → 開此頁 → GAS（擁有者身分）讀檔、內嵌顯示，可儲存。
+// 安全：只允許讀「打卡照資料夾」內的檔，避免被拿來讀任意 Drive 檔。
+function handlePhotoView_(e) {
+  var id = (e && e.parameter && e.parameter.id) || '';
+  var page = function (inner) {
+    return HtmlService.createHtmlOutput(
+      '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
+      '<title>畢業打卡照 ｜ 石門國小</title><style>' +
+      '*{box-sizing:border-box;margin:0}body{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;' +
+      'background:#0e1530;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;' +
+      'justify-content:center;padding:18px;text-align:center}img{max-width:100%;max-height:78vh;border-radius:14px;' +
+      'box-shadow:0 14px 40px rgba(0,0,0,.5)}a.dl{display:inline-block;margin-top:16px;background:linear-gradient(180deg,#ffd06b,#f5b942);' +
+      'color:#141d3b;font-weight:800;text-decoration:none;padding:13px 24px;border-radius:999px}' +
+      'p{color:#aebbe4;font-size:.85rem;margin-top:12px;line-height:1.7}</style></head><body>' + inner +
+      '</body></html>')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  };
+  try {
+    var file = DriveApp.getFileById(id);
+    var fid = PropertiesService.getScriptProperties().getProperty('PHOTO_FOLDER_ID');
+    var inFolder = false, ps = file.getParents();
+    while (ps.hasNext()) { if (ps.next().getId() === fid) { inFolder = true; break; } }
+    if (!inFolder) return page('<p>查無此照片。</p>');
+    var blob = file.getBlob();
+    var uri = 'data:' + (blob.getContentType() || 'image/jpeg') + ';base64,' + Utilities.base64Encode(blob.getBytes());
+    return page('<img src="' + uri + '" alt="畢業打卡照">' +
+      '<a class="dl" href="' + uri + '" download="石門畢業打卡.jpg">⬇️ 儲存照片</a>' +
+      '<p>手機長按圖片也可直接儲存 · 石門國小 第103屆畢業典禮</p>');
+  } catch (err) {
+    return page('<p>找不到這張照片（可能已過期或連結有誤）。</p>');
   }
 }
 
@@ -217,6 +263,9 @@ function doGet(e) {
   }
   if (action === 'like') {
     return handleLike_(e); // 祝福牆愛心 +1
+  }
+  if (action === 'pic') {
+    return handlePhotoView_(e); // 打卡照代理供圖（家長掃 QR 開啟）
   }
   return json_({ ok: true, service: 'smes-grad-103-rsvp', latestView: ensureLatestView_() });
 }
