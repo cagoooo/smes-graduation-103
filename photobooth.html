@@ -152,7 +152,7 @@
       <div class="row"><button class="btn pill pill-alt" id="qrClose">完成</button></div>
     </div>
   </div>
-  <div class="hint" id="hint">小提示：手機直拿、臉對準中央框內最好看；拍完可直接下載或分享到 LINE。</div>
+  <div class="hint" id="hint">小提示：預設用 📷 <b>後鏡頭</b>拍完整合照（畫質更清楚）；想自拍按 <b>🔄</b> 切換前鏡頭。人對準中央框最好看，拍完可下載或分享。</div>
 
   <footer>
     <a class="back" href="./">← 回畢業典禮網站</a>
@@ -180,7 +180,7 @@
       framesEl=$("frames"), placeholder=$("placeholder"), errEl=$("err"), fileInput=$("fileInput");
   var startControls=$("startControls"), liveControls=$("liveControls"), resultControls=$("resultControls");
 
-  var stream=null, facing="user", curFrame="classic", lastDataUrl=null;
+  var stream=null, facing="environment", curFrame="classic", lastDataUrl=null; // 預設後鏡頭：拍完整合照、畫質更清楚
   // 給 canvas 用的、確定載入完成的外框影像
   var frameBitmap = new Image();
   frameBitmap.crossOrigin = "anonymous";
@@ -218,7 +218,8 @@
     video.style.display = (mode==="live") ? "block" : "none";
     shot.style.display = (mode==="result") ? "block" : "none";
     frameImg.style.display = (mode==="result") ? "none" : "block"; // result 已把框畫進圖
-    badge.textContent = mode==="live" ? "● 相機開啟中" : (mode==="result" ? "✓ 拍好了" : "預覽中");
+    badge.textContent = mode==="live" ? (facing==="user" ? "🤳 前鏡頭（自拍）" : "📷 後鏡頭")
+      : (mode==="result" ? "✓ 拍好了" : "預覽中");
   }
 
   async function startCamera(){
