@@ -4,13 +4,13 @@
    index.html 內 styles.css?v= / script.js?v=），sw.js 內容變動
    瀏覽器才會偵測到更新並觸發版本提示。
    ========================================================= */
-const BUILD_VERSION = "1.16.38";
+const BUILD_VERSION = "1.16.39";
 const CACHE = "smes-grad-" + BUILD_VERSION;
 const PRECACHE = [
   "./",
   "./index.html",
-  "./styles.css?v=1.16.38",
-  "./script.js?v=1.16.38",
+  "./styles.css?v=1.16.39",
+  "./script.js?v=1.16.39",
   "./photobooth.html",
   "./photo.html",
   "./assets/logo.png",
@@ -19,7 +19,9 @@ const PRECACHE = [
 ];
 
 self.addEventListener("install", function (e) {
-  // 不自動 skipWaiting：讓頁面顯示「立即更新」提示，由使用者決定何時接管
+  // 自動接管：新版下載完即啟用（搭配 activate 的 clients.claim），下次導覽就吃到最新頁面；
+  // 頁面的 controllerchange 仍有「只有使用者按更新才重整」的旗標，所以不會強制重整、不打斷拍照。
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
       return Promise.allSettled(
