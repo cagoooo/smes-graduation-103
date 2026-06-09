@@ -490,6 +490,7 @@ function htmlPage_(emoji, title, sub, bodyHtml, tone) {
     'a.btn:active{transform:scale(.97);}' +
     '.btn-go{background:linear-gradient(180deg,#ffd06b,#f5b942);color:#141d3b;box-shadow:0 12px 26px rgba(245,185,66,.4);}' +
     '.btn-alt{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.26);}' +
+    '.btn-sheet{background:linear-gradient(180deg,#34d399,#0f9d58);color:#062a1c;box-shadow:0 10px 24px rgba(15,157,88,.36);}' +
     '.foot{margin-top:24px;font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.75;}' +
     '.foot a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}' +
     '.foot a:hover{color:#f5b942;border-bottom-color:#f5b942;}' +
@@ -537,6 +538,9 @@ function handleModerate_(e) {
   var k = encodeURIComponent(getModToken_());
   var toggleHide = base + '?action=moderate&row=' + row + '&v=0&k=' + k;
   var togglePub = base + '?action=moderate&row=' + row + '&v=1&k=' + k;
+  // 直接 deep-link 跳到這筆祝福在「回條」分頁的那一列（手機點開 Sheets 即定位到該列）
+  var sheetUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit#gid=' + sh.getSheetId() + '&range=A' + row;
+  var sheetBtn = '<a class="btn btn-sheet" href="' + sheetUrl + '" target="_blank" rel="noopener noreferrer">📊 開啟試算表編輯／檢查</a>';
   var wallBtn = '<a class="btn btn-alt" href="' + SITE_WALL_URL + '" target="_blank" rel="noopener noreferrer">🔍 前往祝福牆查看</a>';
   var quote = '<div class="quote"><span class="who">' + escHtml_(klass) + '　' + escHtml_(name) +
     '</span><span class="msg">' + escHtml_(msg) + '</span></div>';
@@ -546,6 +550,7 @@ function handleModerate_(e) {
       '<div class="btns">' +
       '<a class="btn btn-go" href="' + SITE_WALL_URL + '" target="_blank" rel="noopener noreferrer">🔍 前往祝福牆查看</a>' +
       '<a class="btn btn-alt" href="' + toggleHide + '">🙈 改為維持隱藏</a>' +
+      sheetBtn +
       '</div>';
     return htmlPage_('✅', '已公開到祝福牆', '這則祝福將顯示在網站祝福牆（約數分鐘內同步，家長重整即見）。', bodyPub, 'ok');
   }
@@ -553,6 +558,7 @@ function handleModerate_(e) {
     '<div class="btns">' +
     '<a class="btn btn-go" href="' + togglePub + '">✅ 改為通過公開</a>' +
     wallBtn +
+    sheetBtn +
     '</div>';
   return htmlPage_('🙈', '已維持隱藏', '這則祝福不會顯示在網站祝福牆。', bodyHide, 'mute');
 }
