@@ -24,10 +24,10 @@
   }
   /* 取景台容器：吃掉 header / 控制列以外的剩餘高度，置中 stage（stage 尺寸由 JS 精準算，保 9:16 又不溢出） */
   .main{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
-  header{text-align:center;margin:6px 0 10px;}
-  header .logo{width:54px;height:54px;vertical-align:middle;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
-  header h1{display:inline-block;vertical-align:middle;margin-left:8px;font-size:clamp(1.2rem,4.6vw,1.7rem);font-weight:900;letter-spacing:.5px;}
-  header .sub{color:#cdd6f4;font-size:clamp(.78rem,3vw,.95rem);margin-top:4px;}
+  header{text-align:center;margin:4px 0 7px;}
+  header .logo{width:48px;height:48px;vertical-align:middle;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
+  header h1{display:inline-block;vertical-align:middle;margin-left:8px;font-size:clamp(1.15rem,4.4vw,1.6rem);font-weight:900;letter-spacing:.5px;}
+  header .sub{color:#cdd6f4;font-size:clamp(.76rem,3vw,.92rem);margin-top:3px;}
 
   /* 9:16 取景台（width/height 由 JS fitStage 設定；此為 JS 跑前的後備尺寸） */
   .stage{position:relative;aspect-ratio:9/16;width:min(92vw,420px);
@@ -45,8 +45,8 @@
     font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(245,196,81,.35);}
 
   /* 風格選擇 */
-  .frames{display:flex;gap:8px;overflow-x:auto;max-width:min(94vw,520px);padding:10px 2px;scrollbar-width:thin;}
-  .frames button{flex:0 0 auto;width:54px;height:96px;border-radius:10px;overflow:hidden;
+  .frames{display:flex;gap:8px;overflow-x:auto;max-width:min(94vw,520px);padding:7px 2px;scrollbar-width:thin;}
+  .frames button{flex:0 0 auto;width:46px;height:82px;border-radius:10px;overflow:hidden;
     border:2px solid transparent;background:#0b1024 center/cover no-repeat;cursor:pointer;position:relative;opacity:.72;transition:.15s;}
   .frames button .lbl{position:absolute;left:0;right:0;bottom:0;font-size:.56rem;background:rgba(8,14,34,.7);padding:2px 0;text-align:center;color:#e9eefc;}
   .frames button.active{opacity:1;border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,196,81,.3);}
@@ -64,13 +64,22 @@
   .pill-alt{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);}
   .pill-green{background:linear-gradient(180deg,#34d399,#0f9d58);color:#06281c;box-shadow:0 10px 24px rgba(15,157,88,.4);}
   .hide{display:none !important;}
-  .hint{color:#aebbe4;font-size:.82rem;text-align:center;margin-top:10px;line-height:1.7;max-width:90vw;}
+  .hint{color:#aebbe4;font-size:.78rem;text-align:center;margin-top:6px;line-height:1.6;max-width:90vw;}
   .err{color:#ffd3d3;background:rgba(153,27,27,.35);border:1px solid rgba(248,113,113,.4);
     padding:10px 14px;border-radius:12px;font-size:.85rem;margin-top:10px;max-width:90vw;text-align:center;line-height:1.6;}
-  footer{margin-top:auto;padding-top:18px;font-size:.82rem;color:rgba(255,255,255,.5);text-align:center;line-height:1.7;}
+  footer{margin-top:auto;padding-top:10px;font-size:.76rem;color:rgba(255,255,255,.5);text-align:center;line-height:1.6;}
   footer a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}
   footer a:hover{color:var(--gold);}
-  a.back{color:#cdd6f4;font-size:.85rem;text-decoration:none;}
+  footer .cred{margin-top:5px;}
+  a.back{color:#cdd6f4;font-size:.84rem;text-decoration:none;border-bottom:none;}
+  /* 矮螢幕（小手機 / 橫放）：再精簡 chrome，把空間讓給取景台 */
+  @media (max-height:730px){
+    header .sub{display:none;}
+    header .logo{width:40px;height:40px;}
+    .hint{display:none;}
+    .frames button{width:42px;height:74px;}
+    footer{padding-top:6px;}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
 </style>
 </head>
@@ -118,10 +127,9 @@
   <div class="hint" id="hint">小提示：手機直拿、臉對準中央框內最好看；拍完可直接下載或分享到 LINE。</div>
 
   <footer>
-    <a class="back" href="./">← 回畢業典禮網站</a><br><br>
-    石門國小 第103屆畢業典禮 · 打卡機<br>
-    Made with <span aria-label="愛心">❤️</span> by
-    <a href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5" target="_blank" rel="noopener noreferrer">阿凱老師</a>
+    <a class="back" href="./">← 回畢業典禮網站</a>
+    <div class="cred">石門國小 第103屆畢業典禮 · 打卡機 ｜ Made with <span aria-label="愛心">❤️</span> by
+    <a href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5" target="_blank" rel="noopener noreferrer">阿凱老師</a></div>
   </footer>
 
 <script>
