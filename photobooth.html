@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16204a">
+<title>📸 畢業打卡機 ｜ 石門國小 第103屆畢業典禮</title>
+<meta name="description" content="石門國小 第103屆畢業典禮 線上打卡機：開鏡頭即時套上畢業外框、和六位班導師一起拍照，一鍵下載分享。">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root{
+    --navy-900:#0e1530; --navy-800:#16204a; --navy-700:#233268;
+    --gold:#f5c451; --gold-soft:#f8d98a; --ink:#fff;
+    --font:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:var(--font);color:var(--ink);min-height:100vh;min-height:100dvh;
+    background:radial-gradient(120% 90% at 50% -10%,#3a4f9e 0%,#233268 42%,#16204a 76%,#0e1530 100%);
+    display:flex;flex-direction:column;align-items:center;
+    padding:max(10px,env(safe-area-inset-top)) 12px max(14px,env(safe-area-inset-bottom));
+  }
+  /* 取景台容器：吃掉 header / 控制列以外的剩餘高度，置中 stage（stage 尺寸由 JS 精準算，保 9:16 又不溢出） */
+  .main{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;}
+  header{text-align:center;margin:6px 0 10px;}
+  header .logo{width:54px;height:54px;vertical-align:middle;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
+  header h1{display:inline-block;vertical-align:middle;margin-left:8px;font-size:clamp(1.2rem,4.6vw,1.7rem);font-weight:900;letter-spacing:.5px;}
+  header .sub{color:#cdd6f4;font-size:clamp(.78rem,3vw,.95rem);margin-top:4px;}
+
+  /* 9:16 取景台（width/height 由 JS fitStage 設定；此為 JS 跑前的後備尺寸） */
+  .stage{position:relative;aspect-ratio:9/16;width:min(92vw,420px);
+    border-radius:18px;overflow:hidden;background:#0b1024;
+    box-shadow:0 18px 50px rgba(0,0,0,.5);border:1px solid rgba(245,196,81,.25);}
+  .stage video,.stage canvas#shot,.stage .placeholder{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .stage video.mirror{transform:scaleX(-1);}
+  .stage .frame{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .stage .placeholder{display:flex;align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(circle at 50% 38%,#2b3c74,#0b1024);color:#9fb0e0;
+    font-size:.95rem;line-height:1.7;padding:24px;}
+  #shot{display:none;object-fit:contain;background:#0b1024;}
+  .badge{position:absolute;left:10px;top:10px;background:rgba(8,14,34,.6);color:var(--gold-soft);
+    font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(245,196,81,.35);}
+
+  /* 風格選擇 */
+  .frames{display:flex;gap:8px;overflow-x:auto;max-width:min(94vw,520px);padding:10px 2px;scrollbar-width:thin;}
+  .frames button{flex:0 0 auto;width:54px;height:96px;border-radius:10px;overflow:hidden;
+    border:2px solid transparent;background:#0b1024 center/cover no-repeat;cursor:pointer;position:relative;opacity:.72;transition:.15s;}
+  .frames button .lbl{position:absolute;left:0;right:0;bottom:0;font-size:.56rem;background:rgba(8,14,34,.7);padding:2px 0;text-align:center;color:#e9eefc;}
+  .frames button.active{opacity:1;border-color:var(--gold);box-shadow:0 0 0 2px rgba(245,196,81,.3);}
+
+  .controls{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:6px;flex-wrap:wrap;}
+  button.btn{border:none;cursor:pointer;font-family:inherit;font-weight:800;border-radius:999px;
+    transition:transform .12s ease,box-shadow .2s ease;}
+  button.btn:active{transform:scale(.95);}
+  .shutter{width:74px;height:74px;border-radius:50%;background:linear-gradient(180deg,#ffd06b,#f5b942);
+    color:#141d3b;font-size:1.9rem;box-shadow:0 10px 24px rgba(245,185,66,.45);display:grid;place-items:center;}
+  .icon-btn{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1.3rem;display:grid;place-items:center;}
+  .pill{padding:13px 22px;font-size:1.02rem;display:inline-flex;align-items:center;gap:8px;}
+  .pill-go{background:linear-gradient(180deg,#ffd06b,#f5b942);color:#141d3b;box-shadow:0 10px 24px rgba(245,185,66,.4);}
+  .pill-alt{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);}
+  .pill-green{background:linear-gradient(180deg,#34d399,#0f9d58);color:#06281c;box-shadow:0 10px 24px rgba(15,157,88,.4);}
+  .hide{display:none !important;}
+  .hint{color:#aebbe4;font-size:.82rem;text-align:center;margin-top:10px;line-height:1.7;max-width:90vw;}
+  .err{color:#ffd3d3;background:rgba(153,27,27,.35);border:1px solid rgba(248,113,113,.4);
+    padding:10px 14px;border-radius:12px;font-size:.85rem;margin-top:10px;max-width:90vw;text-align:center;line-height:1.6;}
+  footer{margin-top:auto;padding-top:18px;font-size:.82rem;color:rgba(255,255,255,.5);text-align:center;line-height:1.7;}
+  footer a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}
+  footer a:hover{color:var(--gold);}
+  a.back{color:#cdd6f4;font-size:.85rem;text-decoration:none;}
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+  <header>
+    <img class="logo" src="assets/logo.png" alt="石門國小校徽">
+    <h1>📸 畢業打卡機</h1>
+    <div class="sub">石門國小 第103屆畢業典禮 · 和六位班導師一起入鏡</div>
+  </header>
+
+  <div class="main" id="main">
+    <div class="stage" id="stage">
+      <div class="placeholder" id="placeholder">📷 按下方「開啟相機」<br>站進框內，和導師們一起拍張畢業照！</div>
+      <video id="video" class="mirror" playsinline autoplay muted></video>
+      <canvas id="shot"></canvas>
+      <img class="frame" id="frame" alt="" src="assets/photobooth/classic.webp?v=1">
+      <div class="badge" id="badge">預覽中</div>
+    </div>
+  </div>
+
+  <div class="frames" id="frames" aria-label="選擇外框風格"></div>
+
+  <!-- 拍照前控制 -->
+  <div class="controls" id="liveControls">
+    <button class="btn icon-btn" id="flipBtn" title="切換前後鏡頭" aria-label="切換鏡頭">🔄</button>
+    <button class="btn shutter" id="shutterBtn" title="拍照" aria-label="拍照">📸</button>
+    <button class="btn icon-btn" id="uploadBtn" title="改用上傳照片" aria-label="上傳照片">🖼️</button>
+  </div>
+
+  <!-- 開場控制 -->
+  <div class="controls" id="startControls">
+    <button class="btn pill pill-go" id="startBtn">📷 開啟相機</button>
+    <button class="btn pill pill-alt" id="uploadBtn2">🖼️ 上傳照片套框</button>
+  </div>
+
+  <!-- 拍完控制 -->
+  <div class="controls hide" id="resultControls">
+    <button class="btn pill pill-green" id="downloadBtn">⬇️ 下載照片</button>
+    <button class="btn pill pill-alt" id="shareBtn">🔗 分享</button>
+    <button class="btn pill pill-alt" id="retakeBtn">↩️ 重拍</button>
+  </div>
+
+  <input type="file" id="fileInput" accept="image/*" class="hide">
+  <div class="err hide" id="err"></div>
+  <div class="hint" id="hint">小提示：手機直拿、臉對準中央框內最好看；拍完可直接下載或分享到 LINE。</div>
+
+  <footer>
+    <a class="back" href="./">← 回畢業典禮網站</a><br><br>
+    石門國小 第103屆畢業典禮 · 打卡機<br>
+    Made with <span aria-label="愛心">❤️</span> by
+    <a href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5" target="_blank" rel="noopener noreferrer">阿凱老師</a>
+  </footer>
+
+<script>
+(function(){
+  "use strict";
+  var V = "1";
+  var FRAMES = [
+    {k:"classic",   n:"粉藍"},
+    {k:"sakura",    n:"櫻花"},
+    {k:"botanical", n:"花環"},
+    {k:"crayon",    n:"蠟筆"},
+    {k:"galaxy",    n:"星空"},
+  ];
+  var OUT_W = 1080, OUT_H = 1920;
+
+  var $ = function(id){ return document.getElementById(id); };
+  var stage=$("stage"), video=$("video"), shot=$("shot"), frameImg=$("frame"), badge=$("badge"),
+      framesEl=$("frames"), placeholder=$("placeholder"), errEl=$("err"), fileInput=$("fileInput");
+  var startControls=$("startControls"), liveControls=$("liveControls"), resultControls=$("resultControls");
+
+  var stream=null, facing="user", curFrame="classic", lastDataUrl=null;
+  // 給 canvas 用的、確定載入完成的外框影像
+  var frameBitmap = new Image();
+  frameBitmap.crossOrigin = "anonymous";
+
+  function frameUrl(k){ return "assets/photobooth/"+k+".webp?v="+V; }
+  function showErr(msg){ errEl.textContent = msg; errEl.classList.remove("hide"); }
+  function clearErr(){ errEl.classList.add("hide"); }
+
+  // 建立風格縮圖選單
+  FRAMES.forEach(function(f){
+    var b=document.createElement("button");
+    b.style.backgroundImage="url('"+frameUrl(f.k)+"')";
+    b.title=f.n; b.dataset.k=f.k;
+    if(f.k===curFrame) b.classList.add("active");
+    b.innerHTML='<span class="lbl">'+f.n+'</span>';
+    b.addEventListener("click", function(){ selectFrame(f.k, b); });
+    framesEl.appendChild(b);
+  });
+  function selectFrame(k, btn){
+    curFrame=k;
+    frameImg.src=frameUrl(k);
+    frameBitmap.src=frameUrl(k);
+    [].forEach.call(framesEl.children, function(c){ c.classList.toggle("active", c.dataset.k===k); });
+    if(btn){} // active 已切
+  }
+  frameBitmap.src=frameUrl(curFrame);
+
+  // ---- 相機 ----
+  function setMode(mode){ // 'start' | 'live' | 'result'
+    startControls.classList.toggle("hide", mode!=="start");
+    liveControls.classList.toggle("hide", mode!=="live");
+    resultControls.classList.toggle("hide", mode!=="result");
+    framesEl.style.display = (mode==="result") ? "none" : "flex";
+    placeholder.style.display = (mode==="start") ? "flex" : "none";
+    video.style.display = (mode==="live") ? "block" : "none";
+    shot.style.display = (mode==="result") ? "block" : "none";
+    frameImg.style.display = (mode==="result") ? "none" : "block"; // result 已把框畫進圖
+    badge.textContent = mode==="live" ? "● 相機開啟中" : (mode==="result" ? "✓ 拍好了" : "預覽中");
+  }
+
+  async function startCamera(){
+    clearErr();
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showErr("這個瀏覽器不支援開啟相機，請改用「上傳照片套框」。"); return;
+    }
+    try{
+      if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); }
+      stream = await navigator.mediaDevices.getUserMedia({
+        video:{ facingMode: facing, width:{ideal:1920}, height:{ideal:1920} }, audio:false
+      });
+      video.srcObject = stream;
+      video.classList.toggle("mirror", facing==="user");
+      await video.play().catch(function(){});
+      setMode("live");
+    }catch(e){
+      var msg = "無法開啟相機。";
+      if(e && (e.name==="NotAllowedError"||e.name==="SecurityError")) msg="相機權限被拒絕。請在瀏覽器網址列允許相機，或改用「上傳照片套框」。";
+      else if(e && e.name==="NotFoundError") msg="找不到相機裝置，請改用「上傳照片套框」。";
+      showErr(msg);
+      setMode("start");
+    }
+  }
+
+  function stopCamera(){ if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream=null; } }
+
+  // ---- 把影像（video 或 image）以 cover 方式畫進 1080x1920，再疊外框 ----
+  function compose(source, sw, sh, mirror){
+    var c = document.createElement("canvas"); c.width=OUT_W; c.height=OUT_H;
+    var ctx = c.getContext("2d");
+    var scale = Math.max(OUT_W/sw, OUT_H/sh);
+    var dw=sw*scale, dh=sh*scale, dx=(OUT_W-dw)/2, dy=(OUT_H-dh)/2;
+    ctx.save();
+    if(mirror){ ctx.translate(OUT_W,0); ctx.scale(-1,1); }
+    ctx.drawImage(source, dx, dy, dw, dh);
+    ctx.restore();
+    if(frameBitmap.complete && frameBitmap.naturalWidth){
+      ctx.drawImage(frameBitmap, 0, 0, OUT_W, OUT_H);
+    }
+    return c;
+  }
+
+  function showResult(canvas){
+    lastDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    var sctx = shot.getContext("2d");
+    shot.width=OUT_W; shot.height=OUT_H;
+    sctx.drawImage(canvas,0,0);
+    stopCamera();
+    setMode("result");
+  }
+
+  function capture(){
+    if(!video.videoWidth){ showErr("相機還沒準備好，請稍候再拍。"); return; }
+    showResult(compose(video, video.videoWidth, video.videoHeight, facing==="user"));
+  }
+
+  // ---- 下載 / 分享 ----
+  function fname(){ return "石門畢業打卡_"+curFrame+".jpg"; }
+  function download(){
+    if(!lastDataUrl) return;
+    var a=document.createElement("a"); a.href=lastDataUrl; a.download=fname(); document.body.appendChild(a); a.click(); a.remove();
+  }
+  function dataURLtoFile(durl, name){
+    var arr=durl.split(","), mime=arr[0].match(/:(.*?);/)[1], bstr=atob(arr[1]), n=bstr.length, u8=new Uint8Array(n);
+    while(n--) u8[n]=bstr.charCodeAt(n);
+    return new File([u8], name, {type:mime});
+  }
+  async function share(){
+    if(!lastDataUrl) return;
+    try{
+      var file=dataURLtoFile(lastDataUrl, fname());
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:"石門畢業打卡", text:"石門國小 第103屆畢業典禮 🎓"});
+      }else{ download(); }
+    }catch(e){ /* 使用者取消或不支援 → 退回下載 */ }
+  }
+
+  // ---- 上傳照片套框（無相機備援）----
+  function pickFile(){ fileInput.click(); }
+  fileInput.addEventListener("change", function(){
+    var f=fileInput.files && fileInput.files[0]; if(!f) return;
+    clearErr();
+    var img=new Image();
+    img.onload=function(){ showResult(compose(img, img.naturalWidth, img.naturalHeight, false)); };
+    img.onerror=function(){ showErr("這張圖讀取失敗，換一張試試。"); };
+    img.src=URL.createObjectURL(f);
+  });
+
+  // ---- 綁定 ----
+  $("startBtn").addEventListener("click", startCamera);
+  $("shutterBtn").addEventListener("click", capture);
+  $("flipBtn").addEventListener("click", function(){ facing = (facing==="user"?"environment":"user"); startCamera(); });
+  $("uploadBtn").addEventListener("click", pickFile);
+  $("uploadBtn2").addEventListener("click", pickFile);
+  $("downloadBtn").addEventListener("click", download);
+  $("shareBtn").addEventListener("click", share);
+  $("retakeBtn").addEventListener("click", function(){ lastDataUrl=null; if(facing){ startCamera(); } else { setMode("start"); } });
+
+  // 若裝置不支援分享檔案，隱藏分享鈕（避免誤導）
+  if(!(navigator.canShare)){ $("shareBtn").classList.add("hide"); }
+
+  // 取景台尺寸：保 9:16 又同時不超過容器寬與高（跨瀏覽器穩，不靠 svh calc）
+  var mainEl=$("main");
+  function fitStage(){
+    var availW = mainEl.clientWidth * 0.96;
+    var availH = mainEl.clientHeight - 4;
+    if(availW<=0 || availH<=0) return;
+    var w = Math.min(availW, availH * 9 / 16);
+    stage.style.width = Math.round(w) + "px";
+    stage.style.height = Math.round(w * 16 / 9) + "px";
+  }
+  window.addEventListener("resize", fitStage);
+  window.addEventListener("orientationchange", function(){ setTimeout(fitStage,200); });
+  fitStage();
+
+  setMode("start");
+})();
+</script>
+</body>
+</html>
