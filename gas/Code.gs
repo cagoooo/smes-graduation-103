@@ -287,7 +287,7 @@ function notifyFreeNewWish_(klass, name, message, total) {
   var approve = base ? base + '?action=moderate&row=' + row + '&v=1&k=' + k : '';
   var hide = base ? base + '?action=moderate&row=' + row + '&v=0&k=' + k : '';
   try {
-    if (t.email) {
+    if (!t.chat && t.email) { // Google Chat 優先；沒設 webhook 才退回 Email
       var html =
         '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">' +
         '<div style="background:#065F46;color:#fff;padding:16px 20px">' +
@@ -314,18 +314,43 @@ function notifyFreeNewWish_(klass, name, message, total) {
   } catch (e) { /* best-effort */ }
   try {
     if (t.chat) {
-      var txt = '🎓 *收到新祝福*\n*班級：* ' + (klass || '—') + '\n*畢業生：* ' + (name || '—') +
-        '\n*祝福：* ' + clip_(message, 200) + '\n累計第 ' + total + ' 則（待審核）' + textModerateLinks_(row);
-      UrlFetchApp.fetch(t.chat, { method: 'post', contentType: 'application/json; charset=utf-8', payload: JSON.stringify({ text: txt }), muteHttpExceptions: true });
+      UrlFetchApp.fetch(t.chat, {
+        method: 'post', contentType: 'application/json; charset=utf-8',
+        payload: JSON.stringify(chatWishCard_(klass, name, message, total, row, approve, hide)),
+        muteHttpExceptions: true
+      });
     }
   } catch (e) { /* best-effort */ }
+}
+
+// 組 Google Chat 卡片（cardsV2）：含「✅ 通過公開 / 🙈 維持隱藏」可點按鈕，點了即更新試算表
+function chatWishCard_(klass, name, message, total, row, approve, hide) {
+  var widgets = [
+    { decoratedText: { topLabel: '班級', text: (klass || '—'), wrapText: true } },
+    { decoratedText: { topLabel: '畢業生', text: (name || '—'), wrapText: true } },
+    { textParagraph: { text: '💌 ' + (message || '—') } },
+    { decoratedText: { topLabel: '累計', text: '第 ' + total + ' 則（待審核）' } }
+  ];
+  var buttons = [];
+  if (approve) buttons.push({ text: '✅ 通過公開', onClick: { openLink: { url: approve } } });
+  if (hide) buttons.push({ text: '🙈 維持隱藏', onClick: { openLink: { url: hide } } });
+  if (buttons.length) widgets.push({ buttonList: { buttons: buttons } });
+  return {
+    cardsV2: [{
+      cardId: 'wish-' + row,
+      card: {
+        header: { title: '🎓 收到一則新的畢業祝福', subtitle: '石門國小 畢業典禮網站' },
+        sections: [{ widgets: widgets }]
+      }
+    }]
+  };
 }
 
 function notifyFreeError_(errMsg, klass, name) {
   try {
     var t = notifyTargets_();
     var line = '❌ 祝福寫入失敗\n班級：' + (klass || '—') + '\n畢業生：' + (name || '—') + '\n錯誤：' + clip_(errMsg, 200);
-    if (t.email) MailApp.sendEmail({ to: t.email, subject: '❌ 畢典祝福寫入失敗', body: line, name: '石門畢典祝福通知' });
+    if (!t.chat && t.email) MailApp.sendEmail({ to: t.email, subject: '❌ 畢典祝福寫入失敗', body: line, name: '石門畢典祝福通知' });
     if (t.chat) UrlFetchApp.fetch(t.chat, { method: 'post', contentType: 'application/json; charset=utf-8', payload: JSON.stringify({ text: line }), muteHttpExceptions: true });
   } catch (e) { /* best-effort */ }
 }
