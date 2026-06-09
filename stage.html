@@ -13,8 +13,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/stage.html" />
   <meta property="og:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta property="og:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。💛" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.30" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.30" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.31" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.31" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -25,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="第103屆 畢業祝福牆｜石門國小畢業典禮" />
   <meta name="twitter:description" content="來看看家長與親友給畢業生的暖心祝福，一句一句陪伴孩子勇敢啟程。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.30" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/stage-og.png?v=1.16.31" />
 
   <!-- Favicon（石門校徽，與主站一致） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -253,6 +253,52 @@
     .empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
       font-size:clamp(1.2rem,2.4vw,2rem);color:rgba(255,255,255,.7);padding:40px;}
 
+    /* ===== 祝福載入中／等待狀態：畢業帽光環 + 金色微光標題 + 跳動圓點（取代單調的純文字） ===== */
+    .loader{display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.1vw,26px);
+      padding:24px;animation:loaderIn .7s cubic-bezier(.2,.9,.25,1) both;}
+    @keyframes loaderIn{from{opacity:0;transform:translateY(16px) scale(.95);}to{opacity:1;transform:none;}}
+    .loader__emblem{position:relative;width:clamp(112px,12vw,176px);height:clamp(112px,12vw,176px);
+      display:flex;align-items:center;justify-content:center;}
+    /* 柔金光暈，緩緩呼吸 */
+    .loader__emblem::before{content:"";position:absolute;inset:-14%;border-radius:50%;
+      background:radial-gradient(circle,rgba(245,196,81,.42),transparent 66%);
+      animation:loaderHalo 2.8s ease-in-out infinite;}
+    @keyframes loaderHalo{0%,100%{transform:scale(.88);opacity:.55;}50%{transform:scale(1.14);opacity:1;}}
+    /* 旋轉金弧（conic + ring 遮罩） */
+    .loader__ring{position:absolute;inset:0;border-radius:50%;
+      background:conic-gradient(from 0deg,transparent 0 58%,var(--gold-soft) 82%,var(--gold) 100%);
+      -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));
+              mask:radial-gradient(farthest-side,transparent calc(100% - 9px),#000 calc(100% - 8px));
+      filter:drop-shadow(0 0 9px rgba(245,196,81,.55));animation:loaderSpin 1.25s linear infinite;}
+    .loader__ring--2{inset:14%;opacity:.5;animation-duration:1.95s;animation-direction:reverse;}
+    @keyframes loaderSpin{to{transform:rotate(360deg);}}
+    /* 中央畢業帽，輕輕擺動 */
+    .loader__cap{position:relative;font-size:clamp(2.7rem,4.6vw,4rem);line-height:1;
+      filter:drop-shadow(0 4px 12px rgba(0,0,0,.42));animation:loaderBob 2.8s ease-in-out infinite;}
+    @keyframes loaderBob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-7px) rotate(4deg);}}
+    .loader__head{display:inline-flex;align-items:center;gap:.5em;}
+    .loader__title{font-family:var(--font-serif);font-weight:800;letter-spacing:.04em;
+      font-size:clamp(1.5rem,3vw,2.6rem);
+      background:linear-gradient(100deg,#fff 28%,var(--gold) 46%,var(--gold-soft) 52%,#fff 70%);
+      background-size:230% 100%;-webkit-background-clip:text;background-clip:text;
+      color:transparent;-webkit-text-fill-color:transparent;animation:loaderShine 2.4s linear infinite;}
+    @keyframes loaderShine{from{background-position:180% 0;}to{background-position:-90% 0;}}
+    /* 跳動三圓點 */
+    .loader__dots{display:inline-flex;gap:clamp(5px,.5vw,7px);align-items:flex-end;}
+    .loader__dots i{width:clamp(7px,.85vw,11px);height:clamp(7px,.85vw,11px);border-radius:50%;
+      background:var(--gold);opacity:.45;animation:loaderDot 1.15s ease-in-out infinite;}
+    .loader__dots i:nth-child(2){animation-delay:.16s;}
+    .loader__dots i:nth-child(3){animation-delay:.32s;}
+    @keyframes loaderDot{0%,100%{transform:translateY(0);opacity:.4;}50%{transform:translateY(-8px);opacity:1;}}
+    .loader__sub{color:rgba(255,255,255,.66);font-size:clamp(.92rem,1.5vw,1.2rem);
+      letter-spacing:.02em;max-width:26ch;line-height:1.7;}
+    /* 等待狀態（無祝福）：不轉的靜態版本 */
+    .loader--wait .loader__cap{animation-duration:3.6s;}
+    @media (prefers-reduced-motion:reduce){
+      .loader,.loader__emblem::before,.loader__ring,.loader__cap,.loader__dots i{animation:none;}
+      .loader__title{animation:none;background:none;color:var(--gold);-webkit-text-fill-color:var(--gold);}
+    }
+
     /* 新祝福即時通知 toast（背景輪詢偵測到審核通過的新祝福時，金色 pill 自底部淡入；投影牆同時把最新祝福捲到最前） */
     .newwish-toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%) translateY(22px);
       z-index:30;display:inline-flex;align-items:center;gap:11px;
@@ -387,7 +433,20 @@
   <div class="stage-filters" id="stageFilters" hidden aria-label="依班級篩選祝福"></div>
 
   <main class="stage" id="stage">
-    <div class="empty" id="empty">祝福載入中…</div>
+    <div class="empty" id="empty">
+      <div class="loader" role="status" aria-live="polite" aria-label="祝福載入中">
+        <div class="loader__emblem" aria-hidden="true">
+          <span class="loader__ring"></span>
+          <span class="loader__ring loader__ring--2"></span>
+          <span class="loader__cap">🎓</span>
+        </div>
+        <div class="loader__head">
+          <span class="loader__title">祝福載入中</span>
+          <span class="loader__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+        <div class="loader__sub">正在迎接家長與親友的暖心祝福</div>
+      </div>
+    </div>
   </main>
 
   <footer class="foot">
@@ -563,7 +622,10 @@
       function renderBatch() {
         var list = getFiltered();
         if (!list.length) {
-          stage.innerHTML = '<div class="empty">這個分類目前還沒有祝福 💛</div>';
+          stage.innerHTML = '<div class="empty"><div class="loader loader--wait" role="status">' +
+            '<div class="loader__emblem" aria-hidden="true"><span class="loader__cap">💌</span></div>' +
+            '<div class="loader__head"><span class="loader__title">祝福即將到來</span></div>' +
+            '<div class="loader__sub">掃描 QR 條碼，留下你的暖心祝福 💛</div></div></div>';
           setTeacher(null); setTeachersAll(false);
           return;
         }
