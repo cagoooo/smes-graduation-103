@@ -20,6 +20,9 @@ director-scenes/
 # 導播機透明外框 overlay（中央去背疊圖、含校景預覽合成）— 本機 OBS/vMix 素材，不公開部署
 overlay-frames/
 
+# 打卡機 9:16 直版海報（中央透明窗 + 底部六位導師合照）— 含導師肖像，本機素材，不公開部署
+photobooth/
+
 # 本地預覽／工具設定
 .claude/
 
