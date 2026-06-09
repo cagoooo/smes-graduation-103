@@ -17,6 +17,7 @@
 var SHEET_ID = '1Y0R7ypyhFtHg1O_P9CHp7MM7_3GZ_WpOr3t1dHNNceg';
 var SHEET_NAME = '回條';
 var SITE_WALL_URL = 'https://cagoooo.github.io/smes-graduation-103/#rsvp'; // 前端祝福牆（審核頁「前往查看」用）
+var SITE_PHOTO_URL = 'https://cagoooo.github.io/smes-graduation-103/photo.html'; // 打卡照顯示頁（公開，避開 GAS HtmlService 沙箱）
 var HEADERS = ['送出時間', '班級', '畢業生姓名', '出席人數', '祝福悄悄話', '公開(填1或打勾)', '愛心'];
 var LATEST_VIEW_NAME = '🆕 最新在最上'; // 唯讀檢視分頁：把「回條」新到舊鏡像顯示（不影響原分頁列序）
 
@@ -143,45 +144,27 @@ function handlePhotoUpload_(data) {
     // ⚠️ 學校網域禁「對外公開分享」(setSharing ANYONE 會「存取遭拒」)，
     //    故照片保持私有，改由本 Web App 以擁有者身分「代理供圖」(action=pic)，繞過分享限制。
     var id = file.getId();
-    // 去掉 /a/<網域>/ 前綴 → 用公開網址，家長(非校內帳號)也能直接開
-    var base = (webAppUrl_() || '').replace(/\/a\/[^/]+\//, '/');
-    return json_({ ok: true, id: id, view: base + '?action=pic&id=' + id });
+    // QR 指向我們自己 GitHub Pages 的 photo.html（公開、無沙箱），由它跟 GAS 要 base64 顯示
+    return json_({ ok: true, id: id, view: SITE_PHOTO_URL + '?id=' + id });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   }
 }
 
-// 代理供圖：家長掃 QR → 開此頁 → GAS（擁有者身分）讀檔、內嵌顯示，可儲存。
+// 代理供圖（JSON）：photo.html 跨域 GET 此端點拿 base64 顯示（避開 GAS HtmlService 沙箱在學校網域對外不可用的問題）。
 // 安全：只允許讀「打卡照資料夾」內的檔，避免被拿來讀任意 Drive 檔。
-function handlePhotoView_(e) {
+function handlePhotoData_(e) {
   var id = (e && e.parameter && e.parameter.id) || '';
-  var page = function (inner) {
-    return HtmlService.createHtmlOutput(
-      '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
-      '<title>畢業打卡照 ｜ 石門國小</title><style>' +
-      '*{box-sizing:border-box;margin:0}body{font-family:-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;' +
-      'background:#0e1530;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;' +
-      'justify-content:center;padding:18px;text-align:center}img{max-width:100%;max-height:78vh;border-radius:14px;' +
-      'box-shadow:0 14px 40px rgba(0,0,0,.5)}a.dl{display:inline-block;margin-top:16px;background:linear-gradient(180deg,#ffd06b,#f5b942);' +
-      'color:#141d3b;font-weight:800;text-decoration:none;padding:13px 24px;border-radius:999px}' +
-      'p{color:#aebbe4;font-size:.85rem;margin-top:12px;line-height:1.7}</style></head><body>' + inner +
-      '</body></html>')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  };
   try {
     var file = DriveApp.getFileById(id);
     var fid = PropertiesService.getScriptProperties().getProperty('PHOTO_FOLDER_ID');
     var inFolder = false, ps = file.getParents();
     while (ps.hasNext()) { if (ps.next().getId() === fid) { inFolder = true; break; } }
-    if (!inFolder) return page('<p>查無此照片。</p>');
+    if (!inFolder) return json_({ ok: false, error: 'not found' });
     var blob = file.getBlob();
-    var uri = 'data:' + (blob.getContentType() || 'image/jpeg') + ';base64,' + Utilities.base64Encode(blob.getBytes());
-    return page('<img src="' + uri + '" alt="畢業打卡照">' +
-      '<a class="dl" href="' + uri + '" download="石門畢業打卡.jpg">⬇️ 儲存照片</a>' +
-      '<p>手機長按圖片也可直接儲存 · 石門國小 第103屆畢業典禮</p>');
+    return json_({ ok: true, img: 'data:' + (blob.getContentType() || 'image/jpeg') + ';base64,' + Utilities.base64Encode(blob.getBytes()) });
   } catch (err) {
-    return page('<p>找不到這張照片（可能已過期或連結有誤）。</p>');
+    return json_({ ok: false, error: String(err) });
   }
 }
 
@@ -264,8 +247,8 @@ function doGet(e) {
   if (action === 'like') {
     return handleLike_(e); // 祝福牆愛心 +1
   }
-  if (action === 'pic') {
-    return handlePhotoView_(e); // 打卡照代理供圖（家長掃 QR 開啟）
+  if (action === 'picdata') {
+    return handlePhotoData_(e); // 打卡照 base64（photo.html 跨域取用顯示）
   }
   return json_({ ok: true, service: 'smes-grad-103-rsvp', latestView: ensureLatestView_() });
 }

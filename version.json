@@ -1,4 +1,4 @@
 {
-  "version": "1.16.34",
-  "notes": "打卡機新增『📲 掃 QR 帶走照片』：拍完一鍵把照片(base64)上傳現有 GAS 後端→存 Google Drive(知道連結可看)→產 QR 給家長掃了開啟並儲存自己的照片；私密連結、不公開不上牆；text/plain POST 免 CORS preflight、可讀回應；沒授權/失敗時友善提示可改直接下載。⚠️ 老師需先在 Apps Script 編輯器執行 authorize() 授權 Drive 一次"
+  "version": "1.16.35",
+  "notes": "打卡機『掃 QR 帶走照片』修正：學校網域禁 Drive 外部分享、GAS HtmlService 沙箱在手機跳『無法開啟檔案』→ 改由公開的 photo.html 顯示。流程：照片存 Drive 私有 → QR 指向 photo.html?id= → 該頁跨域跟 GAS 要 base64(picdata) 顯示+下載；無沙箱、家長免登入。新增 photo.html"
 }

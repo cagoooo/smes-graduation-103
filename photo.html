@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16204a">
+<title>畢業打卡照 ｜ 石門國小 第103屆畢業典禮</title>
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{min-height:100%;}
+  body{font-family:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+    color:#fff;min-height:100svh;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:18px max(14px,env(safe-area-inset-left)) max(18px,env(safe-area-inset-bottom));
+    background:radial-gradient(120% 90% at 50% -10%,#3a4f9e 0%,#233268 42%,#16204a 76%,#0e1530 100%);}
+  h1{font-size:1.05rem;font-weight:800;color:#f8d98a;margin-bottom:14px;letter-spacing:.5px;}
+  #pic{max-width:100%;max-height:74svh;max-height:74vh;border-radius:16px;display:none;
+    box-shadow:0 16px 46px rgba(0,0,0,.5);border:1px solid rgba(245,196,81,.3);}
+  #status{color:#cdd6f4;font-size:1rem;line-height:1.8;padding:30px;}
+  .spin{width:22px;height:22px;border:3px solid rgba(255,255,255,.3);border-top-color:#f5c451;
+    border-radius:50%;display:inline-block;margin-right:9px;vertical-align:middle;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #dl{display:none;margin-top:18px;background:linear-gradient(180deg,#ffd06b,#f5b942);color:#141d3b;
+    font-weight:800;font-size:1.05rem;text-decoration:none;padding:14px 28px;border-radius:999px;
+    box-shadow:0 12px 26px rgba(245,185,66,.4);}
+  #dl:active{transform:scale(.97);}
+  .tip{color:#aebbe4;font-size:.82rem;margin-top:12px;line-height:1.7;}
+  .foot{margin-top:20px;font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.7;}
+  .foot a{color:rgba(255,255,255,.72);text-decoration:none;border-bottom:1px dotted currentColor;}
+  @media (prefers-reduced-motion:reduce){.spin{animation:none;}}
+</style>
+</head>
+<body>
+  <h1>📸 你的畢業打卡照</h1>
+  <div id="status"><span class="spin"></span>照片載入中…</div>
+  <img id="pic" alt="畢業打卡照">
+  <a id="dl" download="石門畢業打卡.jpg">⬇️ 儲存照片</a>
+  <div class="tip" id="tip" style="display:none">手機長按圖片也可直接儲存</div>
+  <div class="foot">
+    石門國小 第103屆畢業典禮 · 打卡機<br>
+    Made with <span aria-label="愛心">❤️</span> by
+    <a href="https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5" target="_blank" rel="noopener noreferrer">阿凱老師</a>
+  </div>
+<script>
+(function(){
+  "use strict";
+  var ENDPOINT = "https://script.google.com/macros/s/AKfycbyQ49Y_tAxh4dBmyK0Rwcb-apR1tShdNpLTPRCKClbyVGQtSX9-atoNDzvCNiucx2NX/exec";
+  var $ = function(id){ return document.getElementById(id); };
+  var id = new URLSearchParams(location.search).get("id");
+  function fail(msg){ $("status").innerHTML = msg; }
+  if(!id){ fail("連結不完整，請重新掃描 QR 條碼。"); return; }
+  fetch(ENDPOINT + "?action=picdata&id=" + encodeURIComponent(id) + "&t=" + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.ok && d.img){
+        var img=$("pic"); img.src=d.img; img.style.display="block";
+        var a=$("dl"); a.href=d.img; a.style.display="inline-block";
+        $("status").style.display="none"; $("tip").style.display="block";
+      } else { fail("找不到這張照片（可能已過期或連結有誤）。"); }
+    })
+    .catch(function(){ fail("照片載入失敗，請檢查網路後重新整理。"); });
+})();
+</script>
+</body>
+</html>

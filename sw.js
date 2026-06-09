@@ -4,14 +4,15 @@
    index.html 內 styles.css?v= / script.js?v=），sw.js 內容變動
    瀏覽器才會偵測到更新並觸發版本提示。
    ========================================================= */
-const BUILD_VERSION = "1.16.34";
+const BUILD_VERSION = "1.16.35";
 const CACHE = "smes-grad-" + BUILD_VERSION;
 const PRECACHE = [
   "./",
   "./index.html",
-  "./styles.css?v=1.16.34",
-  "./script.js?v=1.16.34",
+  "./styles.css?v=1.16.35",
+  "./script.js?v=1.16.35",
   "./photobooth.html",
+  "./photo.html",
   "./assets/logo.png",
   "./favicon.ico",
   "./manifest.webmanifest"
