@@ -250,6 +250,14 @@ function doGet(e) {
   if (action === 'picdata') {
     return handlePhotoData_(e); // 打卡照 base64（photo.html 跨域取用顯示）
   }
+  if (action === 'photofolder') {
+    // 診斷：回傳「打卡照」資料夾連結 + 目前張數（給老師確認雲端位置、做成果用）
+    try {
+      var f = getPhotoFolder_(), n = 0, it = f.getFiles();
+      while (it.hasNext()) { it.next(); n++; }
+      return json_({ ok: true, name: f.getName(), id: f.getId(), url: f.getUrl(), count: n });
+    } catch (err) { return json_({ ok: false, error: String(err) }); }
+  }
   return json_({ ok: true, service: 'smes-grad-103-rsvp', latestView: ensureLatestView_() });
 }
 

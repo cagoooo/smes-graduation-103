@@ -296,6 +296,7 @@
 
   function showResult(canvas){
     lastDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    photoUpload = null;                      // 新照片 → 重置雲端上傳狀態
     var sctx = shot.getContext("2d");
     shot.width=OUT_W; shot.height=OUT_H;
     sctx.drawImage(canvas,0,0);
@@ -308,47 +309,68 @@
     showResult(compose(video, video.videoWidth, video.videoHeight, facing==="user"));
   }
 
-  // ---- 下載 / 分享 ----
+  // ---- 儲存照片 / 分享 / 上傳收集 ----
   function fname(){ return "石門畢業打卡_"+curFrame+".jpg"; }
-  function download(){
-    if(!lastDataUrl) return;
-    var a=document.createElement("a"); a.href=lastDataUrl; a.download=fname(); document.body.appendChild(a); a.click(); a.remove();
-  }
   function dataURLtoFile(durl, name){
     var arr=durl.split(","), mime=arr[0].match(/:(.*?);/)[1], bstr=atob(arr[1]), n=bstr.length, u8=new Uint8Array(n);
     while(n--) u8[n]=bstr.charCodeAt(n);
     return new File([u8], name, {type:mime});
   }
-  async function share(){
+  function download(){
     if(!lastDataUrl) return;
-    try{
-      var file=dataURLtoFile(lastDataUrl, fname());
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:"石門畢業打卡", text:"石門國小 第103屆畢業典禮 🎓"});
-      }else{ download(); }
-    }catch(e){ /* 使用者取消或不支援 → 退回下載 */ }
+    var a=document.createElement("a"); a.href=lastDataUrl; a.download=fname(); document.body.appendChild(a); a.click(); a.remove();
+  }
+  // 這台裝置是否支援「分享檔案」（手機多半支援 → 可叫出系統分享單，內含『儲存影像／存到相簿』）
+  var canShareFiles = false;
+  try { canShareFiles = !!(navigator.canShare && navigator.canShare({ files:[new File([new Uint8Array(1)], "a.jpg", {type:"image/jpeg"})] })); } catch(e){}
+
+  // 上傳到學校 Drive 收集（每張只傳一次；存/分享/QR 都會觸發 → 確保做成果時照片都撈得到）
+  var photoUpload = null;   // null=未傳 / {id,view} / {error}
+  function ensureUploaded(cb){
+    if(photoUpload && photoUpload.view){ if(cb) cb(photoUpload); return; }
+    if(!lastDataUrl){ if(cb) cb(null); return; }
+    fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify({action:"photo", image:lastDataUrl})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d && d.ok && d.view){ photoUpload={id:d.id, view:d.view}; if(cb) cb(photoUpload); }
+        else { if(cb) cb({error:(d&&d.error)||"fail"}); }
+      })
+      .catch(function(){ if(cb) cb({error:"network"}); });
   }
 
-  // ---- 上傳到雲端 → 產生 QR 給家長掃了帶走（只給本人下載，不公開、不上牆）----
+  // 儲存照片：手機 → 系統分享單(點「儲存影像」直接進相簿，免去檔案夾找)；桌機 → 直接下載。同時收集到雲端
+  async function saveToAlbum(){
+    if(!lastDataUrl) return;
+    ensureUploaded();                       // best-effort 收集到學校 Drive
+    if(canShareFiles){
+      try{ await navigator.share({ files:[dataURLtoFile(lastDataUrl, fname())], title:"石門畢業打卡照", text:"石門國小 第103屆畢業典禮 🎓" }); return; }
+      catch(e){ if(e && e.name==="AbortError") return; }   // 使用者取消 → 不動作
+    }
+    download();                             // 桌機 / 不支援分享 → 下載到電腦
+  }
+  // 分享到 LINE / IG 等 App（手機叫系統分享單；桌機無此鈕）
+  async function share(){
+    if(!lastDataUrl) return;
+    ensureUploaded();
+    if(canShareFiles){ try{ await navigator.share({ files:[dataURLtoFile(lastDataUrl, fname())], title:"石門畢業打卡照", text:"石門國小 第103屆畢業典禮 🎓" }); }catch(e){} }
+    else { download(); }
+  }
+
+  // ---- 掃 QR 帶走（沿用同一次上傳的結果）----
   function uploadAndQR(){
     if(!lastDataUrl) return;
     clearErr();
     var up=$("uploading"); up.classList.remove("hide");
     var btn=$("qrBtn"); btn.disabled=true;
-    fetch(ENDPOINT, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({action:"photo", image:lastDataUrl})})
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d && d.ok && d.view){ showQR(d.view); }
-        else {
-          var e=(d&&d.error)||"";
-          showErr(/drive|permission|授權|權限/i.test(e)
-            ? "雲端相簿尚未啟用（老師需先在後台授權一次）。可先按「⬇️ 下載」存到本機。"
-            : "上傳失敗，請稍後再試，或先按「⬇️ 下載」存到本機。");
-        }
-      })
-      .catch(function(){ showErr("網路不穩、上傳失敗。可先按「⬇️ 下載」存到本機。"); })
-      .then(function(){ up.classList.add("hide"); btn.disabled=false; });
+    ensureUploaded(function(u){
+      up.classList.add("hide"); btn.disabled=false;
+      if(u && u.view){ showQR(u.view); return; }
+      var e=(u&&u.error)||"";
+      showErr(/drive|permission|授權|權限/i.test(e)
+        ? "雲端相簿尚未啟用（老師需先在後台授權一次）。可先按「儲存照片」存到手機。"
+        : "網路不穩、上傳失敗，請稍後再試，或先按「儲存照片」存到手機。");
+    });
   }
   function showQR(viewUrl){
     $("qrImg").src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data="+encodeURIComponent(viewUrl);
@@ -375,12 +397,13 @@
   $("uploadBtn2").addEventListener("click", pickFile);
   $("qrBtn").addEventListener("click", uploadAndQR);
   $("qrClose").addEventListener("click", function(){ $("qrModal").classList.add("hide"); });
-  $("downloadBtn").addEventListener("click", download);
+  $("downloadBtn").addEventListener("click", saveToAlbum);
   $("shareBtn").addEventListener("click", share);
-  $("retakeBtn").addEventListener("click", function(){ lastDataUrl=null; if(facing){ startCamera(); } else { setMode("start"); } });
+  $("retakeBtn").addEventListener("click", function(){ lastDataUrl=null; photoUpload=null; if(facing){ startCamera(); } else { setMode("start"); } });
 
-  // 若裝置不支援分享檔案，隱藏分享鈕（避免誤導）
-  if(!(navigator.canShare)){ $("shareBtn").classList.add("hide"); }
+  // 手機(支援分享檔案) → 「存到相簿」；桌機 → 「下載」並隱藏多餘的分享鈕
+  if(canShareFiles){ $("downloadBtn").textContent = "💾 存到相簿"; }
+  else { $("downloadBtn").textContent = "⬇️ 下載"; $("shareBtn").classList.add("hide"); }
 
   // 取景台尺寸：保 9:16 又同時不超過容器寬與高（跨瀏覽器穩，不靠 svh calc）
   var mainEl=$("main"), wsEl=$("workspace");
