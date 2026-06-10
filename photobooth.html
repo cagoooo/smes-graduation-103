@@ -8,6 +8,7 @@
 <meta name="description" content="石門國小 第103屆畢業典禮 線上打卡機：開鏡頭即時套上畢業外框、和六位班導師一起拍照，一鍵下載分享。">
 <link rel="icon" href="favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" as="image" href="assets/photobooth/classic.webp?v=1">
 <style>
   :root{
     --navy-900:#0e1530; --navy-800:#16204a; --navy-700:#233268;
@@ -139,7 +140,7 @@
       <div class="placeholder" id="placeholder">📷 按下方「開啟相機」<br>站進框內，和導師們一起拍張畢業照！</div>
       <video id="video" class="mirror" playsinline autoplay muted></video>
       <canvas id="shot"></canvas>
-      <img class="frame" id="frame" alt="" src="assets/photobooth/classic.webp?v=1">
+      <img class="frame" id="frame" alt="" decoding="async" src="assets/photobooth/classic.webp?v=1">
       <div class="badge" id="badge">預覽中</div>
       <div class="uploading hide" id="uploading"><span class="spin"></span>上傳中…</div>
     </div>
@@ -219,14 +220,15 @@
   var frameBitmap = new Image();
   frameBitmap.crossOrigin = "anonymous";
 
-  function frameUrl(k){ return "assets/photobooth/"+k+".webp?v="+V; }
+  function frameUrl(k){ return "assets/photobooth/"+k+".webp?v="+V; }            // 完整框(1080×1920)：主預覽 + 拍照合成用，選到才載入
+  function thumbUrl(k){ return "assets/photobooth/thumb/"+k+".webp?v="+V; }       // 小縮圖(~10KB)：選單用，大幅省初始流量
   function showErr(msg){ errEl.textContent = msg; errEl.classList.remove("hide"); }
   function clearErr(){ errEl.classList.add("hide"); }
 
   // 建立風格縮圖選單
   FRAMES.forEach(function(f){
     var b=document.createElement("button");
-    b.style.backgroundImage="url('"+frameUrl(f.k)+"')";
+    b.style.backgroundImage="url('"+thumbUrl(f.k)+"')";
     b.title=f.n; b.dataset.k=f.k;
     if(f.k===curFrame) b.classList.add("active");
     b.innerHTML='<span class="lbl">'+f.n+'</span>';
