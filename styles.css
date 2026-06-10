@@ -255,6 +255,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* 倒數 */
 .countdown { margin-top: 32px; }
 .countdown__label { font-size: .85rem; letter-spacing: 2px; color: rgba(255,255,255,.78); margin-bottom: 12px; }
+/* 典禮後回顧模式：倒數改為「圓滿達成」慶祝卡 */
+.countdown--done {
+  display: inline-block; padding: 18px 28px; border-radius: 18px;
+  background: rgba(245, 185, 66, 0.12); border: 1.5px solid rgba(245, 185, 66, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.countdown--done .countdown__label {
+  font-size: clamp(1.02rem, 3.6vw, 1.3rem); font-weight: 900; letter-spacing: 1.5px;
+  color: var(--gold); margin-bottom: 8px;
+}
+.countdown__done { color: rgba(255,255,255,.92); font-size: clamp(.92rem, 3vw, 1.05rem); line-height: 1.8; }
 .countdown__grid { display: flex; gap: clamp(8px, 2.5vw, 16px); justify-content: center; }
 .countdown__box {
   background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
