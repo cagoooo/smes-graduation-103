@@ -73,9 +73,9 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 /* 沒有公開祝福、跑馬燈隱藏時，導覽列回到最頂端不留空隙 */
 .topticker[hidden] + .nav { top: 0; }
 .nav__inner {
-  max-width: var(--maxw); margin-inline: auto;
-  padding: 10px clamp(14px, 4vw, 28px);
-  display: flex; align-items: center; gap: 12px;
+  max-width: 1220px; margin-inline: auto;          /* 比內容(--maxw 1080)寬：讓導覽列在寬螢幕能完整放下全部連結 */
+  padding: 10px clamp(14px, 4vw, 24px);
+  display: flex; align-items: center; gap: 10px;
 }
 .nav__brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; flex-shrink: 0; }
 .nav__logo { width: 40px; height: auto; flex-shrink: 0; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
@@ -127,8 +127,12 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .nav__links a {
   text-decoration: none; color: rgba(255, 255, 255, 0.82);
   font-size: .9rem; font-weight: 500; white-space: nowrap;
-  padding: 8px 12px; border-radius: 999px; transition: background .2s, color .2s;
+  padding: 7px 10px; border-radius: 999px; transition: background .2s, color .2s;
 }
+/* 連結放不下時：兩側漸層提示「還有更多，可用滑鼠滾輪左右捲」（由 script.js 加 class） */
+.nav__links.fade-right { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); }
+.nav__links.fade-left { -webkit-mask-image: linear-gradient(90deg, transparent, #000 32px); mask-image: linear-gradient(90deg, transparent, #000 32px); }
+.nav__links.fade-left.fade-right { -webkit-mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); }
 .nav__links a:hover, .nav__links a.is-active { background: rgba(245, 185, 66, 0.18); color: var(--gold); }
 
 /* === 手機：漢堡下拉選單（取代橫向捲動，放在基礎 .nav__links 規則之後以正確覆蓋） === */

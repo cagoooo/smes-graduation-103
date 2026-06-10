@@ -140,6 +140,24 @@
       if (nav.classList.contains("is-open") && !nav.contains(e.target)) setOpen(false);
     });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });
+
+    // 桌機：連結太多放不下時，滑鼠滾輪可左右捲動，兩側加漸層提示「還有更多」
+    function updateNavFade() {
+      var max = links.scrollWidth - links.clientWidth;
+      if (max <= 2) { links.classList.remove("fade-left", "fade-right"); return; }
+      links.classList.toggle("fade-left", links.scrollLeft > 4);
+      links.classList.toggle("fade-right", links.scrollLeft < max - 4);
+    }
+    links.addEventListener("wheel", function (e) {
+      if (links.scrollWidth <= links.clientWidth + 2) return;     // 放得下就不攔截
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;        // 觸控板本就橫向捲 → 放行
+      e.preventDefault();
+      links.scrollLeft += (e.deltaY || e.deltaX);
+      updateNavFade();
+    }, { passive: false });
+    links.addEventListener("scroll", updateNavFade, { passive: true });
+    window.addEventListener("resize", updateNavFade);
+    updateNavFade();
   })();
 
   /* ---------- 分享 / 複製連結（含 toast） ---------- */
