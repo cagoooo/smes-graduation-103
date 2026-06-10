@@ -863,9 +863,8 @@
     });
   }
 
-  /* ---------- 校歌重編版 BGM（主頁背景音樂・預設自動開啟 + 跨分頁互斥，避免與 stage 畢業歌雙軌） ----------
-     預設 intentOn=true（開啟）：載入即嘗試自動播放；瀏覽器 autoplay 政策會擋帶聲音的自動播放，
-     故在使用者第一個互動（點 / 滑 / 按鍵）瞬間補播；按一下按鈕即靜音。
+  /* ---------- 校歌重編版 BGM（主頁背景音樂・預設關閉，按鈕才播 + 跨分頁互斥，避免與 stage 畢業歌雙軌） ----------
+     預設 intentOn=false（關閉）：進頁面不自動播放，按下「校歌重編版」按鈕才開始播（淡入）；再按一下淡出靜音。
      BroadcastChannel("smes-grad-bgm")：哪一頁開始播就廣播 "playing"，另一分頁收到即靜音
      （僅同瀏覽器跨分頁、不跨裝置，投影機端只開 stage 不受影響）。 */
   (function () {
@@ -873,7 +872,7 @@
     var btn = document.getElementById("bgmToggle");
     if (!audio || !btn) return;
     var ico = btn.querySelector(".bgm-toggle__ico");
-    var fadeId = null, intentOn = true;          // 預設開啟播放
+    var fadeId = null, intentOn = false;         // 預設關閉：進頁面不自動播放，按下按鈕才播
     var channel = ("BroadcastChannel" in window) ? new BroadcastChannel("smes-grad-bgm") : null;
     var VOL = 0.5;
 
@@ -908,19 +907,7 @@
     // 其他分頁（stage 按下開啟畢業歌）開始播 → 主頁校歌自動靜音，避免兩種音軌同時播
     if (channel) channel.onmessage = function (e) { if (e.data === "playing") mute(); };
 
-    // 首個互動補播（autoplay 政策需使用者手勢；按到音樂鈕本身則交給 click 處理）
-    function teardown() {
-      ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { window.removeEventListener(ev, onGesture); });
-    }
-    function onGesture(e) {
-      if (e && e.target && e.target.closest && e.target.closest("#bgmToggle")) { teardown(); return; }
-      teardown();
-      if (intentOn && audio.paused) play(true);
-    }
-    ["pointerdown", "keydown", "touchstart"].forEach(function (ev) { window.addEventListener(ev, onGesture, { passive: true }); });
-
-    // 預設開啟：顯示開啟狀態並先嘗試自動播放（被擋則等首個互動補播）
+    // 預設關閉：只顯示關閉狀態，不自動播放、不在首次互動補播；使用者按下按鈕才播放
     setBtn();
-    play(true);
   })();
 })();
