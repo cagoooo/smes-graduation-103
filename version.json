@@ -1,4 +1,4 @@
 {
-  "version": "1.16.39",
-  "notes": "Service Worker 改『自動接管(skipWaiting + clients.claim)』：新版下載即啟用，下次導覽就吃到最新頁面，家長不必手動按更新；搭配既有 HTML network-first，不強制重整、不打斷拍照。解決舊快取一直顯示舊版（看不到打卡機）的問題"
+  "version": "1.16.40",
+  "notes": "導覽列『📸 打卡機』金色高亮按鈕：原本放在可橫向捲動的連結列(overflow-x:auto)裡，連結太多時會被捲到看不見；改成移出連結列、固定放在 LIVE 左邊，金色高亮、各寬度都看得到；手機(≤540px)自動縮成 icon-only(📸) 不擠不溢出"
 }

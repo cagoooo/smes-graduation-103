@@ -102,6 +102,17 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .nav__live:hover { background: #d22b22; transform: translateY(-1px); }
 .nav__live .btn__live-dot { width: 8px; height: 8px; }
 
+/* 導覽列「📸 打卡機」金色高亮按鈕：移出可捲動連結列，各寬度都看得到 */
+.nav__photobooth {
+  flex-shrink: 0; display: inline-flex; align-items: center; white-space: nowrap;
+  text-decoration: none; font-weight: 800; font-size: .86rem; letter-spacing: .3px;
+  padding: 7px 15px; border-radius: 999px;
+  background: linear-gradient(180deg, #ffd66f 0%, var(--gold) 100%); color: var(--navy-900);
+  box-shadow: 0 4px 14px rgba(245,185,66,.45); transition: transform .2s, box-shadow .2s, filter .2s;
+}
+.nav__photobooth:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(245,185,66,.6); filter: brightness(1.04); }
+@media (max-width: 540px) { .nav__pb-txt { display: none; } .nav__photobooth { padding: 7px 11px; font-size: 1rem; } }
+
 /* 漢堡按鈕（手機顯示） */
 .nav__toggle {
   display: none; flex-shrink: 0; width: 44px; height: 44px; padding: 0;
