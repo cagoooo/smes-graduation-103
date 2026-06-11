@@ -359,6 +359,31 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .is-postevent #wishes  { order: -10; }
 /* 其餘區塊維持原始順序（order:0），自然退到成果群組下方 */
 
+/* 典禮後 Hero 自動精簡：不再滿版整屏，縮小巨標題、隱藏過期日期 pills 與
+   （與「圓滿達成」慶祝卡重複的）長 lede、收緊間距，讓下方「直播回放」
+   一進頁面就露出/緊接在後 ＝ 真正「一進來就看到成果」。 */
+.is-postevent .hero { min-height: auto; padding-top: clamp(22px, 4vh, 44px); padding-bottom: clamp(16px, 3vh, 30px); }
+.is-postevent .hero__logo { width: clamp(50px, 12vw, 70px); margin-bottom: 8px; }
+.is-postevent .hero__school { margin-bottom: 6px; font-size: clamp(.8rem, 2.4vw, .95rem); }
+.is-postevent .hero__eyebrow { margin-bottom: 8px; }
+.is-postevent .hero__title { font-size: clamp(2rem, 9.5vw, 3.8rem); }
+.is-postevent .hero__slogan { margin-top: 3px; font-size: clamp(1rem, 4.2vw, 1.5rem); }
+.is-postevent .hero__lede { display: none; }   /* 與 countdown--done 慶祝語重複，精簡版隱藏 */
+.is-postevent .hero__pills { display: none; }   /* 典禮已過，日期/時間/地點 pills 隱藏（資訊仍在下方典禮資訊區） */
+.is-postevent .countdown { margin-top: 14px; }
+.is-postevent .countdown--done { padding: 12px 22px; }
+.is-postevent .countdown--done .countdown__label { font-size: clamp(.95rem, 3.2vw, 1.15rem); margin-bottom: 6px; }
+.is-postevent .countdown__done { font-size: clamp(.86rem, 2.7vw, .98rem); line-height: 1.65; }
+.is-postevent .hero__cta { margin-top: 16px; gap: 10px; }
+.is-postevent .hero__scroll { display: none; } /* 短 Hero 不需要向下捲動箭頭 */
+/* 成果首區（直播回放）緊接精簡 Hero：縮小頂距，讓「典禮直播・回放」標題一進頁面就露出 */
+.is-postevent #live { padding-top: clamp(26px, 4vh, 46px); }
+/* #live 的 intro 是賽前框架（「無法到場？」），典禮後已不適用且佔位 → 隱藏，
+   回放狀態由 live-stage__status（JS 改「典禮已圓滿結束—點擊觀看完整回放」）承接，
+   同時把回放徽章與影片往上靠、更快露出 */
+.is-postevent #live .section__intro { display: none; }
+.is-postevent #live .live-stage { margin-top: clamp(14px, 2.5vh, 24px); }
+
 /* =========================================================
    典禮資訊卡
    ========================================================= */
