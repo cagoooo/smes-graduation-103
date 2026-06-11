@@ -696,10 +696,11 @@
         featPrev: document.getElementById("wfeatPrev"),
         featNext: document.getElementById("wfeatNext"),
         openWall: document.getElementById("showcaseOpenWall"),
-        allN: document.getElementById("showcaseAllN")
+        allN: document.getElementById("showcaseAllN"),
+        live: document.getElementById("wlive")
       };
       var scReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      var scState = { visible: false, dataReady: false, animated: false, stats: null, heatSig: "", featSig: "" };
+      var scState = { visible: false, dataReady: false, animated: false, stats: null, heatSig: "", featSig: "", lastTotal: null, lastHearts: null };
 
       // 數字滾動到目標值（easeOutCubic + 千分位）
       function countUp(el, target) {
@@ -814,6 +815,11 @@
         if (!sc.section) return;
         var s = computeStats(ws);
         scState.stats = s;
+        // 偵測到數字變動（新祝福／新愛心）→ 即時標示亮一下（首次載入不亮）
+        if (sc.live && scState.lastTotal !== null && (s.total !== scState.lastTotal || s.hearts !== scState.lastHearts)) {
+          sc.live.classList.remove("is-bump"); void sc.live.offsetWidth; sc.live.classList.add("is-bump");
+        }
+        scState.lastTotal = s.total; scState.lastHearts = s.hearts;
         if (sc.allN) sc.allN.textContent = s.total;
         if (sc.statGrid && scState.animated) { // 已滾動過 → 後續輪詢直接更新數字（不重新滾動）
           var nums = sc.statGrid.querySelectorAll(".wstat__num");

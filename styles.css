@@ -939,6 +939,31 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .wstat__label { display: block; margin-top: 10px; color: rgba(255, 255, 255, .82); font-size: clamp(.78rem, 1.6vw, .98rem); font-weight: 600; }
 
+/* 即時更新標示：綠色脈動圓點 + 文字，數字變動時整顆 pill 亮一下 */
+.wlive {
+  width: fit-content; max-width: 100%; margin: clamp(16px, 3vw, 24px) auto 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 999px;
+  background: rgba(46, 204, 113, .12); border: 1px solid rgba(46, 204, 113, .42);
+  color: #86e6ad; font-weight: 700; font-size: clamp(.76rem, 1.5vw, .92rem);
+  white-space: nowrap;
+}
+.wlive__dot {
+  flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: #2ecc71;
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, .6); animation: wlivePulse 1.9s ease-out infinite;
+}
+.wlive.is-bump { animation: wliveBump 1.1s var(--ease); }
+@keyframes wlivePulse {
+  0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, .55); }
+  70% { box-shadow: 0 0 0 9px rgba(46, 204, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+@keyframes wliveBump {
+  0% { transform: scale(1); }
+  28% { transform: scale(1.07); background: rgba(46, 204, 113, .28); border-color: rgba(46, 204, 113, .85); }
+  100% { transform: scale(1); }
+}
+
 /* 區塊小標（各班熱度 / 精選祝福共用） */
 .wblock__h {
   font-family: var(--font-serif); color: #fff; text-align: center;
@@ -1024,6 +1049,8 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   .wheat__fill { transition: none; }
   .wfeat__card { transition: none; }
   .wstat:hover { transform: none; }
+  .wlive__dot { animation: none; }
+  .wlive.is-bump { animation: none; }
 }
 
 /* 換頁 / 切班級轉場：舊頁淡出滑走 → 換內容 → 新卡片交錯滑入（方向感知，提升絲滑感） */
