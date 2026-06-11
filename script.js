@@ -206,7 +206,8 @@
   /* ---------- YouTube facade：點擊才載入 iframe（省效能 / 隱私），直播 + 畢業歌共用 ---------- */
   [
     { embed: "liveEmbed", play: "liveEmbedPlay", vid: "OiJlVXOzM8U", title: "石門國小第103屆畢業典禮直播" },
-    { embed: "songEmbed", play: "songEmbedPlay", vid: "ZCV1j_9mW8A", title: "畢業歌〈風箏〉MV" }
+    { embed: "songEmbed", play: "songEmbedPlay", vid: "ZCV1j_9mW8A", title: "畢業歌〈風箏〉MV" },
+    { embed: "blessEmbed", play: "blessEmbedPlay", vid: "-vhVoyd8fUs", title: "2026畢業典禮祝福影片大集錦" }
   ].forEach(function (c) {
     var embed = document.getElementById(c.embed);
     var play = document.getElementById(c.play);

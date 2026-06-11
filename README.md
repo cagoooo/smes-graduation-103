@@ -26,7 +26,8 @@
 - 🌈 校園巡禮路線
 - 👨‍👩‍👧‍👦 給家長的溫馨提醒
 
-- 📺 **線上直播**：https://www.youtube.com/live/OiJlVXOzM8U
+- 📺 **典禮直播回放**：https://www.youtube.com/live/OiJlVXOzM8U
+- 🎬 **祝福影片大集錦**（師長＋六年級各班祝福，附中文 CC 字幕與章節）：https://youtu.be/-vhVoyd8fUs
 
 ## 技術
 
