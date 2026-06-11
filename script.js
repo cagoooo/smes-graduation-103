@@ -793,7 +793,9 @@
         if (!picked.length) { sc.featStage.innerHTML = '<p class="wfeat__loading">祝福即將精選呈現…</p>'; return; }
         featCards = picked;
         sc.featStage.innerHTML = picked.map(function (w, k) {
-          return '<figure class="wfeat__card' + (k === 0 ? " is-active" : "") + '">' +
+          var len = String(w.m || "").length;
+          var lenCls = len > 150 ? " len-xl" : len > 70 ? " len-l" : "";
+          return '<figure class="wfeat__card' + (k === 0 ? " is-active" : "") + lenCls + '">' +
             '<blockquote class="wfeat__quote">' + esc(w.m) + '</blockquote>' +
             '<figcaption class="wfeat__meta">' +
             '<span class="wfeat__to">💛 給 ' + esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</span>' +
