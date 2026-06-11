@@ -677,6 +677,176 @@
         var t = document.getElementById("rsvp");
         if (t) { try { t.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {} }
       });
+
+      // ===== 祝福成果專區（#wishes）：數據儀表板 + 各班熱度 + 精選輪播 =====
+      // 各班專屬色（對應 Hero 紙花彩虹色），師長金、其他石板灰
+      var CLASS_COLOR = {
+        "六年1班": "#ff5e6c", "六年2班": "#ff9f43", "六年3班": "#ffc94d",
+        "六年4班": "#2ecc71", "六年5班": "#45aaf2", "六年6班": "#9d7bff",
+        "師長": "#f5b942", "其他": "#9aa7c2"
+      };
+      function classColor(c) { return CLASS_COLOR[c] || "#9aa7c2"; }
+      var sc = {
+        section: document.getElementById("wishes"),
+        statGrid: document.getElementById("wstatGrid"),
+        heatList: document.getElementById("wheatList"),
+        featStage: document.getElementById("wfeatStage"),
+        featNav: document.getElementById("wfeatNav"),
+        featDots: document.getElementById("wfeatDots"),
+        featPrev: document.getElementById("wfeatPrev"),
+        featNext: document.getElementById("wfeatNext"),
+        openWall: document.getElementById("showcaseOpenWall"),
+        allN: document.getElementById("showcaseAllN")
+      };
+      var scReduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var scState = { visible: false, dataReady: false, animated: false, stats: null, heatSig: "", featSig: "" };
+
+      // 數字滾動到目標值（easeOutCubic + 千分位）
+      function countUp(el, target) {
+        if (!el) return;
+        target = Math.max(0, target || 0);
+        if (scReduce) { el.textContent = target.toLocaleString(); return; }
+        var dur = 1300, t0 = null;
+        function step(ts) {
+          if (t0 == null) t0 = ts;
+          var p = Math.min(1, (ts - t0) / dur);
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased).toLocaleString();
+          if (p < 1) requestAnimationFrame(step);
+          else el.textContent = target.toLocaleString();
+        }
+        requestAnimationFrame(step);
+      }
+
+      function computeStats(ws) {
+        var groups = {}, hearts = 0, maxlen = 0;
+        ws.forEach(function (w) {
+          var c = String(w.c || "").trim() || "其他";
+          groups[c] = (groups[c] || 0) + 1;
+          hearts += Math.max(0, parseInt(w.l, 10) || 0);
+          maxlen = Math.max(maxlen, String(w.m || "").length);
+        });
+        return { total: ws.length, hearts: hearts, groups: Object.keys(groups).length, maxlen: maxlen, byGroup: groups };
+      }
+
+      function animateShowcaseIn() {
+        if (scState.animated || !scState.stats) return;
+        scState.animated = true;
+        var s = scState.stats;
+        if (sc.statGrid) {
+          var nums = sc.statGrid.querySelectorAll(".wstat__num");
+          for (var i = 0; i < nums.length; i++) countUp(nums[i], s[nums[i].getAttribute("data-stat")] || 0);
+        }
+        if (sc.heatList) {
+          var fills = sc.heatList.querySelectorAll(".wheat__fill");
+          for (var j = 0; j < fills.length; j++) (function (el) {
+            var w = el.getAttribute("data-w") || "0";
+            if (scReduce) el.style.width = w + "%";
+            else requestAnimationFrame(function () { requestAnimationFrame(function () { el.style.width = w + "%"; }); });
+          })(fills[j]);
+        }
+      }
+      function maybeAnimateShowcase() { if (scState.visible && scState.dataReady) animateShowcaseIn(); }
+
+      function renderHeat(s) {
+        if (!sc.heatList) return;
+        var entries = Object.keys(s.byGroup).map(function (k) { return [k, s.byGroup[k]]; });
+        entries.sort(function (a, b) { return b[1] - a[1]; });
+        var sig = entries.map(function (e) { return e[0] + ":" + e[1]; }).join("|");
+        if (sig === scState.heatSig) return; // 沒變不重繪，避免每次輪詢重置動畫
+        scState.heatSig = sig;
+        var max = entries.length ? entries[0][1] : 1;
+        sc.heatList.innerHTML = entries.map(function (e) {
+          var name = e[0], n = e[1], pct = Math.max(3, Math.round(n / max * 100));
+          var wNow = scState.animated ? "width:" + pct + "%;" : "";
+          return '<li class="wheat__row">' +
+            '<span class="wheat__name">' + esc(name) + '</span>' +
+            '<span class="wheat__track"><span class="wheat__fill" data-w="' + pct + '" style="background:' + classColor(name) + ';' + wNow + '"></span></span>' +
+            '<span class="wheat__n">' + n + '<small> 則</small></span></li>';
+        }).join("");
+      }
+
+      // 精選輪播
+      var featCards = [], featIdx = 0, featTimer = null;
+      function showFeat(i) {
+        if (!featCards.length || !sc.featStage) return;
+        featIdx = (i + featCards.length) % featCards.length;
+        var cards = sc.featStage.querySelectorAll(".wfeat__card");
+        var dots = sc.featDots ? sc.featDots.querySelectorAll(".wfeat__dot") : [];
+        for (var k = 0; k < cards.length; k++) cards[k].classList.toggle("is-active", k === featIdx);
+        for (var d = 0; d < dots.length; d++) dots[d].classList.toggle("is-active", d === featIdx);
+      }
+      function stopFeatAuto() { if (featTimer) { clearInterval(featTimer); featTimer = null; } }
+      function startFeatAuto() { stopFeatAuto(); if (scReduce || featCards.length <= 1) return; featTimer = setInterval(function () { showFeat(featIdx + 1); }, 5500); }
+      function renderFeat(ws) {
+        if (!sc.featStage) return;
+        var top = ws.slice().filter(function (w) { return String(w.m || "").trim(); })
+          .sort(function (a, b) { return (b.l || 0) - (a.l || 0); });
+        var seen = {}, picked = [];
+        for (var i = 0; i < top.length && picked.length < 6; i++) {
+          var key = String(top[i].m).slice(0, 40);
+          if (seen[key]) continue; seen[key] = 1; picked.push(top[i]);
+        }
+        var sig = picked.map(function (w) { return (w.r || "") + "/" + (w.l || 0); }).join("|");
+        if (sig === scState.featSig) return; // 名單沒變不重建，不打斷輪播
+        scState.featSig = sig;
+        if (!picked.length) { sc.featStage.innerHTML = '<p class="wfeat__loading">祝福即將精選呈現…</p>'; return; }
+        featCards = picked;
+        sc.featStage.innerHTML = picked.map(function (w, k) {
+          return '<figure class="wfeat__card' + (k === 0 ? " is-active" : "") + '">' +
+            '<blockquote class="wfeat__quote">' + esc(w.m) + '</blockquote>' +
+            '<figcaption class="wfeat__meta">' +
+            '<span class="wfeat__to">💛 給 ' + esc(w.c) + " " + esc(maskName(w.n, w.c)) + '</span>' +
+            ((w.l || 0) > 0 ? '<span class="wfeat__likes">❤️ ' + w.l + '</span>' : '') +
+            '</figcaption></figure>';
+        }).join("");
+        if (sc.featDots) sc.featDots.innerHTML = picked.map(function (w, k) {
+          return '<button type="button" class="wfeat__dot' + (k === 0 ? " is-active" : "") + '" data-i="' + k + '" aria-label="第 ' + (k + 1) + ' 則精選祝福"></button>';
+        }).join("");
+        if (sc.featNav) sc.featNav.hidden = picked.length <= 1;
+        featIdx = 0;
+        startFeatAuto();
+      }
+
+      function renderShowcase(ws) {
+        if (!sc.section) return;
+        var s = computeStats(ws);
+        scState.stats = s;
+        if (sc.allN) sc.allN.textContent = s.total;
+        if (sc.statGrid && scState.animated) { // 已滾動過 → 後續輪詢直接更新數字（不重新滾動）
+          var nums = sc.statGrid.querySelectorAll(".wstat__num");
+          for (var i = 0; i < nums.length; i++) nums[i].textContent = (s[nums[i].getAttribute("data-stat")] || 0).toLocaleString();
+        }
+        renderHeat(s);
+        renderFeat(ws);
+        scState.dataReady = true;
+        maybeAnimateShowcase();
+      }
+
+      // 輪播控制：箭頭 / 圓點 / hover 暫停
+      if (sc.featPrev) sc.featPrev.addEventListener("click", function () { showFeat(featIdx - 1); startFeatAuto(); });
+      if (sc.featNext) sc.featNext.addEventListener("click", function () { showFeat(featIdx + 1); startFeatAuto(); });
+      if (sc.featDots) sc.featDots.addEventListener("click", function (e) {
+        var b = e.target.closest ? e.target.closest(".wfeat__dot") : null;
+        if (!b) return; showFeat(parseInt(b.getAttribute("data-i"), 10) || 0); startFeatAuto();
+      });
+      if (sc.featStage) {
+        sc.featStage.addEventListener("mouseenter", stopFeatAuto);
+        sc.featStage.addEventListener("mouseleave", startFeatAuto);
+      }
+      // 「看全部 N 則祝福」→ 開啟沉浸式放大牆 overlay
+      if (sc.openWall) sc.openWall.addEventListener("click", openWall);
+      // 捲到專區 → 觸發一次數字滾動 + 長條填充
+      if (sc.section) {
+        if (scReduce || !("IntersectionObserver" in window)) { scState.visible = true; maybeAnimateShowcase(); }
+        else {
+          var scIo = new IntersectionObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) if (entries[i].isIntersecting) { scState.visible = true; maybeAnimateShowcase(); scIo.disconnect(); break; }
+          }, { threshold: 0.2 });
+          scIo.observe(sc.section);
+        }
+      }
+
       function load() {
         fetch(RSVP_ENDPOINT + "?action=wishes&t=" + Date.now())
           .then(function (r) { return r.json(); })
@@ -690,6 +860,7 @@
             }
             lastSeenMaxR = maxR;
             allWishes = ws;
+            renderShowcase(ws); // 祝福成果專區：數據儀表板 + 各班熱度 + 精選輪播（依即時資料）
             if (curFilter !== "全部" && !ws.some(function (w) { return w.c === curFilter; })) curFilter = "全部";
             buildFilters();
             renderCards();

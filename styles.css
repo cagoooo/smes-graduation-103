@@ -902,6 +902,127 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .wish-pager__btn:disabled { opacity: .4; cursor: not-allowed; }
 .wish-pager__info { font-weight: 700; color: var(--ink-soft); font-size: .92rem; white-space: nowrap; }
 
+/* =========================================================
+   祝福成果專區（#wishes）— 深色金緻 showcase
+   ========================================================= */
+.section--wishes {
+  background: radial-gradient(120% 100% at 50% -10%, #2a3a78 0%, #1d2a52 46%, #16204a 78%, #101733 100%);
+  color: #fff; overflow: hidden;
+}
+.section--wishes .section__title { color: #fff; }
+.section--wishes .section__intro { color: rgba(255, 255, 255, .82); max-width: 720px; }
+.wishes__glow {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(58% 42% at 50% -2%, rgba(245, 185, 66, .18), transparent 70%);
+}
+.section--wishes .container { position: relative; z-index: 1; }
+
+/* A. 成果數據儀表板 */
+.wstat-grid {
+  margin-top: clamp(30px, 5vw, 48px);
+  display: grid; gap: clamp(12px, 2vw, 20px);
+  grid-template-columns: repeat(4, 1fr);
+}
+.wstat {
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(245, 185, 66, .26);
+  border-radius: var(--radius); padding: clamp(18px, 2.6vw, 30px) 12px; text-align: center;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 14px 36px rgba(8, 14, 34, .3);
+  transition: transform .25s var(--ease), border-color .25s;
+}
+.wstat:hover { transform: translateY(-4px); border-color: rgba(245, 185, 66, .55); }
+.wstat__ico { font-size: clamp(1.5rem, 3.2vw, 2.2rem); display: block; margin-bottom: 6px; line-height: 1; }
+.wstat__num {
+  font-family: var(--font-serif); font-weight: 900; color: var(--gold);
+  font-size: clamp(2rem, 6.4vw, 3.5rem); line-height: 1; display: block;
+  text-shadow: 0 2px 18px rgba(245, 185, 66, .32); font-variant-numeric: tabular-nums;
+}
+.wstat__label { display: block; margin-top: 10px; color: rgba(255, 255, 255, .82); font-size: clamp(.78rem, 1.6vw, .98rem); font-weight: 600; }
+
+/* 區塊小標（各班熱度 / 精選祝福共用） */
+.wblock__h {
+  font-family: var(--font-serif); color: #fff; text-align: center;
+  font-size: clamp(1.2rem, 3.6vw, 1.75rem); font-weight: 900;
+  margin: clamp(42px, 6.5vw, 70px) 0 clamp(18px, 3vw, 28px);
+}
+
+/* B. 各班祝福熱度長條 */
+.wheat__list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: clamp(10px, 1.6vw, 15px); }
+.wheat__loading, .wfeat__loading { text-align: center; color: rgba(255, 255, 255, .5); padding: 18px 0; }
+.wheat__row { display: grid; grid-template-columns: 5.4em 1fr auto; align-items: center; gap: clamp(8px, 1.5vw, 14px); }
+.wheat__name { font-weight: 700; font-size: clamp(.8rem, 1.7vw, .96rem); color: rgba(255, 255, 255, .92); white-space: nowrap; }
+.wheat__track { display: block; height: clamp(16px, 2.4vw, 22px); background: rgba(255, 255, 255, .08); border-radius: 999px; overflow: hidden; }
+.wheat__fill {
+  display: block; height: 100%; width: 0; border-radius: 999px; min-width: 4px;
+  box-shadow: 0 0 14px rgba(255, 255, 255, .18) inset;
+  transition: width 1.1s cubic-bezier(.22, 1, .36, 1);
+}
+.wheat__n { font-weight: 800; font-size: clamp(.82rem, 1.7vw, .98rem); color: var(--gold); min-width: 3.4em; text-align: right; white-space: nowrap; }
+.wheat__n small { color: rgba(255, 255, 255, .55); font-weight: 600; font-size: .82em; }
+
+/* C. 精選暖心祝福輪播 */
+.wfeat { max-width: 760px; margin: 0 auto; }
+.wfeat__stage { position: relative; min-height: clamp(196px, 30vw, 236px); }
+.wfeat__card {
+  position: absolute; inset: 0; opacity: 0; visibility: hidden;
+  transition: opacity .6s var(--ease);
+  display: flex; flex-direction: column; justify-content: center;
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(245, 185, 66, .3); border-left: 5px solid var(--gold);
+  border-radius: var(--radius-lg); padding: clamp(22px, 3.6vw, 38px);
+  box-shadow: 0 18px 46px rgba(8, 14, 34, .38);
+}
+.wfeat__card.is-active { opacity: 1; visibility: visible; }
+.wfeat__quote {
+  font-family: var(--font-serif); font-size: clamp(1.05rem, 2.5vw, 1.5rem); line-height: 1.85; color: #fff;
+  margin: 0; quotes: "「" "」"; position: relative;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.wfeat__meta { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.wfeat__to { color: var(--gold); font-weight: 800; font-size: clamp(.9rem, 1.8vw, 1.06rem); }
+.wfeat__likes {
+  display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 122, 107, .18);
+  border: 1px solid rgba(255, 122, 107, .42); color: #ffb3a8; border-radius: 999px;
+  padding: 4px 12px; font-weight: 800; font-size: .9rem; white-space: nowrap;
+}
+.wfeat__nav { display: flex; align-items: center; justify-content: center; gap: clamp(12px, 2vw, 18px); margin-top: clamp(16px, 2.4vw, 22px); }
+.wfeat__nav[hidden] { display: none; }
+.wfeat__arrow {
+  flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .25);
+  background: rgba(255, 255, 255, .08); color: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background .2s, transform .15s, color .2s;
+}
+.wfeat__arrow:hover { background: var(--gold); color: var(--navy-900); transform: scale(1.08); }
+.wfeat__dots { display: flex; gap: 8px; align-items: center; }
+.wfeat__dot {
+  width: 9px; height: 9px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(255, 255, 255, .28); transition: background .2s, transform .2s;
+}
+.wfeat__dot.is-active { background: var(--gold); transform: scale(1.3); }
+
+/* D. 行動入口 */
+.wshow__cta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: clamp(42px, 6vw, 64px); }
+.btn-wallzoom--hero {
+  background: linear-gradient(180deg, #ffd06b, #f5b942); color: var(--navy-900);
+  border-color: var(--gold); box-shadow: 0 12px 28px rgba(245, 185, 66, .38);
+}
+.btn-wallzoom--hero:hover { background: linear-gradient(180deg, #ffd884, #ffc24d); color: var(--navy-900); transform: translateY(-2px); }
+.btn-wallzoom--hero b { font-weight: 900; }
+.btn-wallzoom--ghost { background: rgba(255, 255, 255, .08); color: #fff; border-color: rgba(255, 255, 255, .32); }
+.btn-wallzoom--ghost:hover { background: rgba(255, 255, 255, .18); color: #fff; }
+
+@media (max-width: 680px) {
+  .wstat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 440px) {
+  .wheat__row { grid-template-columns: 4.4em 1fr auto; }
+  .wshow__cta .btn-wallzoom { width: 100%; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheat__fill { transition: none; }
+  .wfeat__card { transition: none; }
+  .wstat:hover { transform: none; }
+}
+
 /* 換頁 / 切班級轉場：舊頁淡出滑走 → 換內容 → 新卡片交錯滑入（方向感知，提升絲滑感） */
 .wishwall__cards { overflow-x: clip; }   /* 滑入時不外溢出現橫向捲軸；仍保留垂直 hover 浮起陰影 */
 .wishwall__cards.is-leaving { opacity: 0; transition: opacity .2s ease, transform .2s ease; }
