@@ -8,6 +8,18 @@
   <meta name="author" content="阿凱老師" />
   <meta name="theme-color" content="#1d2a52" />
 
+  <!-- 成果置頂・自動切換：典禮結束後（ONAIR_END，與 script.js 同一時刻）在 <html> 掛 is-postevent，
+       由 CSS 把「直播回放→影片→紀錄相簿→祝福成果」整組排到 Hero 下方，讓家長一進頁面就先看到成果。
+       放在 <head> 首屏繪製前執行 ＝ 零閃爍（不會先看到舊順序再跳動）。 -->
+  <script>
+    (function () {
+      try {
+        var END = new Date("2026-06-10T12:00:00+08:00").getTime(); // 典禮結束時刻（須與 script.js 的 ONAIR_END 一致）
+        if (Date.now() >= END) document.documentElement.classList.add("is-postevent");
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="canonical" href="https://cagoooo.github.io/smes-graduation-103/" />
 
   <!-- Open Graph / FB / LINE 社群分享卡片 -->
@@ -16,8 +28,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/" />
   <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta property="og:description" content="第103屆畢業典禮圓滿落幕 🎓 感謝滿滿的祝福與陪伴 — 點進來看典禮回放、祝福牆與打卡照，一起回味孩子們啟程的時刻。" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.21.0" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.21.0" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +40,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta name="twitter:description" content="第103屆畢業典禮圓滿落幕 🎓 感謝滿滿的祝福與陪伴 — 點進來看典禮回放、祝福牆與打卡照，一起回味孩子們啟程的時刻。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.21.0" />
 
   <!-- Favicon / 圖示（石門校徽） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -76,7 +88,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=1.20.0" />
+  <link rel="stylesheet" href="styles.css?v=1.21.0" />
 </head>
 <body>
   <!-- 跳到主內容（無障礙） -->
@@ -119,6 +131,7 @@
         <a href="#route">校園巡禮</a>
         <a href="#song">畢業歌</a>
         <a href="#bless">祝福影片</a>
+        <a href="#gallery">紀錄相簿</a>
         <a href="#wishes">祝福成果</a>
         <a href="#parents">家長須知</a>
         <a href="#teachers">畢業班導師</a>
@@ -165,6 +178,7 @@
           <a class="btn btn--live" href="#live">
             <span class="btn__live-dot" aria-hidden="true"></span>觀看典禮直播
           </a>
+          <a class="btn btn--album" href="#gallery">📷 看活動相簿</a>
           <a class="btn btn--wish" href="#wishform">✍️ 寫下祝福</a>
           <a class="btn btn--primary" href="#program">查看典禮流程</a>
           <a class="btn btn--ghost" href="#parents">給家長的話</a>
@@ -242,7 +256,7 @@
           </div>
 
           <div class="live-embed" id="liveEmbed">
-            <img class="live-embed__poster" src="assets/teachers-group.png?v=1.20.0" alt="石門國小第103屆畢業典禮直播・六班導師大集合" loading="lazy" decoding="async" />
+            <img class="live-embed__poster" src="assets/teachers-group.png?v=1.21.0" alt="石門國小第103屆畢業典禮直播・六班導師大集合" loading="lazy" decoding="async" />
             <button class="live-embed__play" id="liveEmbedPlay" type="button" aria-label="播放典禮直播">
               <span class="live-embed__play-ico" aria-hidden="true">▶</span>
             </button>
@@ -272,6 +286,46 @@
             <span aria-hidden="true">↗</span> 在 YouTube 觀看
           </a>
         </div>
+      </div>
+    </section>
+
+    <!-- ===== 畢業典禮紀錄相簿（專業攝影・Google 相簿） ===== -->
+    <section class="section section--gallery" id="gallery">
+      <div class="container">
+        <h2 class="section__title reveal">📷 畢業典禮紀錄相簿</h2>
+        <p class="section__intro reveal">專業攝影師為第103屆畢業生留下的每一個瞬間——點開相簿，重溫孩子們啟程當天的笑容與感動。</p>
+
+        <div class="gallery-grid reveal">
+          <a class="gallery-card" href="https://photos.google.com/share/AF1QipPLGYk139I6grEqu19WacUjMpTxiviQ1zR8NsLypX1c7tqWrCmtyHD1ukALJhCBwA?key=d2N2Vno1a3dLUl9zWkJjZHdFSVE4MXRDNVNLam9B" target="_blank" rel="noopener noreferrer">
+            <span class="gallery-card__cover">
+              <img src="https://lh3.googleusercontent.com/pw/AP1GczNml86hI3AEhbosF8QI_l-geyCDTOK5zcTCoI7E5v96NQlpzalwaMREiX88Wk3NeQm93PZCpKTa36eCK-9J2Aa3IxoLQJHqCrxvupp6TlG1FdRzSKZw=w1000-h620-p-k"
+                alt="103屆國小畢典 Part.1 相簿封面" loading="lazy" decoding="async" width="1000" height="620"
+                onerror="this.style.display='none';this.parentNode.classList.add('is-noimg');" />
+              <span class="gallery-card__tag">Part.1</span>
+            </span>
+            <span class="gallery-card__body">
+              <span class="gallery-card__name">103屆國小畢典・Part.1</span>
+              <span class="gallery-card__meta">115.6.10・專業攝影紀錄</span>
+              <span class="gallery-card__cta">📂 開啟完整相簿 →</span>
+            </span>
+          </a>
+
+          <a class="gallery-card" href="https://photos.google.com/share/AF1QipMa__u4Vhui3rN8sBA_RTbafPpVLElGwK_XxeV_CcliAye_BvvBuUDS6_FbZ7Lxeg?key=NzFHOUxfVUdrLUtLRmdoYVZiT05zNjdGRUR5U0tn" target="_blank" rel="noopener noreferrer">
+            <span class="gallery-card__cover">
+              <img src="https://lh3.googleusercontent.com/pw/AP1GczOQrdB8j8j1xpIZUS01Js9Dr6UxnCEXZM5Ohc5VEm8oRmkHbscncEmJE-f72DnM-3S9ydjWqF2S1qceDLjy2tbBflYg3lL7Py7TX_yl9naLOF6Zrazf=w1000-h620-p-k"
+                alt="103屆國小畢典 Part.2 相簿封面" loading="lazy" decoding="async" width="1000" height="620"
+                onerror="this.style.display='none';this.parentNode.classList.add('is-noimg');" />
+              <span class="gallery-card__tag">Part.2</span>
+            </span>
+            <span class="gallery-card__body">
+              <span class="gallery-card__name">103屆國小畢典・Part.2</span>
+              <span class="gallery-card__meta">115.6.10・專業攝影紀錄</span>
+              <span class="gallery-card__cta">📂 開啟完整相簿 →</span>
+            </span>
+          </a>
+        </div>
+
+        <p class="gallery-note reveal">📌 相簿由 Google 相簿提供，點擊將在新分頁開啟，可線上瀏覽並下載原圖。</p>
       </div>
     </section>
 
@@ -803,6 +857,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=1.20.0"></script>
+  <script src="script.js?v=1.21.0"></script>
 </body>
 </html>
