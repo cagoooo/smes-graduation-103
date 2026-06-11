@@ -20,6 +20,10 @@ director-scenes/
 # 導播機透明外框 overlay（中央去背疊圖、含校景預覽合成）— 本機 OBS/vMix 素材，不公開部署
 overlay-frames/
 
+# 自製直播墊片／外框背景（bg1_starting…bg6_thankyou 換場墊片、bg_*_frame／pip_* 外框、bg_yt_cover）
+# — 含導師肖像衍生剪影、未被站內引用，本機 OBS/vMix 素材，不公開部署
+assets/custom-bgs/
+
 # 打卡機 9:16 直版海報原始大圖（中央透明窗 + 底部六位導師合照）— 含導師肖像高解析，本機素材，不公開部署
 # 註：只忽略「根目錄」photobooth/；公開上線用的最佳化 webp 在 assets/photobooth/（導師已同意公開、同主站導師專區）
 /photobooth/
