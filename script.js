@@ -354,7 +354,7 @@
       var count = document.getElementById("wishCount");
       var filters = document.getElementById("wishFilters");
       if (!wall || !cards) return;
-      var allWishes = [], curFilter = "全部", lastSeenMaxR = null;
+      var allWishes = [], curFilter = "全部", curSearch = "", lastSeenMaxR = null;
 
       // 從 wish.html 連結進來會帶 #wishform，目的地是「也為畢業生留下祝福」輸入區。
       // 但祝福牆卡片是非同步載入的，瀏覽器的錨點跳轉發生在卡片長出來之前 → 表單被擠到下方，
@@ -390,6 +390,14 @@
         });
       }
       function clip(s, n) { s = String(s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n) + "…" : s; }
+      // 祝福搜尋比對：班級／畢業生全名／祝福內容（含即可，大小寫不敏感）。比對全名但顯示仍遮罩，家長用孩子全名找得到。
+      function matchSearch(w, q) {
+        q = String(q || "").trim().toLowerCase();
+        if (!q) return true;
+        return String(w.c || "").toLowerCase().indexOf(q) !== -1
+          || String(w.n || "").toLowerCase().indexOf(q) !== -1
+          || String(w.m || "").toLowerCase().indexOf(q) !== -1;
+      }
       function likedSet() {
         try { return JSON.parse(localStorage.getItem("smes_liked") || "[]"); } catch (e) { return []; }
       }
@@ -427,14 +435,19 @@
       function renderCards(anim) {
         var reduceMo = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         var list = curFilter === "全部" ? allWishes.slice() : allWishes.filter(function (w) { return w.c === curFilter; });
+        if (curSearch) list = list.filter(function (w) { return matchSearch(w, curSearch); }); // 搜尋：班級／姓名／關鍵字
         list.sort(function (a, b) { return (b.l || 0) - (a.l || 0); }); // 愛心多的排前面（熱門優先）
         var totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
         if (curPage >= totalPages) curPage = totalPages - 1;
         if (curPage < 0) curPage = 0;
-        var html = list.slice(curPage * PAGE_SIZE, (curPage + 1) * PAGE_SIZE).map(cardHTML).join("");
-        var countText = curFilter === "全部"
-          ? "目前已有 " + allWishes.length + " 則祝福 💛"
-          : curFilter + "：" + list.length + " 則（全校 " + allWishes.length + " 則）💛";
+        var html = list.length
+          ? list.slice(curPage * PAGE_SIZE, (curPage + 1) * PAGE_SIZE).map(cardHTML).join("")
+          : '<p class="wishwall__empty">😢 找不到符合「' + esc(curSearch) + '」的祝福<br>換個關鍵字，或用孩子的<b>全名</b>再試試看</p>';
+        var countText = curSearch
+          ? "🔍 找到 " + list.length + " 則符合「" + curSearch + "」的祝福"
+          : (curFilter === "全部"
+            ? "目前已有 " + allWishes.length + " 則祝福 💛"
+            : curFilter + "：" + list.length + " 則（全校 " + allWishes.length + " 則）💛");
         function commit() {
           cards.innerHTML = html;
           if (count) count.textContent = countText;
@@ -483,6 +496,20 @@
           renderCards("fade");
         });
       }
+      // 祝福搜尋（班級／姓名／關鍵字）：即時過濾卡片牆，與班級篩選可疊加
+      var searchInput = document.getElementById("wishSearchInput");
+      var searchClear = document.getElementById("wishSearchClear");
+      function applySearch(q) {
+        curSearch = String(q || "").trim();
+        if (searchClear) searchClear.hidden = !curSearch;
+        curPage = 0;
+        renderCards("fade");
+      }
+      if (searchInput) searchInput.addEventListener("input", function () { applySearch(searchInput.value); });
+      if (searchClear) searchClear.addEventListener("click", function () {
+        if (searchInput) { searchInput.value = ""; searchInput.focus(); }
+        applySearch("");
+      });
       // 主頁祝福牆翻頁（左右切換，避免一次顯示全部越拉越長）
       var wishPagerEl = document.getElementById("wishPager");
       if (wishPagerEl) wishPagerEl.addEventListener("click", function (e) {
@@ -844,6 +871,13 @@
       }
       // 「看全部 N 則祝福」→ 開啟沉浸式放大牆 overlay
       if (sc.openWall) sc.openWall.addEventListener("click", openWall);
+      // 成果專區「想找自己孩子的祝福？」→ 捲到祝福牆搜尋框並聚焦
+      var showcaseFind = document.getElementById("showcaseFind");
+      if (showcaseFind) showcaseFind.addEventListener("click", function () {
+        var box = document.querySelector(".wishsearch");
+        if (box) { try { box.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (_) {} }
+        if (searchInput) setTimeout(function () { try { searchInput.focus({ preventScroll: true }); } catch (_) { searchInput.focus(); } }, 480);
+      });
       // 捲到專區 → 觸發一次數字滾動 + 長條填充
       if (sc.section) {
         if (scReduce || !("IntersectionObserver" in window)) { scState.visible = true; maybeAnimateShowcase(); }

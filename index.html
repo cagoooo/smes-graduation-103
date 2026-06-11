@@ -16,8 +16,8 @@
   <meta property="og:url" content="https://cagoooo.github.io/smes-graduation-103/" />
   <meta property="og:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta property="og:description" content="第103屆畢業典禮圓滿落幕 🎓 感謝滿滿的祝福與陪伴 — 點進來看典禮回放、祝福牆與打卡照，一起回味孩子們啟程的時刻。" />
-  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.19.3" />
-  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.19.3" />
+  <meta property="og:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
+  <meta property="og:image:secure_url" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -28,7 +28,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="石門國小 第103屆畢業典禮｜啟程・感恩・祝福" />
   <meta name="twitter:description" content="第103屆畢業典禮圓滿落幕 🎓 感謝滿滿的祝福與陪伴 — 點進來看典禮回放、祝福牆與打卡照，一起回味孩子們啟程的時刻。" />
-  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.19.3" />
+  <meta name="twitter:image" content="https://cagoooo.github.io/smes-graduation-103/assets/og-cover.png?v=1.20.0" />
 
   <!-- Favicon / 圖示（石門校徽） -->
   <link rel="icon" href="favicon.ico" sizes="any" />
@@ -76,7 +76,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="styles.css?v=1.19.3" />
+  <link rel="stylesheet" href="styles.css?v=1.20.0" />
 </head>
 <body>
   <!-- 跳到主內容（無障礙） -->
@@ -242,7 +242,7 @@
           </div>
 
           <div class="live-embed" id="liveEmbed">
-            <img class="live-embed__poster" src="assets/teachers-group.png?v=1.19.3" alt="石門國小第103屆畢業典禮直播・六班導師大集合" loading="lazy" decoding="async" />
+            <img class="live-embed__poster" src="assets/teachers-group.png?v=1.20.0" alt="石門國小第103屆畢業典禮直播・六班導師大集合" loading="lazy" decoding="async" />
             <button class="live-embed__play" id="liveEmbedPlay" type="button" aria-label="播放典禮直播">
               <span class="live-embed__play-ico" aria-hidden="true">▶</span>
             </button>
@@ -339,6 +339,7 @@
           <a class="btn-wallzoom btn-wallzoom--stage" href="stage.html">🌌 現場星空投影版</a>
           <a class="btn-wallzoom btn-wallzoom--ghost" href="#wishform">✍️ 我也要留一句</a>
         </div>
+        <p class="wshow__find reveal"><button type="button" id="showcaseFind" class="wshow__findbtn">🔎 想找自己孩子的祝福？點我搜尋 →</button></p>
       </div>
     </section>
 
@@ -663,6 +664,12 @@
 
         <!-- 祝福展示牆（跑馬燈 + 卡片）：有已公開祝福時由 script.js 顯示 -->
         <div class="wishwall reveal" id="wishWall" hidden>
+          <div class="wishsearch" role="search">
+            <span class="wishsearch__ico" aria-hidden="true">🔍</span>
+            <input type="search" id="wishSearchInput" class="wishsearch__input" placeholder="搜尋祝福：班級、孩子的名字或關鍵字…" aria-label="搜尋祝福" autocomplete="off" maxlength="40" enterkeyhint="search" />
+            <button type="button" id="wishSearchClear" class="wishsearch__clear" aria-label="清除搜尋" hidden>×</button>
+          </div>
+          <p class="wishsearch__hint">💡 為保護學生隱私，搜尋結果的姓名仍以「王○明」顯示；用孩子的全名即可找到你留的那則祝福</p>
           <p class="wishwall__count" id="wishCount"></p>
           <div class="wishwall__filters" id="wishFilters" hidden aria-label="依班級篩選祝福"></div>
           <div class="wishwall__cards" id="wishCards"></div>
@@ -796,6 +803,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=1.19.3"></script>
+  <script src="script.js?v=1.20.0"></script>
 </body>
 </html>
