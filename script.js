@@ -224,6 +224,71 @@
     });
   });
 
+
+  /* ---------- 紀錄相簿封面：每次載入隨機一張（自兩本 Google 相簿各取樣 24 張的照片池），提高可看度 ---------- */
+  (function () {
+    var BASE = "https://lh3.googleusercontent.com/pw/";
+    var SIZE = "=w1000-h620-p-k";
+    var POOLS = [
+      ["AP1GczNiy6sEpfBRzko3OBfdOY0mqbxwy4VRR15nXBKm2zGM_f11gu8o1_WW90HnRKJdnz5tT1I8DXuZCdKr0AmCyaeUPD0_6bC5mxi3WYry4Fpx2CtiWwoa",
+      "AP1GczPywYeECYPoMglGZPx_QMejMcjI8QbrwFt2KBaRdwkezUPdNAL1j_VpOzV8oV6ALtAhX3cK-f9t7SZD3Arq0PchdAofxY2XPOrIjZiDhm3dTGMKxmBR",
+      "AP1GczOT5GjOcZo2odkV9NuF0IP1kAaR1bvZVsLYYLdYu22UZlmp-F1cSrgVtV9cjnX8p4QHsja1r6rDhFy93GInbNM5fPX5Ybte1ltV4cyy56wODlDzDQSs",
+      "AP1GczNhdFfQky9CFjmLuaVMuYbBubfEog33cdiSoYRAsCxJZUZftaEREjmn98Cr1sr1jVo-sdYiPIM_Ab9ewchdqqkjfXDGDLiALkYqD6ZTAQxV_KCVDu24",
+      "AP1GczNk7g4MgENHU_hvLpCk0HJ0DGf9xjrifXdV6wiCt68f0YVhYd_7IyyNUPOXdHnJvBk2BjmWea87l2CbaavlBx8C-zLcATcIlU-77B6kUNPYJgFn75Lv",
+      "AP1GczMkl7Q931u1ODwlpPyZdfHaIcLNNvKLL9y0MASpEMZQJP6WhvmCTDAWm2KLpyt9xa63XA6vrkUPkvY1xPQn2RErzGp_BGyToUQhQ0B6A_FYLg4xYSnY",
+      "AP1GczPOCAzOmcJsTCgTpqqoNI63zWPOtz3XjMoNWQKLGfInUrop4pfMsMHrg35Y-ANhlY35yxvLjyDz9OCZzRrm-ET33u6wU3cUftgnZtfPiy-5MR6SS80i",
+      "AP1GczPkUR4jyPRXQ_PbkgBT2yBbTqrNfyE4hx3kT3My0Grqt4qzfspudjRui9e3CbouztiOSq6sK2JGQGvbaTG270NZJSuskdziSIy1QgZgqzgV3cIqbVw2",
+      "AP1GczPvYlsU3MruxB1syw4nANLa-7r_7AZJaugwiVi-TIZR07CqNZmKMiboy2WczL9J0qTyL-bN5EtInIVppBTlN86DM-PB9IShdf5tTz82I2IujK901ipn",
+      "AP1GczOBsqxRrhYwX0eKyA4FZALu3I71TghD8pBCArDX2L6iHKxCsEbE_wA6DMFbi6DPKkMzD2rfdU9LoVYgUnyoIS2ruQCBV7I_uN-Bxrsj6dmG7SSRI3Kb",
+      "AP1GczP3XPBQZeOHBOPzwBkr3zGNxE_X9eHKVbgQQq97YszyQWdifnNWVl7zCADteuU4fVDGlJL5rFUedRlvL1EiJw1pE5zVNsYCS00aoURcj25WrAI10ft4",
+      "AP1GczP6ZCkllsgxxRF9UktaeKDukahqLmEWLdrPdihVXa7DaXOIBgIEp44JKWZFo1FrgJBnmkpFnmxEP2aMJHVlNazc3rf5zBSwyyKxvdmrDcjUnhvDtOLL",
+      "AP1GczMImInW2MaNnsExEWMN42A3JaECb7Opelo4z8hMVAeQ1ph_xnv5u1-nvGllrHQ3qptUYo_CkhYuEle_HjY3vDXoC-ONdh7UVAVNXjlXfNh4BmlsTWtl",
+      "AP1GczPIDNn6_JjKMsdLdUzAui5dI7lLvrQz7qc9hF9EwBLrGU6KTirRrBC5vBwcRtLJVdlriFbVEqHF5HwVi_irELlxebJUSbDU4W2sTkv6DFGlYofHQxER",
+      "AP1GczO4yD-ZTal8JqK1RbiZu_DREpl1qS_pTm54r18hjsqr5U-Po7qFfnqe3zTHs3TkRm06mhVBAf4B2-ejiGO705ECGS12xTQMYI1T5q8lDhakdyX0_2Gm",
+      "AP1GczNlPdtEP1Rpg-_akv2RutlKwfRkY39fvqo6A_Kl1qzSHXns4YcxdNmYzH88udIL8vBogOop_1H8iiJ4DFEe0hYcIvAYBetkSYUFC0jLYuIusAk0h9Kp",
+      "AP1GczPy7FZ6xhIXxq7nJTzzTJ6szTI19qKktTeD_vQCO64vlgpX2cp7g-cov7rrkaDPCAqkczEZs1sNsTAQEWwLDpbaQ9Glg-HjxuInvbZ3Ib15APc80Qgt",
+      "AP1GczMjcMCkdgH_sN-bh5vTFZsovr6zg_81J-UGW1A8Z-591XWnVUk4xEbeKBEMLKJuwf2-LTdXRLJot2ZjNYgQHVnEkoaoN8Nbqs8bO71c3b-TX23it3Q8",
+      "AP1GczORylcWqrvH06Zjm7UGdsK1EPtcrVaEGLkr1JDzI6NFypbI-N6irhdM1qgkmyhAnWNioVdicPWN1UU4TOB77AyZpvoTtJI5n4mGYiXPi2pUfFtv1UAt",
+      "AP1GczOIpCyIAepJI0xi34uFNz1MgLkMM3aj8EEL4RWuVKowsmsh0cecF0ESbd8Cq87w090uNn_ZWvLYpl2IypSF71SOw_sG1RrWjkY3jEt3ipMhspv7EliT",
+      "AP1GczOkUNF7z8DYfrAnfuGLszsEwG3VNft0wbguo-hcxfBYIFBWVZuWLYe5CXySQwsPOqs_FqpR-C4D93-2DfgweeuZfnD8tHUmZfNuwsvU0pI47q77ULji",
+      "AP1GczOHSa_8pKtEgkmvhrpC8yFLxE13qvLtM55DeUPCLN2bkK0ZaVWPvdTegLuIuAyASXSpyWgt8vYUrceDc0WStQ50eLyuIDDTs9j9vNqWCTktH3x0i0U3",
+      "AP1GczPsxgSiD_tE3n0zkoqLRzDPA5z6ykxi_EWDXNiX4K25dj7irh4CojRV-7XaQ70NT4Iy-_bng134hBcUyqpAGrIdtbaOhahrm8f34_CLXfbNuTQjxdTa",
+      "AP1GczNhkpJhYLVOWNmbQlqfslFeWC5JkNkVFbY98N9vF1xMKFwB2lbgBUxSnl9ZiFLfVJH-eUesZwVES2939bzSdGXwhA0Pz_ZZlwi2OyRWIzqaujJkLQWf"],
+      ["AP1GczP9Yg13JDWmkpSNQETtGzm8BpEW3RxBqbA1GUMMff4hg4i4Cnyc2iPgv8dySzxAPFXTphH0_VpztkIcZLrix_8pV4EkIx8w_6PW_VG3au2T99fR44t2",
+      "AP1GczNEb_JEuvGBIH_x3qW99ZOH_5Ra5uwdp4lmXZGWEQH4suJQCIPZ_3puOqI-ZRXANuJtAboSj62sDOyARxlw1cpBzU41yqOWgeXWoqdUWPPi1EIHyKtT",
+      "AP1GczN9eZsQelJI_U3Bz65Gcfzhbq8A43UBOGKmIfBYYcciAKdizdfwstrUdN_epmzCImtmZR2sktGh0FS7a8SJtvmJ9Mm8MR2hMsi_weYcXECRVNCcXVYQ",
+      "AP1GczOCAI089L1_0pq6d_fgSJ6BjNe1_WenHCnShpDo4qP4_ebz38o9Ix7PfW5DjUEwZfo8zD0BCJQsTBKGFCeEdyR9Db0fXwCjV99MoJbCjg2eVrqjx2xM",
+      "AP1GczPJLiK_SuSPQJZm7laBwYgeuwn-ldIXiJHdYf9M5DYrJZpYWwEdnsS8hPGnteqZHnKQPVPVgV2hxu4PA00G33KGXPrWKRAk5XLR0nh-sobVGW2c3wjd",
+      "AP1GczM-_AKVJFAgRH1HK54Ndh0-jp18SzmlnIYkfvQobMko8NS015hgH6YcNUuqMx0N4VvDZVdwyZ4zfiDXrOkFUTNVxyTG6WUyiGyKgsk7WR7FwIe-Vp3K",
+      "AP1GczPDIodTBL2i_t3IWu_LFG3DYlpmjOu6RAcHLLxklRhAXWScBIahpi1k159440_A48u7q0vu2e25WlBG-j1vuDgbr036y6UhKrMsv_Q_W2S7aQI-gVUQ",
+      "AP1GczNhKNJkL4fR0RQpTpTc9I4DMUqFkNB0NTlG7nvS5OytP9DDPtGOPu4GWlYVjHRsWxwlY-VD_7N06jpSp6vjSWSmLaH8cp958CSbc_7tOR41DF5SQuca",
+      "AP1GczNE-but3ldz5dGzs5dPRaq23gN6ZjIYqEAx7qd9FfuyRRbVBPherrGSJXu9UKOQjqU7i_0S6PXnDhV_D0BFUtjCZcj-hE_NSFXLR-wWq7POi79mQzyU",
+      "AP1GczNt-njCrVXzFTAlNm4dznnSzdvhJtKcfMWPKAaiBYBQZJK-DQOs7BYzv6aeiyOXyPC6EoH0s0DS12byZyXw6LEXfH47t0lJ-8pdfdjCGrRgLUPNlh1x",
+      "AP1GczN3obvunrAinsjRmQlZYBhQaSlQf6m4wldDI6d5c063nKMPQpCqxPym1HC59WOzCLhYqjz7fR1S9M8lo1rDF45yfM3945P7cNWYJOzwYwKDDzjGecdO",
+      "AP1GczPDVCexN0u4_fwPUcaiyXa4VeJtzl3qtD9C2gMZypUaBESX7xr4aFomPfXbdQmEnHzUyl9VOCgg8D4kUjgGtf2w4DCOWXPG7PZrPGljJdMXcpclysgO",
+      "AP1GczNhyg7qwtZAKQ1EjKejaadJFAj6zcg8U4GP8WbNs-1xwT7RTAivc7bPsKFH0A9FCUaJUwVDxwqeAyVUeYtI8wLjpDp3bLqXze_2Xpanhy-4SuIlSr9N",
+      "AP1GczOdO4x339EsqflvGTAEK09xcIFy7Oe_pIAw9Wwru_VfxVpJETaeKr8CAr713skttuimrZ0athW9kr_4wJRewCVRIRfS-B-PWAOCgDXETl0hHEaUP2pJ",
+      "AP1GczP5Pwct3d8hUZ9utX6mK1oDydv8AQ0JFONFICgbXJ06VyEvCYzKDMGccpKJ_DvONUG0g85nAhmmuyHvk8O7NloWUJaIjSyfTPG-rvKNpTCCqLm0x7zg",
+      "AP1GczMd-xghdZxLvKtJs7kfJ6PdNc4fTx2TQzC42qpDaQW7T0Ec3vnlLDLv_AD-7RW0r98K9_f_fRpGU2mTpPulmt5TQHqyjiVo7k4GB0_chu7GaHAt7mpL",
+      "AP1GczMrnQvIPoUYwPhEjs_vJjNTJGjXwTG7mCpspErfyBY-cxC6XR_UvjaJLzbc7evGVygVSgJJxpZ6hvhaxz692ckyQnzomVbrzz5FbD0epO1gadeYn9yd",
+      "AP1GczP4B5fiHFJqo-UQ8jVcdxOkyvkDlt-S8hNcPNnkiszXnKHfIK9H9vdYzgiOwngOJXZRrNq2kZ-swTpP6bpFWYauEWybzt0nrwJWUej4ukT15G0bj2uK",
+      "AP1GczMlBRKpZgumrwYxkACNMLqd-yMnLVYvk47-4QNxfibZDZfLGFirZAALqrLV_-0qel6s08CCdd0jGvhvPhWkb_SrXb0W0NMkKxgXtOnCk27VNiMX7Tp2",
+      "AP1GczOb4-Xu5r1eoD3BT_dGN5hXIIFnaHeYcebVNsUW-uw8OwCdmS5q1F5omDAKm06eCpstJlyhwaI65QJdq-9RdW3e6gPStmTMLO4IRcd1L0o_WlMcVZa-",
+      "AP1GczNxF9jVModgg49BG-68twCNBNxxlwp09jcmYe0rdAeLJULaOwom0RU-DzQ9pIFWqFx_ERhviuLC3tnkFHKyrwOmE6OUW-OTErmjlrR0CQcNb_fkXicN",
+      "AP1GczM8vLXnd79ENvVxhtav4i-2Ah8ygTcoipSdxuyXLQlHLtP9gDr8IQ4F78VBLm5pmSJR9B55jP-Dqyar1LzC6GFvlWE13ZEu04zjEnrnW1OjrGhdY5J1",
+      "AP1GczNjcwvMr8SYM2RqyanUdhw3LEsAekhuA6gPkRfDN153NOctghuwFuCzvwoeMmCpGxDpekCWxktDg9jjUaKIWiZfBb1-sqZQcttbtTksRodaQchgftrw",
+      "AP1GczP_eTl4srQbSYX7Naz08JwPMcRqRc6MKfKdYXjIwkzbEl0Du_Mk2ZIeiV8QE3GnATV111Ad5DF_LSOc6ETtE9WAepzrHXiKATDGehHhdUV5pADZRTma"]
+    ];
+    var imgs = document.querySelectorAll(".gallery-card__cover img");
+    POOLS.forEach(function (pool, i) {
+      var img = imgs[i];
+      if (!img || !pool.length) return;
+      var orig = img.getAttribute("src");
+      img.onerror = function () { this.onerror = null; this.src = orig; }; /* 隨機圖失效 → 回退原封面 */
+      img.src = BASE + pool[Math.floor(Math.random() * pool.length)] + SIZE;
+    });
+  })();
+
   /* ---------- 日期感知直播狀態（按鈕 + 站內直播區） ---------- */
   (function () {
     var heroLive = document.querySelector(".btn--live");
