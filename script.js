@@ -232,7 +232,8 @@
   [
     { embed: "liveEmbed", play: "liveEmbedPlay", vid: "OiJlVXOzM8U", title: "石門國小第103屆畢業典禮直播" },
     { embed: "recapEmbed", play: "recapEmbedPlay", vid: "51izmIQX4rQ", title: "第103屆畢業典禮完整活動紀錄（4K）" },
-    { embed: "songEmbed", play: "songEmbedPlay", vid: "ZCV1j_9mW8A", title: "畢業歌〈風箏〉MV" },
+    { embed: "song103Embed", play: "song103EmbedPlay", vid: "gqpvdatNI5k", title: "103屆畢業歌－風箏（本屆精剪）" },
+    { embed: "songEmbed", play: "songEmbedPlay", vid: "ZCV1j_9mW8A", title: "畢業歌〈風箏〉原曲 MV" },
     { embed: "blessEmbed", play: "blessEmbedPlay", vid: "-vhVoyd8fUs", title: "2026畢業典禮祝福影片大集錦" }
   ].forEach(function (c) {
     var embed = document.getElementById(c.embed);
