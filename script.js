@@ -158,6 +158,31 @@
     links.addEventListener("scroll", updateNavFade, { passive: true });
     window.addEventListener("resize", updateNavFade);
     updateNavFade();
+
+    // 桌機：滑鼠移近導覽列左右「邊緣感應區」→ 自動平滑捲動（越貼邊越快、離開即停），
+    // 不必滾輪也能看到被截斷的導覽項；hover:none（手機觸控）時 mousemove 不會觸發、
+    // matchMedia 放在 handler 內每次評估（避免載入時機判斷鎖死），維持手指滑動不受影響
+    var EDGE = 90;                       // 邊緣感應區寬度（px）
+    var V_MIN = 2, V_MAX = 14;           // 自動捲動速度範圍（px/frame）
+    var vel = 0, rafId = 0;
+    function autoStep() {
+      if (vel !== 0 && links.scrollWidth > links.clientWidth + 2) {
+        links.scrollLeft += vel;
+        updateNavFade();
+        rafId = requestAnimationFrame(autoStep);
+      } else { rafId = 0; }
+    }
+    links.addEventListener("mousemove", function (e) {
+      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+      if (links.scrollWidth <= links.clientWidth + 2) { vel = 0; return; }  // 放得下就不捲
+      var r = links.getBoundingClientRect();
+      var dL = e.clientX - r.left, dR = r.right - e.clientX;
+      if (dL < EDGE) vel = -(V_MIN + (V_MAX - V_MIN) * (1 - dL / EDGE));
+      else if (dR < EDGE) vel = V_MIN + (V_MAX - V_MIN) * (1 - dR / EDGE);
+      else vel = 0;
+      if (vel !== 0 && !rafId) rafId = requestAnimationFrame(autoStep);
+    });
+    links.addEventListener("mouseleave", function () { vel = 0; });
   })();
 
   /* ---------- 分享 / 複製連結（含 toast） ---------- */
