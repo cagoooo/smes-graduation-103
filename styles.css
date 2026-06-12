@@ -353,6 +353,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
    ========================================================= */
 .is-postevent main { display: flex; flex-direction: column; }
 .is-postevent #hero    { order: -50; }
+.is-postevent #recap   { order: -45; }  /* 4K 精剪紀錄影片＝成果主打，排第一 */
 .is-postevent #live    { order: -40; }
 .is-postevent #bless   { order: -30; }
 .is-postevent #gallery { order: -20; }
@@ -376,7 +377,9 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .is-postevent .countdown__done { font-size: clamp(.86rem, 2.7vw, .98rem); line-height: 1.65; }
 .is-postevent .hero__cta { margin-top: 16px; gap: 10px; }
 .is-postevent .hero__scroll { display: none; } /* 短 Hero 不需要向下捲動箭頭 */
-/* 成果首區（直播回放）緊接精簡 Hero：縮小頂距，讓「典禮直播・回放」標題一進頁面就露出 */
+/* 成果首區（4K 紀錄影片）緊接精簡 Hero：縮小頂距，讓成果標題一進頁面就露出 */
+.is-postevent #recap { padding-top: clamp(26px, 4vh, 46px); }
+.is-postevent #recap .live-stage { margin-top: clamp(14px, 2.5vh, 24px); }
 .is-postevent #live { padding-top: clamp(26px, 4vh, 46px); }
 /* #live 的 intro 是賽前框架（「無法到場？」），典禮後已不適用且佔位 → 隱藏，
    回放狀態由 live-stage__status（JS 改「典禮已圓滿結束—點擊觀看完整回放」）承接，
@@ -680,6 +683,25 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 }
 .live-stage__external:hover { color: var(--gold); border-bottom-color: var(--gold); }
 .live-stage { text-align: center; }
+
+/* =========================================================
+   完整活動紀錄影片（4K 精剪版）
+   ========================================================= */
+.section--recap { background: var(--paper); }
+.recap-feats {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px;
+  margin-bottom: clamp(14px, 2.5vw, 20px);
+}
+.recap-feat {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 13px; border-radius: 999px; font-size: .84rem; font-weight: 600;
+  color: var(--gold-deep); background: rgba(201, 162, 77, .1);
+  border: 1px solid rgba(201, 162, 77, .35);
+}
+.recap-chapters {
+  margin-top: 16px; font-size: .86rem; line-height: 1.8; color: var(--ink-soft);
+  max-width: 640px; margin-left: auto; margin-right: auto;
+}
 
 /* =========================================================
    畢業歌〈風箏〉MV 嵌入
