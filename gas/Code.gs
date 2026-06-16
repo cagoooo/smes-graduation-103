@@ -464,6 +464,7 @@ function chatWishCard_(klass, name, message, total, row, approve, hide) {
   if (hide) buttons.push({ text: '🙈 維持隱藏', onClick: { openLink: { url: hide } } });
   if (buttons.length) widgets.push({ buttonList: { buttons: buttons } });
   return {
+    text: '🎓 收到新祝福 (' + (klass || '—') + ' ' + (name || '—') + ')：' + (message || '—'),
     cardsV2: [{
       cardId: 'wish-' + row,
       card: {
