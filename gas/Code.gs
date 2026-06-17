@@ -533,6 +533,22 @@ function testLineNotify() {
   return 'LINE 推播成功（HTTP 200），請查看手機 LINE（卡片下方有審核按鈕）';
 }
 
+function testChatNotify() {
+  var t = notifyTargets_();
+  if (!t.chat) throw new Error('尚未設定指令碼屬性 GOOGLE_CHAT_WEBHOOK，請先設定再測試。');
+  var sh = getSheet_();
+  var total = Math.max(1, sh.getLastRow() - 1);
+  var payload = chatWishCard_('六年甲班', '王小明', '親愛的孩子，畢業快樂，前程似錦！（測試）', total, total + 1, '', '');
+  var resp = UrlFetchApp.fetch(t.chat, {
+    method: 'post', contentType: 'application/json; charset=utf-8',
+    payload: JSON.stringify(payload), muteHttpExceptions: true
+  });
+  var code = resp.getResponseCode();
+  Logger.log('Google Chat push HTTP status = ' + code);
+  if (code < 200 || code >= 300) throw new Error('Google Chat 推播失敗，HTTP ' + code + '：' + resp.getContentText());
+  return 'Google Chat 推播成功（HTTP ' + code + '），請查看手機 Google Chat！';
+}
+
 /* ============================================================
  *  LINE 卡片按鈕審核（方案 A：點按鈕開審核小頁，免 webhook）
  *  - 卡片按鈕帶 row + 安全 token(k)，點擊開本頁直接更新 F 欄「公開」
