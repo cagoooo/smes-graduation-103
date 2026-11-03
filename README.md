@@ -118,3 +118,18 @@ python -m http.server 8000
 
 歡迎依教學現場、活動或工作流程需求進行 fork／客製化。建議在變更說明中交代使用情境、主要修改、測試方式，以及是否影響資料格式或部署設定。
 <!-- END:PROJECT_GUIDE -->
+
+<!-- akai-edu-tools:backlink -->
+
+---
+
+## 🔗 阿凱老師教育工具集
+
+這個專案是[阿凱老師教育工具集](https://cagoooo.github.io/Akai/)的 **#106 石門國小 第103屆畢業典禮｜啟程・感恩・祝福**，由桃園市龍潭區石門國民小學阿凱老師開發。
+
+- 工具介紹頁：[https://cagoooo.github.io/Akai/tool/106/](https://cagoooo.github.io/Akai/tool/106/)
+- 線上使用：[https://cagoooo.github.io/smes-graduation-103/](https://cagoooo.github.io/smes-graduation-103/)
+- 教學情境文章：[https://cagoooo.github.io/Akai/blog/graduation-103-shimen-wishwall-106/](https://cagoooo.github.io/Akai/blog/graduation-103-shimen-wishwall-106/)
+- 全部工具（上百個教育工具與原始碼）：[https://cagoooo.github.io/Akai/](https://cagoooo.github.io/Akai/)
+
+想改造成自己的版本？到上面的教學情境文章，按左下角「複製 AI 開發提示詞」，貼給 ChatGPT、Claude、Gemini 等 AI 助手，就能參考這份原始碼開始規劃。
