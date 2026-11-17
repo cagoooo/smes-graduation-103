@@ -4,13 +4,14 @@
    index.html 內 styles.css?v= / script.js?v=），sw.js 內容變動
    瀏覽器才會偵測到更新並觸發版本提示。
    ========================================================= */
-const BUILD_VERSION = "1.24.1";
-const CACHE = "smes-grad-" + BUILD_VERSION;
+const BUILD_VERSION = "1.24.2";
+const CACHE_PREFIX = "smes-grad-";
+const CACHE = CACHE_PREFIX + BUILD_VERSION;
 const PRECACHE = [
   "./",
   "./index.html",
-  "./styles.css?v=1.24.1",
-  "./script.js?v=1.24.1",
+  "./styles.css?v=1.24.2",
+  "./script.js?v=1.24.2",
   "./photobooth.html",
   "./photo.html",
   "./assets/logo.png",
@@ -36,7 +37,7 @@ self.addEventListener("activate", function (e) {
     caches.keys()
       .then(function (keys) {
         return Promise.all(
-          keys.filter(function (k) { return k !== CACHE; })
+          keys.filter(function (k) { return k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE; })
               .map(function (k) { return caches.delete(k); })
         );
       })
