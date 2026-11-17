@@ -599,7 +599,7 @@ function escHtml_(s) {
 // 畢業典禮風格的審核結果頁（tone: 'ok' 綠光暈脈動 / 'mute' 灰靜止 / 'warn' 琥珀靜止）
 function htmlPage_(emoji, title, sub, bodyHtml, tone) {
   var halo = (tone === 'mute' || tone === 'warn') ? tone : 'ok';
-  var authorUrl = 'https://www.smes.tyc.edu.tw/modules/tadnews/page.php?ncsn=11&nsn=16#a5';
+  var authorUrl = 'https://cagoooo.github.io/Akai/';
   var html =
     '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">' +
